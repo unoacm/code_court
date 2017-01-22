@@ -12,8 +12,20 @@ class Language(db.Model):
     __tablename__ = 'language'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True)
     is_enabled = db.Column(db.Boolean)
+
+    def __init__(self, name, is_enabled):
+        """
+        Initializes a language object
+
+        Args:
+            name (str): the name of the langauge
+            is_enabled (bool): whether or not the language is currently
+                               enabled
+        """
+        self.name = name
+        self.is_enabled = is_enabled
 
     def __str__(self):
         return "Problem({})".format(self.name)

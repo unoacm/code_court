@@ -11,7 +11,9 @@ from os import path
 
 from flask import Flask, render_template
 
-from database import db
+import models
+
+from models import db
 
 from views.admin import admin
 from views.api import api
