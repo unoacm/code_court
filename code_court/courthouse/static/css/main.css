@@ -1,0 +1,19 @@
+body {
+    padding-top: 70px;
+    padding-bottom: 20px;
+}
+
+.container {
+}
+
+#content {
+    background-color:#fff;
+    border-radius:3px;
+    padding:10px;
+}
+
+#footer {
+    padding-left: 0px;
+    padding-right: 0px;
+    color:#fff
+}
