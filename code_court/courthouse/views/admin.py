@@ -12,7 +12,7 @@ from flask import (
 )
 
 admin = Blueprint('admin', __name__,
-                        template_folder='templates')
+                  template_folder='templates')
 
 class ModelMissingException(Exception):
     pass
@@ -24,13 +24,6 @@ def index():
     a list of links to other admin pages
     """
     return render_template("admin_index.html")
-
-@admin.route("/users/", methods=["GET"])
-def users():
-    """
-    The user view page
-    """
-    return render_template("users.html")
 
 @admin.route("/languages/", methods=["GET"])
 def languages_view():

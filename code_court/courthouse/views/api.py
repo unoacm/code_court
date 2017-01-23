@@ -13,7 +13,7 @@ from flask import (
 )
 
 api = Blueprint('api', __name__,
-                        template_folder='templates')
+                template_folder='templates')
 
 @api.route("/", methods=["GET"])
 def index():
