@@ -1,0 +1,11 @@
+language: python
+python:
+  - "2.7"
+  - "3.5"
+  - "3.6"
+install:
+  - pip install six
+  - pip install -r code_court/courthouse/requirements.txt
+script:
+  - cd code_court/courthouse/
+  - nosetests
