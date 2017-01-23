@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Languages</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>is_enabled</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for language in languages %}
+        <tr>
+            <td>{{ language.id }}</td>
+            <td>{{ language.name }}</td>
+            <td>{{ language.is_enabled }}</td>
+            <td><a href="{{ url_for('admin.languages_del', lang_id=language.id) }}" class="btn btn-danger btn-xs">del</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('admin.languages_add') }}" class="btn btn-primary">add</a>
+{% endblock %}

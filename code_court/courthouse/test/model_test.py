@@ -4,7 +4,7 @@ import tempfile
 
 import web
 
-from web import app, models
+from web import app, model
 
 class ModelsTestCase(unittest.TestCase):
     """
@@ -20,15 +20,15 @@ class ModelsTestCase(unittest.TestCase):
             web.setup_database(app)
 
     def test_language(self):
-        init_results = models.Language.query.filter_by(name="python").all()
+        init_results = model.Language.query.filter_by(name="python").all()
 
         # create and add python lang
-        python = models.Language("python", True)
-        models.db.session.add(python)
-        models.db.session.commit()
+        python = model.Language("python", True)
+        model.db.session.add(python)
+        model.db.session.commit()
 
         # fetch python lang
-        results = models.Language.query.filter_by(name="python").all()
+        results = model.Language.query.filter_by(name="python").all()
 
         self.assertGreater(len(results), len(init_results))
 

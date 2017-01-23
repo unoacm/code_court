@@ -11,9 +11,9 @@ from os import path
 
 from flask import Flask, render_template
 
-import models
+import model
 
-from models import db
+from model import db
 
 from views.admin import admin
 from views.api import api
@@ -39,6 +39,7 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['model'] = model
 
     db.init_app(app)
 
