@@ -16,10 +16,10 @@
             <td>{{ language.id }}</td>
             <td>{{ language.name }}</td>
             <td>{{ language.is_enabled }}</td>
-            <td><a href="{{ url_for('admin.languages_del', lang_id=language.id) }}" class="btn btn-danger btn-xs">del</a></td>
+            <td><a href="{{ url_for('languages.languages_del', lang_id=language.id) }}" class="btn btn-danger btn-xs">del</a></td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('admin.languages_add') }}" class="btn btn-primary">add</a>
+<a href="{{ url_for('languages.languages_add') }}" class="btn btn-primary">add</a>
 {% endblock %}
