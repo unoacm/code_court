@@ -11,13 +11,14 @@ from os import path
 
 from flask import Flask, render_template
 
-import models
+import model
 
-from models import db
+from model import db
 
-from views.admin import admin
-from views.api import api
 from views.main import main
+from views.api import api
+from views.admin.admin import admin
+from views.admin.languages import languages
 
 # turn down log level for werkzeug
 wlog = logging.getLogger('werkzeug')
@@ -39,13 +40,16 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['model'] = model
 
     db.init_app(app)
 
     app.logger.setLevel(logging.INFO)
 
     app.register_blueprint(main, url_prefix='')
+    app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(languages, url_prefix='/admin/languages')
 
     @app.context_processor
     def inject_user():
