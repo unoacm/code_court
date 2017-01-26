@@ -61,6 +61,28 @@ class ModelsTestCase(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
 
+    def test_contest(self):
+        """test the contest table"""
+        CONTEST_ARGS = {
+            "name": "1620 bracket",
+            "activate_time": string_to_dt('2017-01-25T10:45'),
+            "start_time": string_to_dt('2017-01-25T11:00'),
+            "freeze_time": string_to_dt('2017-01-25T16:00'),
+            "end_time": string_to_dt('2017-01-25T16:45'),
+            "deactivate_time": string_to_dt('2017-01-26T10:45'),
+            "is_public": True,
+        }
+
+        # create and add contest
+        contest = model.Contest(**CONTEST_ARGS)
+        model.db.session.add(contest)
+        model.db.session.commit()
+
+        # fetch contest
+        results = model.Contest.query.filter_by(name=CONTEST_ARGS['name']).all()
+
+        self.assertEqual(len(results), 1)
+
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(self.dbfile)
