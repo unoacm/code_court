@@ -1,10 +1,14 @@
+import datetime
 import os
-import unittest
 import tempfile
+import unittest
 
 import web
 
 from web import app, model
+
+def string_to_dt(s):
+    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')
 
 class ModelsTestCase(unittest.TestCase):
     """
@@ -34,6 +38,26 @@ class ModelsTestCase(unittest.TestCase):
 
         # fetch python lang
         results = model.Language.query.filter_by(name=LANG_ARGS['name']).all()
+
+        self.assertEqual(len(results), 1)
+
+    def test_user(self):
+        """test the user table"""
+        USER_ARGS = {
+            "email": "testuser@example.com",
+            "name": "Test A. B. User",
+            "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
+            "creation_time": string_to_dt("2017-01-01T12:12"),
+            "misc_data": '{"teacher": "Cavanaugh"}',
+        }
+
+        # create and add user
+        user = model.User(**USER_ARGS)
+        model.db.session.add(user)
+        model.db.session.commit()
+
+        # fetch user
+        results = model.User.query.filter_by(email=USER_ARGS['email']).all()
 
         self.assertEqual(len(results), 1)
 
