@@ -87,3 +87,40 @@ class User(db.Model):
         self.name = name
         self.password = password
         self.misc_data = misc_data
+
+class Contest(db.Model):
+    """Stores information about a contest"""
+    __tablename__ = 'contest'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True, nullable=False)
+    """str: the contest's name"""
+
+    activate_time = db.Column(db.DateTime)
+    """DateTime: the contest's activation time, users will be able to see the contest,
+        but they will not be able to see the problems or upload submissions"""
+
+    start_time = db.Column(db.DateTime, nullable=False)
+    """DateTime: the contest's start time, users will be able to upload submissions at this time"""
+
+    freeze_time = db.Column(db.DateTime)
+    """DateTime: the time when the contest's scoreboard freezes"""
+
+    end_time = db.Column(db.DateTime, nullable=False)
+    """DateTime: the time when the contest ends, users will not be able to upload submissions
+        after this time"""
+
+    deactivate_time = db.Column(db.DateTime)
+    """DateTime: the contest will be hidden at this time"""
+
+    is_public = db.Column(db.Boolean, nullable=False)
+    """bool: whether or not the contest can be joined/viewed by anyone"""
+
+    def __init__(self, name, start_time, end_time, is_public, activate_time=None, freeze_time=None, deactivate_time=None):
+        self.name = name
+        self.start_time = start_time
+        self.end_time = end_time
+        self.is_public = is_public
+        self.activate_time = activate_time
+        self.freeze_time = freeze_time
+        self.deactivate_time = deactivate_time
