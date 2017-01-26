@@ -141,3 +141,24 @@ class Contest(db.Model):
         self.activate_time = activate_time
         self.freeze_time = freeze_time
         self.deactivate_time = deactivate_time
+
+
+class Configuration(db.Model):
+    """Stores general configuration information"""
+    __tablename__ = 'configuration'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    key = db.Column(db.String, unique=True, nullable=False)
+    """str: the config entry name"""
+
+    val = db.Column(db.String, nullable=False)
+    """str: the config entry val"""
+
+    valType = db.Column(db.String, nullable=False)
+    """str: the type of the config entry val"""
+
+    def __init__(self, key, val, valType):
+        self.key = key
+        self.val = val
+        self.valType = valType
