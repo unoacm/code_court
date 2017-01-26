@@ -100,6 +100,24 @@ class ModelsTestCase(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
 
+    def test_configuration(self):
+        """test the configuration table"""
+        CONF_ARGS = {
+            "key": "use_strict_comparison",
+            "val": "True",
+            "valType": "bool",
+        }
+
+        # create and add contest
+        conf_type = model.Configuration(**CONF_ARGS)
+        model.db.session.add(conf_type)
+        model.db.session.commit()
+
+        # fetch contest
+        results = model.Configuration.query.filter_by(key=CONF_ARGS['key']).all()
+
+        self.assertEqual(len(results), 1)
+
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(self.dbfile)
