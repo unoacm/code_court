@@ -1,3 +1,5 @@
+import json
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
@@ -8,27 +10,30 @@ test_case_problem_at = db.Table('test_case_problem', db.Model.metadata,
     db.Column('test_case_id', db.Integer, db.ForeignKey('test_case.id'))
 )
 
+
 class Language(db.Model):
+    """Stores the configuration for a programming language"""
     __tablename__ = 'language'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
-    is_enabled = db.Column(db.Boolean)
 
-    def __init__(self, name, is_enabled):
-        """
-        Initializes a language object
+    name = db.Column(db.String, unique=True, nullable=False)
+    """str: the language name"""
 
-        Args:
-            name (str): the name of the langauge
-            is_enabled (bool): whether or not the language is currently
-                               enabled
-        """
+    is_enabled = db.Column(db.Boolean, nullable=False)
+    """bool: whether or not the language is enabled"""
+
+    run_script = db.Column(db.String, nullable=False)
+    """str: script (with shebang) that compiles and runs scripts for this language"""
+
+    def __init__(self, name, is_enabled, run_script):
         self.name = name
         self.is_enabled = is_enabled
+        self.run_script = run_script
 
     def __str__(self):
         return "Problem({})".format(self.name)
+
 
 class Problem(db.Model):
     __tablename__ = 'problem'

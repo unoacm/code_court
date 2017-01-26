@@ -7,6 +7,7 @@
             <th>id</th>
             <th>name</th>
             <th>is_enabled</th>
+            <th>run_script</th>
             <th></th>
             <th></th>
         </tr>
@@ -17,8 +18,9 @@
             <td>{{ language.id }}</td>
             <td>{{ language.name }}</td>
             <td>{{ language.is_enabled }}</td>
+            <td>...</td>
             <td>
-                <a href="{{ url_for('languages.languages_add', lang_id=language.id) }}" class="btn btn-danger btn-xs">edit</a>
+                <a href="{{ url_for('languages.languages_add', lang_id=language.id) }}" class="btn btn-info btn-xs">edit</a>
                 <a href="{{ url_for('languages.languages_del', lang_id=language.id) }}" class="btn btn-danger btn-xs">del</a>
             </td>
         </tr>
