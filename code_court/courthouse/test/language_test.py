@@ -32,7 +32,8 @@ class LanguageTestCase(unittest.TestCase):
         # check adding
         rv = self.app.post('/admin/languages/add/', data={
             "name": init_python_name,
-            "is_enabled": "on"
+            "is_enabled": "on",
+            "run_script": "#!/bin/bash\npython $1",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
@@ -47,7 +48,8 @@ class LanguageTestCase(unittest.TestCase):
         rv = self.app.post('/admin/languages/add/', data={
             "lang_id": 1,
             "name": edit_python_name,
-            "is_enabled": "on"
+            "is_enabled": "on",
+            "run_script": "#!/bin/bash\npython $1",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 

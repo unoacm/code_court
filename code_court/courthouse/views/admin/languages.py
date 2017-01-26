@@ -93,6 +93,7 @@ def add_lang():
 
     name = request.form.get("name")
     is_enabled = request.form.get("is_enabled")
+    run_script = request.form.get("run_script")
 
     if name is None:
         # TODO: give better feedback for failure
@@ -100,11 +101,9 @@ def add_lang():
         abort(400)
 
     # convert is_enabled to a bool
-    if is_enabled == "on":
-        is_enabled_bool = True
-    elif is_enabled == "off" or is_enabled is None:
-        is_enabled_bool = False
-    else:
+
+    is_enabled_bool = checkbox_result_to_bool(is_enabled)
+    if is_enabled_bool is None:
         # TODO: give better feedback for failure
         current_app.logger.info("Invalid language is_enabled: %s", is_enabled)
         abort(400)
@@ -114,6 +113,7 @@ def add_lang():
         lang = model.Language.query.filter_by(id=lang_id).one()
         lang.name = name
         lang.is_enabled = is_enabled_bool
+        lang.run_script = run_script
     else: # add
         # check if is duplicate
         if is_dup_lang_name(name):
@@ -121,7 +121,7 @@ def add_lang():
             current_app.logger.info("Tried to add a duplicate language: %s", name)
             abort(400)
 
-        lang = model.Language(name, is_enabled_bool)
+        lang = model.Language(name, is_enabled_bool, run_script)
         model.db.session.add(lang)
 
     model.db.session.commit()
@@ -154,9 +154,11 @@ def display_lang_add_form(lang_id):
                                action_label="Edit",
                                lang_id=lang_id,
                                name=lang[0].name,
-                               is_enabled=lang[0].is_enabled)
+                               is_enabled=lang[0].is_enabled,
+                               run_script=lang[0].run_script)
 
 
+## Util functions
 def get_model():
     """
     Gets the model from the current app,
@@ -189,3 +191,19 @@ def is_dup_lang_name(name):
     model = get_model()
     dup_lang = model.Language.query.filter_by(name=name).all()
     return len(dup_lang) > 0
+
+def checkbox_result_to_bool(res):
+    """
+    Takes in a checkbox result from a form and converts it to a bool
+
+    Params:
+        res (str): the result string from a checkbox
+
+    Returns:
+        bool: the boolean value of res
+    """
+    if res == "on":
+        return True
+    elif res == "off" or res is None:
+        return False
+    return None

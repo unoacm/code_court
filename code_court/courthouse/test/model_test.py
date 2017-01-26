@@ -20,17 +20,22 @@ class ModelsTestCase(unittest.TestCase):
             web.setup_database(app)
 
     def test_language(self):
-        init_results = model.Language.query.filter_by(name="python").all()
+        """test the language table"""
+        LANG_ARGS = {
+            "name": "python",
+            "is_enabled": True,
+            "run_script": "#!/bin/bash\npython $1",
+        }
 
         # create and add python lang
-        python = model.Language("python", True)
+        python = model.Language(**LANG_ARGS)
         model.db.session.add(python)
         model.db.session.commit()
 
         # fetch python lang
-        results = model.Language.query.filter_by(name="python").all()
+        results = model.Language.query.filter_by(name=LANG_ARGS['name']).all()
 
-        self.assertGreater(len(results), len(init_results))
+        self.assertEqual(len(results), 1)
 
     def tearDown(self):
         os.close(self.db_fd)
