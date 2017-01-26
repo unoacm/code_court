@@ -83,6 +83,23 @@ class ModelsTestCase(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
 
+    def test_problem_type(self):
+        """test the problem_type table"""
+        PT_ARGS = {
+            "name": "1620 bracket",
+            "eval_script": "import sys; sys.exit(0)"
+        }
+
+        # create and add contest
+        problem_type = model.ProblemType(**PT_ARGS)
+        model.db.session.add(problem_type)
+        model.db.session.commit()
+
+        # fetch contest
+        results = model.ProblemType.query.filter_by(name=PT_ARGS['name']).all()
+
+        self.assertEqual(len(results), 1)
+
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(self.dbfile)

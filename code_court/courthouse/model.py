@@ -36,6 +36,23 @@ class Language(db.Model):
         return "Problem({})".format(self.name)
 
 
+class ProblemType(db.Model):
+    """Stores information about a problem type"""
+    __tablename__ = 'problem_type'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String, unique=True, nullable=False)
+    """str: the name of the problem type"""
+
+    eval_script = db.Column(db.String, nullable=False)
+    """str: script (with shebang) that evaluates this problem type"""
+
+    def __init__(self, name, eval_script):
+        self.name = name
+        self.eval_script = eval_script
+
+
 class Problem(db.Model):
     __tablename__ = 'problem'
 
