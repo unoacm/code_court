@@ -6,12 +6,6 @@ from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
 
-test_case_problem_at = db.Table('test_case_problem', db.Model.metadata,
-    db.Column('problem_id', db.Integer, db.ForeignKey('problem.id')),
-    db.Column('test_case_id', db.Integer, db.ForeignKey('test_case.id'))
-)
-
-
 class Language(db.Model):
     """Stores the configuration for a programming language"""
     __tablename__ = 'language'
@@ -57,20 +51,31 @@ class Problem(db.Model):
     __tablename__ = 'problem'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    problem_statements = db.relationship("TestCase", secondary=test_case_problem_at, back_populates="problems")
+
+    problem_type = db.relationship('ProblemType', backref=db.backref('Problem', lazy='dynamic'))
+    problem_type_id = db.Column(db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
+    """int: a foreignkey to the problem's problem type"""
+
+    name = db.Column(db.String, unique=True, nullable=False)
+    """str: the problem's name"""
+
+    problem_statement = db.Column(db.String, nullable=False)
+    """str: the problem statement in markdown format"""
+
+    sample_input = db.Column(db.String)
+    """str: the problem's sample input, this may be shown to the user """
+
+    sample_output = db.Column(db.String)
+    """str: the problem's sample output, this may be shown to the user """
+
+    secret_input = db.Column(db.String)
+    """str: the problem's secret input, this may be shown to the user """
+
+    secret_output = db.Column(db.String)
+    """str: the problem's secret output, this may be shown to the user """
 
     def __str__(self):
         return "Problem({})".format(self.name)
-
-
-class TestCase(db.Model):
-    __tablename__ = 'test_case'
-
-    id = db.Column(db.Integer, primary_key=True)
-    input_string = db.Column(db.String)
-    output_string = db.Column(db.String)
-    problems = db.relationship("Problem", secondary=test_case_problem_at, back_populates="problem_statements")
 
 
 class User(db.Model):

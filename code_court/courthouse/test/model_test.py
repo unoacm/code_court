@@ -117,6 +117,54 @@ class ModelsTestCase(unittest.TestCase):
 
         self.assertEqual(len(results), 1)
 
+    def test_problem_type(self):
+        """test the problem_type table"""
+        PROBLEM_TYPE_ARGS = {
+            "name": "input/output",
+            "eval_script": "#!/bin/bash\nexit 0",
+        }
+
+        # create and add contest
+        problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
+        model.db.session.add(problem_type)
+        model.db.session.commit()
+
+        # fetch contest
+        results = model.ProblemType.query.filter_by(name=PROBLEM_TYPE_ARGS['name']).all()
+
+        self.assertEqual(len(results), 1)
+
+    def test_problem(self):
+        """test the problem table"""
+        # add problem type
+        PROBLEM_TYPE_ARGS = {
+            "name": "input/output",
+            "eval_script": "#!/bin/bash\nexit 0",
+        }
+        problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
+        model.db.session.add(problem_type)
+        model.db.session.commit()
+
+        PROBLEM_ARGS = {
+            "problem_type": problem_type,
+            "name": "The Input/Output Problem",
+            "problem_statement": "Print the string 'Hello, World!' n times",
+            "sample_input": "3",
+            "sample_output": "Hello, World!Hello, World!Hello, World!",
+            "secret_input": "4",
+            "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
+        }
+
+        # create and add contest
+        problem = model.Problem(**PROBLEM_ARGS)
+        model.db.session.add(problem)
+        model.db.session.commit()
+
+        # fetch contest
+        results = model.Problem.query.filter_by(name=PROBLEM_ARGS['name']).all()
+
+        self.assertEqual(len(results), 1)
+
     def tearDown(self):
         pass
 
