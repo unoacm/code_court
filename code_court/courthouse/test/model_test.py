@@ -15,8 +15,7 @@ class ModelsTestCase(unittest.TestCase):
     Contains tests for the database model
     """
     def setUp(self):
-        self.db_fd, self.dbfile = tempfile.mkstemp()
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + self.dbfile
+        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
         app.config['TESTING'] = True
         app.app_context().push()
         self.app = app.test_client()
@@ -119,8 +118,7 @@ class ModelsTestCase(unittest.TestCase):
         self.assertEqual(len(results), 1)
 
     def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(self.dbfile)
+        pass
 
 if __name__ == '__main__':
     unittest.main()
