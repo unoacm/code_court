@@ -167,3 +167,39 @@ class Configuration(db.Model):
         self.key = key
         self.val = val
         self.valType = valType
+
+class SavedCode(db.Model):
+    """Stores general configuration information"""
+    __tablename__ = 'saved_code'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    contest = db.relationship('Contest', backref=db.backref('SavedCode', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the saved_code's contest"""
+
+    problem = db.relationship('Problem', backref=db.backref('SavedCode', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    """int: a foreignkey to the saved_code's problem"""
+
+    user = db.relationship('User', backref=db.backref('SavedCode', lazy='dynamic'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the saved_code's user"""
+
+    language = db.relationship('Language', backref=db.backref('SavedCode', lazy='dynamic'))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    """int: a foreignkey to the saved_code's language"""
+
+    source_code = db.Column(db.String, unique=True, nullable=False)
+    """str: the saved source code"""
+
+    last_updated_time = db.Column(db.DateTime)
+    """DateTime: the time the code was last updated at"""
+
+    def __init__(self, contest, problem, user, language, source_code, last_updated_time):
+        self.contest = contest
+        self.problem = problem
+        self.user = user
+        self.language = language
+        self.source_code = source_code
+        self.last_updated_time = last_updated_time
