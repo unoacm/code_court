@@ -203,3 +203,63 @@ class SavedCode(db.Model):
         self.language = language
         self.source_code = source_code
         self.last_updated_time = last_updated_time
+
+class Run(db.Model):
+    """Stores information about a specific run. This might be a
+    submission, or just a test run"""
+    __tablename__ = 'run'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user = db.relationship('User', backref=db.backref('Run', lazy='dynamic'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the run's user"""
+
+    contest = db.relationship('Contest', backref=db.backref('Run', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the run's contest"""
+
+    language = db.relationship('Language', backref=db.backref('Run', lazy='dynamic'))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    """int: a foreignkey to the run's language"""
+
+    problem = db.relationship('Problem', backref=db.backref('Run', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    """int: a foreignkey to the run's problem"""
+
+    source_code = db.Column(db.String, nullable=False)
+    """str: the submitted source code"""
+
+    submit_time = db.Column(db.DateTime, nullable=False)
+    """DateTime: the time the code was submitted"""
+
+    started_execing_time = db.Column(db.DateTime)
+    """DateTime: the time the code started being executed"""
+
+    finished_execing_time = db.Column(db.DateTime)
+    """DateTime: the time the code finished being executed"""
+
+    run_input = db.Column(db.String, nullable=False)
+    """str: input text passed to the submitted program"""
+
+    run_output = db.Column(db.String)
+    """str: the output of the submitted program"""
+
+    @property
+    def is_judging(self):
+        return (self.started_execing_time is not None and
+                self.finished_execing_time is None)
+
+    @property
+    def is_judged(self):
+        return self.finished_execing_time is not None
+
+    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input):
+        self.user = user
+        self.contest = contest
+        self.language = language
+        self.problem = problem
+        self.submit_time = submit_time
+        self.source_code =  source_code
+        self.run_input = run_input
+

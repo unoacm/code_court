@@ -267,8 +267,29 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.add(saved_code)
         model.db.session.commit()
 
+    def test_run(self):
+        """test the run table"""
+        contest_args, contest = get_contest()
+        problem_args, problem = get_problem()
+        user_args, user = get_user()
+        language_args, language = get_language()
+
+        RUN_ARGS = {
+            "user": user,
+            "contest": contest,
+            "language": language,
+            "problem": problem,
+            "submit_time": string_to_dt('2017-01-26T10:45'),
+            "source_code": "print('hello'*input())",
+            "run_input": "5",
+        }
+        run = model.Run(**RUN_ARGS)
+        model.db.session.add(run)
+        model.db.session.commit()
+
     def tearDown(self):
         pass
 
 if __name__ == '__main__':
     unittest.main()
+
