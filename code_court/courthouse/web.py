@@ -19,6 +19,7 @@ from views.main import main
 from views.api import api
 from views.admin.admin import admin
 from views.admin.languages import languages
+from views.defendant import defendant
 
 # turn down log level for werkzeug
 wlog = logging.getLogger('werkzeug')
@@ -50,6 +51,7 @@ def create_app():
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(languages, url_prefix='/admin/languages')
+    app.register_blueprint(defendant, url_prefix='/defendant')
 
     @app.context_processor
     def inject_user():

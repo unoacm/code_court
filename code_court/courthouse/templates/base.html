@@ -41,6 +41,10 @@
                         <li {% if request.path.startswith('/admin') %}class="active"{% endif %}>
                             <a href="{{ url_for('admin.index') }}">Admin</a>
                         </li>
+
+                        <li {% if request.path.startswith('/defendant') %}class="active"{% endif %}>
+                            <a href="{{ url_for('defendant.index') }}">Defendant</a>
+                        </li>
                     </ul>
                 </div>
             </div>
