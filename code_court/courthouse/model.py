@@ -83,6 +83,7 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
+
     email = db.Column(db.String, unique=True, nullable=False)
     """str: the user's email"""
 
@@ -263,3 +264,35 @@ class Run(db.Model):
         self.source_code =  source_code
         self.run_input = run_input
 
+
+class Clarification(db.Model):
+    """Stores information about a user or judge clarification"""
+    __tablename__ = 'clarification'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    contest = db.relationship('Contest', backref=db.backref('Clarification', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the clarification's contest"""
+
+    problem = db.relationship('Problem', backref=db.backref('Clarification', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=True)
+    """int: a foreignkey to the clarification's problem, if it is null, the
+        the clarification is general"""
+
+    asker_user = db.relationship('User', backref=db.backref('Clarification', lazy='dynamic'))
+    asker_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the user that initiated the clarification"""
+
+    parent = db.relationship("Clarification", remote_side=[id])
+    parent_id = db.Column(db.Integer, db.ForeignKey('clarification.id'), nullable=True)
+    """int: a foreignkey to the a parent clarification"""
+
+    contents = db.Column(db.String, nullable=False)
+    """str: the contents of the clarification"""
+
+    creation_time = db.Column(db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    """DateTime: the time the clarification was created at"""
+
+    is_public = db.Column(db.Boolean, nullable=False)
+    """bool: whether or not the clarification is shown to everyone, or just the intiator"""

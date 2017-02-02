@@ -287,6 +287,24 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.add(run)
         model.db.session.commit()
 
+    def test_clarification(self):
+        """test the clarification table"""
+        contest_args, contest = get_contest()
+        problem_args, problem = get_problem()
+        user_args, user = get_user()
+
+        CLARIFICATION_ARGS = {
+            "contest": contest,
+            "problem": problem,
+            "asker_user": user,
+            "contents": "What is this thing?",
+            "creation_time": string_to_dt('2017-01-26T10:45'),
+            "is_public": False,
+        }
+        clarification = model.Clarification(**CLARIFICATION_ARGS)
+        model.db.session.add(clarification)
+        model.db.session.commit()
+
     def tearDown(self):
         pass
 
