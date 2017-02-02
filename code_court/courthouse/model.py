@@ -296,3 +296,10 @@ class Clarification(db.Model):
 
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
+
+class UserRole(db.Model):
+    """Stores system user roles"""
+    __tablename__ = 'user_role'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)

@@ -305,6 +305,15 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.add(clarification)
         model.db.session.commit()
 
+    def test_user_role(self):
+        """test the user_role table"""
+        USER_ROLE_ARGS = {
+            "name": "admin",
+        }
+        user_role = model.UserRole(**USER_ROLE_ARGS)
+        model.db.session.add(user_role)
+        model.db.session.commit()
+
     def tearDown(self):
         pass
 
