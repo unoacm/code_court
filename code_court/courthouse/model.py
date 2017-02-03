@@ -6,6 +6,21 @@ from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
 
+contest_problem = db.Table('contest_problem', db.Model.metadata,
+    db.Column('contest_id', db.Integer, db.ForeignKey('contest.id')),
+    db.Column('problem_id', db.Integer, db.ForeignKey('problem.id'))
+)
+
+contest_user = db.Table('contest_user', db.Model.metadata,
+    db.Column('contest_id', db.Integer, db.ForeignKey('contest.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+user_user_role = db.Table('user_user_role', db.Model.metadata,
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('user_role_id', db.Integer, db.ForeignKey('user_role.id'))
+)
+
 class Language(db.Model):
     """Stores the configuration for a programming language"""
     __tablename__ = 'language'
@@ -74,6 +89,8 @@ class Problem(db.Model):
     secret_output = db.Column(db.String)
     """str: the problem's secret output, this may be shown to the user """
 
+    contests = db.relationship("Contest", secondary=contest_problem, back_populates="problems")
+
     def __str__(self):
         return "Problem({})".format(self.name)
 
@@ -99,6 +116,9 @@ class User(db.Model):
     misc_data = db.Column(db.String, nullable=False)
     """str: misc data about a user, stored as a json object"""
 
+    contests = db.relationship("Contest", secondary=contest_user, back_populates="users")
+    user_roles = db.relationship("UserRole", secondary=user_user_role, back_populates="users")
+
     def __init__(self, email, name, password, creation_time=None, misc_data=None):
         if misc_data is None:
             misc_data = json.dumps({})
@@ -110,6 +130,7 @@ class User(db.Model):
         self.name = name
         self.password = password
         self.misc_data = misc_data
+
 
 class Contest(db.Model):
     """Stores information about a contest"""
@@ -138,6 +159,10 @@ class Contest(db.Model):
 
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the contest can be joined/viewed by anyone"""
+
+    # users = db.relationship("ContestUser", back_populates="contest")
+    users = db.relationship("User", secondary=contest_user, back_populates="contests")
+    problems = db.relationship("Problem", secondary=contest_problem, back_populates="contests")
 
     def __init__(self, name, start_time, end_time, is_public, activate_time=None, freeze_time=None, deactivate_time=None):
         self.name = name
@@ -168,6 +193,7 @@ class Configuration(db.Model):
         self.key = key
         self.val = val
         self.valType = valType
+
 
 class SavedCode(db.Model):
     """Stores general configuration information"""
@@ -205,11 +231,11 @@ class SavedCode(db.Model):
         self.source_code = source_code
         self.last_updated_time = last_updated_time
 
+
 class Run(db.Model):
     """Stores information about a specific run. This might be a
     submission, or just a test run"""
     __tablename__ = 'run'
-
     id = db.Column(db.Integer, primary_key=True)
 
     user = db.relationship('User', backref=db.backref('Run', lazy='dynamic'))
@@ -297,9 +323,12 @@ class Clarification(db.Model):
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
+
 class UserRole(db.Model):
     """Stores system user roles"""
     __tablename__ = 'user_role'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
+
+    users = db.relationship("User", secondary=user_user_role, back_populates="user_roles")
