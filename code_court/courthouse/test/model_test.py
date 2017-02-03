@@ -315,7 +315,10 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.commit()
 
     def tearDown(self):
-        pass
+        for table in reversed(model.db.metadata.sorted_tables):
+            model.db.session.execute(table.delete())
+        model.db.session.commit()
+
 
 if __name__ == '__main__':
     unittest.main()
