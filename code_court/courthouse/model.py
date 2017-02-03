@@ -6,12 +6,6 @@ from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
 
-test_case_problem_at = db.Table('test_case_problem', db.Model.metadata,
-    db.Column('problem_id', db.Integer, db.ForeignKey('problem.id')),
-    db.Column('test_case_id', db.Integer, db.ForeignKey('test_case.id'))
-)
-
-
 class Language(db.Model):
     """Stores the configuration for a programming language"""
     __tablename__ = 'language'
@@ -57,20 +51,31 @@ class Problem(db.Model):
     __tablename__ = 'problem'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    problem_statements = db.relationship("TestCase", secondary=test_case_problem_at, back_populates="problems")
+
+    problem_type = db.relationship('ProblemType', backref=db.backref('Problem', lazy='dynamic'))
+    problem_type_id = db.Column(db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
+    """int: a foreignkey to the problem's problem type"""
+
+    name = db.Column(db.String, unique=True, nullable=False)
+    """str: the problem's name"""
+
+    problem_statement = db.Column(db.String, nullable=False)
+    """str: the problem statement in markdown format"""
+
+    sample_input = db.Column(db.String)
+    """str: the problem's sample input, this may be shown to the user """
+
+    sample_output = db.Column(db.String)
+    """str: the problem's sample output, this may be shown to the user """
+
+    secret_input = db.Column(db.String)
+    """str: the problem's secret input, this may be shown to the user """
+
+    secret_output = db.Column(db.String)
+    """str: the problem's secret output, this may be shown to the user """
 
     def __str__(self):
         return "Problem({})".format(self.name)
-
-
-class TestCase(db.Model):
-    __tablename__ = 'test_case'
-
-    id = db.Column(db.Integer, primary_key=True)
-    input_string = db.Column(db.String)
-    output_string = db.Column(db.String)
-    problems = db.relationship("Problem", secondary=test_case_problem_at, back_populates="problem_statements")
 
 
 class User(db.Model):
@@ -78,6 +83,7 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
+
     email = db.Column(db.String, unique=True, nullable=False)
     """str: the user's email"""
 
@@ -162,3 +168,138 @@ class Configuration(db.Model):
         self.key = key
         self.val = val
         self.valType = valType
+
+class SavedCode(db.Model):
+    """Stores general configuration information"""
+    __tablename__ = 'saved_code'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    contest = db.relationship('Contest', backref=db.backref('SavedCode', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the saved_code's contest"""
+
+    problem = db.relationship('Problem', backref=db.backref('SavedCode', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    """int: a foreignkey to the saved_code's problem"""
+
+    user = db.relationship('User', backref=db.backref('SavedCode', lazy='dynamic'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the saved_code's user"""
+
+    language = db.relationship('Language', backref=db.backref('SavedCode', lazy='dynamic'))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    """int: a foreignkey to the saved_code's language"""
+
+    source_code = db.Column(db.String, unique=True, nullable=False)
+    """str: the saved source code"""
+
+    last_updated_time = db.Column(db.DateTime)
+    """DateTime: the time the code was last updated at"""
+
+    def __init__(self, contest, problem, user, language, source_code, last_updated_time):
+        self.contest = contest
+        self.problem = problem
+        self.user = user
+        self.language = language
+        self.source_code = source_code
+        self.last_updated_time = last_updated_time
+
+class Run(db.Model):
+    """Stores information about a specific run. This might be a
+    submission, or just a test run"""
+    __tablename__ = 'run'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user = db.relationship('User', backref=db.backref('Run', lazy='dynamic'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the run's user"""
+
+    contest = db.relationship('Contest', backref=db.backref('Run', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the run's contest"""
+
+    language = db.relationship('Language', backref=db.backref('Run', lazy='dynamic'))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    """int: a foreignkey to the run's language"""
+
+    problem = db.relationship('Problem', backref=db.backref('Run', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    """int: a foreignkey to the run's problem"""
+
+    source_code = db.Column(db.String, nullable=False)
+    """str: the submitted source code"""
+
+    submit_time = db.Column(db.DateTime, nullable=False)
+    """DateTime: the time the code was submitted"""
+
+    started_execing_time = db.Column(db.DateTime)
+    """DateTime: the time the code started being executed"""
+
+    finished_execing_time = db.Column(db.DateTime)
+    """DateTime: the time the code finished being executed"""
+
+    run_input = db.Column(db.String, nullable=False)
+    """str: input text passed to the submitted program"""
+
+    run_output = db.Column(db.String)
+    """str: the output of the submitted program"""
+
+    @property
+    def is_judging(self):
+        return (self.started_execing_time is not None and
+                self.finished_execing_time is None)
+
+    @property
+    def is_judged(self):
+        return self.finished_execing_time is not None
+
+    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input):
+        self.user = user
+        self.contest = contest
+        self.language = language
+        self.problem = problem
+        self.submit_time = submit_time
+        self.source_code =  source_code
+        self.run_input = run_input
+
+
+class Clarification(db.Model):
+    """Stores information about a user or judge clarification"""
+    __tablename__ = 'clarification'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    contest = db.relationship('Contest', backref=db.backref('Clarification', lazy='dynamic'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    """int: a foreignkey to the clarification's contest"""
+
+    problem = db.relationship('Problem', backref=db.backref('Clarification', lazy='dynamic'))
+    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=True)
+    """int: a foreignkey to the clarification's problem, if it is null, the
+        the clarification is general"""
+
+    asker_user = db.relationship('User', backref=db.backref('Clarification', lazy='dynamic'))
+    asker_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    """int: a foreignkey to the user that initiated the clarification"""
+
+    parent = db.relationship("Clarification", remote_side=[id])
+    parent_id = db.Column(db.Integer, db.ForeignKey('clarification.id'), nullable=True)
+    """int: a foreignkey to the a parent clarification"""
+
+    contents = db.Column(db.String, nullable=False)
+    """str: the contents of the clarification"""
+
+    creation_time = db.Column(db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    """DateTime: the time the clarification was created at"""
+
+    is_public = db.Column(db.Boolean, nullable=False)
+    """bool: whether or not the clarification is shown to everyone, or just the intiator"""
+
+class UserRole(db.Model):
+    """Stores system user roles"""
+    __tablename__ = 'user_role'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)

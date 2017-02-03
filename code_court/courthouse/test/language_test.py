@@ -72,7 +72,9 @@ class LanguageTestCase(unittest.TestCase):
         self.assertEqual(add_python_count-1, del_python_count)
 
     def tearDown(self):
-        pass
+        for table in reversed(model.db.metadata.sorted_tables):
+            model.db.session.execute(table.delete())
+        model.db.session.commit()
 
 if __name__ == '__main__':
     unittest.main()
