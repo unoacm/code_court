@@ -44,9 +44,9 @@ def get_problem():
 def get_language():
     """returns a test Language"""
     LANG_ARGS = {
-        "name": "python",
+        "name": "ruby",
         "is_enabled": True,
-        "run_script": "#!/bin/bash\npython $1",
+        "run_script": "#!/bin/bash\nruby $1",
     }
 
     # create and add python lang
@@ -102,23 +102,22 @@ class ModelsTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.app_context().push()
         self.app = app.test_client()
-        with app.app_context():
-            web.setup_database(app)
+        web.setup_database(app)
 
     def test_language(self):
         """test the language table"""
         LANG_ARGS = {
-            "name": "python",
+            "name": "ruby",
             "is_enabled": True,
-            "run_script": "#!/bin/bash\npython $1",
+            "run_script": "#!/bin/bash\nruby $1",
         }
 
         # create and add python lang
-        python = model.Language(**LANG_ARGS)
-        model.db.session.add(python)
+        lang = model.Language(**LANG_ARGS)
+        model.db.session.add(lang)
         model.db.session.commit()
 
-        # fetch python lang
+        # fetch lang
         results = model.Language.query.filter_by(name=LANG_ARGS['name']).all()
 
         self.assertEqual(len(results), 1)
@@ -320,9 +319,7 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.commit()
 
     def tearDown(self):
-        for table in reversed(model.db.metadata.sorted_tables):
-            model.db.session.execute(table.delete())
-        model.db.session.commit()
+        model.db.drop_all()
 
 
 if __name__ == '__main__':
