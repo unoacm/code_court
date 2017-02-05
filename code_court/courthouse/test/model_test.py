@@ -154,9 +154,14 @@ class ModelsTestCase(unittest.TestCase):
             "deactivate_time": string_to_dt('2017-01-26T10:45'),
             "is_public": True,
         }
+        user_args, user = get_user()
+        problem_args, problem = get_problem()
 
         # create and add contest
         contest = model.Contest(**CONTEST_ARGS)
+        contest.users.append(user)
+        contest.problems.append(problem)
+
         model.db.session.add(contest)
         model.db.session.commit()
 
