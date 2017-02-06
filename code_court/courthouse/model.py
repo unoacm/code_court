@@ -42,7 +42,7 @@ class Language(db.Model):
         self.run_script = run_script
 
     def __str__(self):
-        return "Problem({})".format(self.name)
+        return "Language({})".format(self.name)
 
 
 class ProblemType(db.Model):
@@ -329,6 +329,9 @@ class UserRole(db.Model):
     __tablename__ = 'user_role'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False, unique=True)
 
     users = db.relationship("User", secondary=user_user_role, back_populates="user_roles")
+
+    def __init__(self, name):
+        self.name = name

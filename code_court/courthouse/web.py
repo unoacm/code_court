@@ -67,8 +67,42 @@ def create_app():
 def setup_database(app):
     """Creates the database tables on initial startup"""
     with app.app_context():
-        app.logger.info("Creating db tables")
-        db.create_all()
+        if not is_db_inited(app):
+            app.logger.info("Creating db tables")
+            db.create_all()
+            db.session.commit()
+            init_db(app)
+
+def is_db_inited(app):
+    """Checks if the db is initialized
+
+    Args:
+        app: the flask app
+
+    Returns:
+        bool: True if the database has been initialized
+    """
+    with app.app_context():
+        if not db.engine.dialect.has_table(db.engine, "user_role"):
+            return False
+        return model.UserRole.query.count() > 0
+
+def init_db(app):
+    """Performs the initial database setup for the application
+    """
+    with app.app_context():
+        app.logger.info("Initializing db tables")
+
+        model.db.session.add_all([model.UserRole("defendant"),
+                                 model.UserRole("operator"),
+                                 model.UserRole("judge")])
+
+        model.db.session.add_all([model.Language("python", True, "#!/bin/bash\npython $1")])
+
+        model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
+                                  model.Configuration("contestants_see_sample_output", "True", "bool")])
+        model.db.session.commit()
+
 
 def setup_logging(app):
     """Sets up the flask app loggers"""
@@ -96,8 +130,8 @@ app = create_app()
 if __name__ == "__main__":
     PORT = 9191
 
-    setup_database(app)
     setup_logging(app)
+    setup_database(app)
 
     app.logger.info("Running on port %s", PORT)
     app.run(host="0.0.0.0", port=PORT, debug=True)
