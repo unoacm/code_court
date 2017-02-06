@@ -39,9 +39,11 @@ def create_app():
     app = Flask(__name__)
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400 # 1 day
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db" #TODO: put this in config
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['model'] = model
+    app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
+
 
     db.init_app(app)
 
@@ -72,6 +74,8 @@ def setup_database(app):
             db.create_all()
             db.session.commit()
             init_db(app)
+            if not app.config['TESTING']:
+                dev_init_db(app)
 
 def is_db_inited(app):
     """Checks if the db is initialized
@@ -94,13 +98,50 @@ def init_db(app):
         app.logger.info("Initializing db tables")
 
         model.db.session.add_all([model.UserRole("defendant"),
-                                 model.UserRole("operator"),
-                                 model.UserRole("judge")])
+                                  model.UserRole("operator"),
+                                  model.UserRole("judge"),
+                                  model.UserRole("executioner")])
 
         model.db.session.add_all([model.Language("python", True, "#!/bin/bash\npython $1")])
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool")])
+
+        model.db.session.add_all([model.ProblemType("input-output",
+                                                    '#!/bin/bash\ntest "$1" = "$2"')])
+        model.db.session.commit()
+
+def dev_init_db(app):
+    """Performs the initial database setup for the application
+    """
+    with app.app_context():
+        app.logger.info("Initializing tables with dev data")
+        roles = {x.id: x for x in model.UserRole.query.all()}
+
+        test_contestant = model.User("testuser@flainted.com", "Test User", "pass", user_roles=[roles['defendant']])
+        model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
+                                  model.User("exec@flainted.com", "Executioner", "epass", user_roles=[roles['executioner']]),
+                                  test_contestant])
+
+        # create test contest
+        test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
+                                     model.str_to_dt("2030-01-01T11:11"), True)
+        model.db.session.add(test_contest)
+
+        io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
+        test_problem = model.Problem(io_problem_type, "fizzbuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
+                                     "3", "1\n2\nFizz",
+                                     "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\n9\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
+        test_contest.problems.append(test_problem)
+        test_contest.users.append(test_contestant)
+
+        python = model.Language.query.filter_by(name="python").one()
+        for i in range(59):
+            test_run = model.Run(test_contestant, test_contest, python, test_problem,
+                                 model.str_to_dt("2017-02-05T23:{}".format(i)),
+                                 'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
+                                 test_problem.secret_input, True)
+            model.db.session.add(test_run)
         model.db.session.commit()
 
 

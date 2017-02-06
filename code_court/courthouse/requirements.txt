@@ -3,6 +3,7 @@ colorama==0.3.7
 cookies==2.2.1
 decorator==4.0.11
 Flask==0.12
+Flask-HTTPAuth==3.2.2
 Flask-SQLAlchemy==2.1
 gunicorn==19.6.0
 ipython==5.1.0

@@ -21,6 +21,7 @@ user_user_role = db.Table('user_user_role', db.Model.metadata,
     db.Column('user_role_id', db.Integer, db.ForeignKey('user_role.id'))
 )
 
+
 class Language(db.Model):
     """Stores the configuration for a programming language"""
     __tablename__ = 'language'
@@ -77,23 +78,32 @@ class Problem(db.Model):
     problem_statement = db.Column(db.String, nullable=False)
     """str: the problem statement in markdown format"""
 
-    sample_input = db.Column(db.String)
+    sample_input = db.Column(db.String, nullable=False)
     """str: the problem's sample input, this may be shown to the user """
 
-    sample_output = db.Column(db.String)
+    sample_output = db.Column(db.String, nullable=False)
     """str: the problem's sample output, this may be shown to the user """
 
-    secret_input = db.Column(db.String)
+    secret_input = db.Column(db.String, nullable=False)
     """str: the problem's secret input, this may be shown to the user """
 
-    secret_output = db.Column(db.String)
+    secret_output = db.Column(db.String, nullable=False)
     """str: the problem's secret output, this may be shown to the user """
 
     contests = db.relationship("Contest", secondary=contest_problem, back_populates="problems")
 
+    def __init__(self, problem_type, name, problem_statement, sample_input,
+                 sample_output, secret_input, secret_output):
+        self.problem_type = problem_type
+        self.name = name
+        self.problem_statement = problem_statement
+        self.sample_input = sample_input
+        self.sample_output = sample_output
+        self.secret_input = secret_input
+        self.secret_output = secret_output
+
     def __str__(self):
         return "Problem({})".format(self.name)
-
 
 class User(db.Model):
     """Stores information about a user"""
@@ -119,12 +129,15 @@ class User(db.Model):
     contests = db.relationship("Contest", secondary=contest_user, back_populates="users")
     user_roles = db.relationship("UserRole", secondary=user_user_role, back_populates="users")
 
-    def __init__(self, email, name, password, creation_time=None, misc_data=None):
+    def __init__(self, email, name, password, creation_time=None, misc_data=None, user_roles=None):
         if misc_data is None:
             misc_data = json.dumps({})
 
         if creation_time is None:
             self.creation_time = datetime.datetime.utcnow()
+
+        if user_roles is not None:
+            self.user_roles = user_roles
 
         self.email = email
         self.name = name
@@ -272,6 +285,9 @@ class Run(db.Model):
     run_output = db.Column(db.String)
     """str: the output of the submitted program"""
 
+    is_submission = db.Column(db.Boolean, nullable=False)
+    """bool: if true the run is a submission, if false it's a test run"""
+
     @property
     def is_judging(self):
         return (self.started_execing_time is not None and
@@ -281,7 +297,7 @@ class Run(db.Model):
     def is_judged(self):
         return self.finished_execing_time is not None
 
-    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input):
+    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input, is_submission):
         self.user = user
         self.contest = contest
         self.language = language
@@ -289,6 +305,7 @@ class Run(db.Model):
         self.submit_time = submit_time
         self.source_code =  source_code
         self.run_input = run_input
+        self.is_submission = is_submission
 
 
 class Clarification(db.Model):
@@ -328,10 +345,13 @@ class UserRole(db.Model):
     """Stores system user roles"""
     __tablename__ = 'user_role'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
+    id = db.Column(db.String, primary_key=True)
 
     users = db.relationship("User", secondary=user_user_role, back_populates="user_roles")
 
     def __init__(self, name):
-        self.name = name
+        self.id = name
+
+def str_to_dt(s):
+    """Converts a string in format 2017-12-30T12:60 to datetime"""
+    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')

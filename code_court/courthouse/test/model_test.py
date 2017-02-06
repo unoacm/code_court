@@ -7,92 +7,6 @@ import web
 
 from web import app, model
 
-def string_to_dt(s):
-    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')
-
-def get_problem_type():
-    """returns a test ProblemType"""
-    PROBLEM_TYPE_ARGS = {
-        "name": "input/output",
-        "eval_script": "#!/bin/bash\nexit 0",
-    }
-    problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
-    model.db.session.add(problem_type)
-    model.db.session.commit()
-
-    return PROBLEM_TYPE_ARGS, problem_type
-
-def get_problem():
-    """returns a test Problem"""
-    problem_type_args, problem_type = get_problem_type()
-    PROBLEM_ARGS = {
-        "problem_type": problem_type,
-        "name": "The Input/Output Problem",
-        "problem_statement": "Print the string 'Hello, World!' n times",
-        "sample_input": "3",
-        "sample_output": "Hello, World!Hello, World!Hello, World!",
-        "secret_input": "4",
-        "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
-    }
-
-    problem = model.Problem(**PROBLEM_ARGS)
-    model.db.session.add(problem)
-    model.db.session.commit()
-
-    return PROBLEM_ARGS, problem
-
-def get_language():
-    """returns a test Language"""
-    LANG_ARGS = {
-        "name": "ruby",
-        "is_enabled": True,
-        "run_script": "#!/bin/bash\nruby $1",
-    }
-
-    # create and add python lang
-    lang = model.Language(**LANG_ARGS)
-    model.db.session.add(lang)
-    model.db.session.commit()
-
-    return LANG_ARGS, lang
-
-def get_user():
-    """returns a test user"""
-    USER_ARGS = {
-        "email": "testuser@example.com",
-        "name": "Test A. B. User",
-        "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-        "creation_time": string_to_dt("2017-01-01T12:12"),
-        "misc_data": '{"teacher": "Cavanaugh"}',
-    }
-
-    # create and add user
-    user = model.User(**USER_ARGS)
-    model.db.session.add(user)
-    model.db.session.commit()
-
-    return USER_ARGS, user
-
-def get_contest():
-    """returns a test contest"""
-    CONTEST_ARGS = {
-        "name": "1620 bracket",
-        "activate_time": string_to_dt('2017-01-25T10:45'),
-        "start_time": string_to_dt('2017-01-25T11:00'),
-        "freeze_time": string_to_dt('2017-01-25T16:00'),
-        "end_time": string_to_dt('2017-01-25T16:45'),
-        "deactivate_time": string_to_dt('2017-01-26T10:45'),
-        "is_public": True,
-    }
-
-    # create and add contest
-    contest = model.Contest(**CONTEST_ARGS)
-    model.db.session.add(contest)
-    model.db.session.commit()
-
-    return CONTEST_ARGS, contest
-
-
 class ModelsTestCase(unittest.TestCase):
     """
     Contains tests for the database model
@@ -128,7 +42,7 @@ class ModelsTestCase(unittest.TestCase):
             "email": "testuser@example.com",
             "name": "Test A. B. User",
             "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-            "creation_time": string_to_dt("2017-01-01T12:12"),
+            "creation_time": model.str_to_dt("2017-01-01T12:12"),
             "misc_data": '{"teacher": "Cavanaugh"}',
         }
 
@@ -146,11 +60,11 @@ class ModelsTestCase(unittest.TestCase):
         """test the contest table"""
         CONTEST_ARGS = {
             "name": "1620 bracket",
-            "activate_time": string_to_dt('2017-01-25T10:45'),
-            "start_time": string_to_dt('2017-01-25T11:00'),
-            "freeze_time": string_to_dt('2017-01-25T16:00'),
-            "end_time": string_to_dt('2017-01-25T16:45'),
-            "deactivate_time": string_to_dt('2017-01-26T10:45'),
+            "activate_time": model.str_to_dt('2017-01-25T10:45'),
+            "start_time": model.str_to_dt('2017-01-25T11:00'),
+            "freeze_time": model.str_to_dt('2017-01-25T16:00'),
+            "end_time": model.str_to_dt('2017-01-25T16:45'),
+            "deactivate_time": model.str_to_dt('2017-01-26T10:45'),
             "is_public": True,
         }
         user_args, user = get_user()
@@ -265,7 +179,7 @@ class ModelsTestCase(unittest.TestCase):
             "user": user,
             "language": language,
             "source_code": "print('hello')",
-            "last_updated_time": string_to_dt('2017-01-26T10:45'),
+            "last_updated_time": model.str_to_dt('2017-01-26T10:45'),
         }
         saved_code = model.SavedCode(**SAVED_CODE_ARGS)
         model.db.session.add(saved_code)
@@ -283,9 +197,10 @@ class ModelsTestCase(unittest.TestCase):
             "contest": contest,
             "language": language,
             "problem": problem,
-            "submit_time": string_to_dt('2017-01-26T10:45'),
+            "submit_time": model.str_to_dt('2017-01-26T10:45'),
             "source_code": "print('hello'*input())",
             "run_input": "5",
+            "is_submission": True,
         }
         run = model.Run(**RUN_ARGS)
         model.db.session.add(run)
@@ -302,7 +217,7 @@ class ModelsTestCase(unittest.TestCase):
             "problem": problem,
             "asker_user": user,
             "contents": "What is this thing?",
-            "creation_time": string_to_dt('2017-01-26T10:45'),
+            "creation_time": model.str_to_dt('2017-01-26T10:45'),
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)
@@ -320,6 +235,88 @@ class ModelsTestCase(unittest.TestCase):
 
     def tearDown(self):
         model.db.drop_all()
+
+def get_problem_type():
+    """returns a test ProblemType"""
+    PROBLEM_TYPE_ARGS = {
+        "name": "input/output",
+        "eval_script": "#!/bin/bash\nexit 0",
+    }
+    problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
+    model.db.session.add(problem_type)
+    model.db.session.commit()
+
+    return PROBLEM_TYPE_ARGS, problem_type
+
+def get_problem():
+    """returns a test Problem"""
+    problem_type_args, problem_type = get_problem_type()
+    PROBLEM_ARGS = {
+        "problem_type": problem_type,
+        "name": "The Input/Output Problem",
+        "problem_statement": "Print the string 'Hello, World!' n times",
+        "sample_input": "3",
+        "sample_output": "Hello, World!Hello, World!Hello, World!",
+        "secret_input": "4",
+        "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
+    }
+
+    problem = model.Problem(**PROBLEM_ARGS)
+    model.db.session.add(problem)
+    model.db.session.commit()
+
+    return PROBLEM_ARGS, problem
+
+def get_language():
+    """returns a test Language"""
+    LANG_ARGS = {
+        "name": "ruby",
+        "is_enabled": True,
+        "run_script": "#!/bin/bash\nruby $1",
+    }
+
+    # create and add python lang
+    lang = model.Language(**LANG_ARGS)
+    model.db.session.add(lang)
+    model.db.session.commit()
+
+    return LANG_ARGS, lang
+
+def get_user():
+    """returns a test user"""
+    USER_ARGS = {
+        "email": "testuser@example.com",
+        "name": "Test A. B. User",
+        "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
+        "creation_time": model.str_to_dt("2017-01-01T12:12"),
+        "misc_data": '{"teacher": "Cavanaugh"}',
+    }
+
+    # create and add user
+    user = model.User(**USER_ARGS)
+    model.db.session.add(user)
+    model.db.session.commit()
+
+    return USER_ARGS, user
+
+def get_contest():
+    """returns a test contest"""
+    CONTEST_ARGS = {
+        "name": "1620 bracket",
+        "activate_time": model.str_to_dt('2017-01-25T10:45'),
+        "start_time": model.str_to_dt('2017-01-25T11:00'),
+        "freeze_time": model.str_to_dt('2017-01-25T16:00'),
+        "end_time": model.str_to_dt('2017-01-25T16:45'),
+        "deactivate_time": model.str_to_dt('2017-01-26T10:45'),
+        "is_public": True,
+    }
+
+    # create and add contest
+    contest = model.Contest(**CONTEST_ARGS)
+    model.db.session.add(contest)
+    model.db.session.commit()
+
+    return CONTEST_ARGS, contest
 
 
 if __name__ == '__main__':
