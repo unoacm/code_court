@@ -118,9 +118,9 @@ def dev_init_db(app):
         app.logger.info("Initializing tables with dev data")
         roles = {x.id: x for x in model.UserRole.query.all()}
 
-        test_contestant = model.User("testuser@flainted.com", "Test User", "pass", user_roles=[roles['defendant']])
+        test_contestant = model.User("testuser@example.com", "Test User", "pass", user_roles=[roles['defendant']])
         model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
-                                  model.User("exec@flainted.com", "Executioner", "epass", user_roles=[roles['executioner']]),
+                                  model.User("exec@example.com", "Executioner", "epass", user_roles=[roles['executioner']]),
                                   test_contestant])
 
         # create test contest
