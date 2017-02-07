@@ -102,7 +102,7 @@ def init_db(app):
                                   model.UserRole("judge"),
                                   model.UserRole("executioner")])
 
-        model.db.session.add_all([model.Language("python", True, "#!/bin/bash\npython $1")])
+        model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python2 $2')])
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool")])
@@ -139,7 +139,7 @@ def dev_init_db(app):
         for i in range(59):
             test_run = model.Run(test_contestant, test_contest, python, test_problem,
                                  model.str_to_dt("2017-02-05T23:{}".format(i)),
-                                 'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
+                                 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
                                  test_problem.secret_input, True)
             model.db.session.add(test_run)
         model.db.session.commit()

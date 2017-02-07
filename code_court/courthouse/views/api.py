@@ -60,6 +60,7 @@ def get_writ():
         "source_code": chosen_run.source_code,
         "language": chosen_run.language.name,
         "run_script": chosen_run.language.run_script,
+        "input": chosen_run.run_input,
         "return_url": url_for("api.submit_writ", run_id=chosen_run.id, _external=True)
     }
 
@@ -95,6 +96,7 @@ def submit_writ(run_id):
 
     run.run_output = request.json['output']
     run.finished_execing_time = datetime.datetime.utcnow()
+    model.db.session.add(run)
     model.db.session.commit()
 
     # TODO: perform judging
