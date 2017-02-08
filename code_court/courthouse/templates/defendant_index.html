@@ -1,8 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Defendant</h2>
+  <!-- This following dropdown block is heavily adapted from the one found
+  in the W3Schools Bootstrap Tutorial, found at:
+  http://www.w3schools.com/bootstrap/bootstrap_dropdowns.asp -->
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select Language
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      {% for language in languages %}
+      <li>
+        {% if language.is_enabled %}
+        <a href="{{ url_for('defendant.index', lang_id=language.id) }}" class="btn btn-info btn-xs">
+            {{ language.name }}
+        </a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+</div>
+<ul>
+
+</ul>
 <ul>
     <textarea name="submission" rows="10" cols="80">
+        {% if selection %}
+            {{ selection }}
+        {% endif %}
         Temporary code area.
     </textarea>
 </ul>
