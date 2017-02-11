@@ -14,7 +14,7 @@ import requests
 
 from requests.auth import HTTPBasicAuth
 
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 writ_url = "http://localhost:9191/api/get-writ"
 executioner_email = "exec@example.com"
@@ -78,6 +78,7 @@ def submit_writ(return_url, out):
     r = requests.get(writ_url, )
     status = requests.post(return_url,
                            json={"output": out.decode("utf-8")}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+
 
 def event_loop():
     logging.info("Looking for writs")
