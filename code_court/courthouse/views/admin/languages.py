@@ -1,6 +1,7 @@
 import json
 import re
-import sqlalchemy
+
+import util
 
 from flask import (
     abort,
@@ -27,7 +28,7 @@ def languages_view():
     Returns:
         a rendered language view template
     """
-    model = get_model()
+    model = util.get_model()
 
     languages = model.Language.query.all()
 
@@ -45,7 +46,7 @@ def languages_add(lang_id):
     Returns:
         a rendered add/edit template or a redirect to the language view page
     """
-    model = get_model()
+    model = util.get_model()
     if request.method == "GET": # display add form
         return display_lang_add_form(lang_id)
     elif request.method == "POST": # process added/edited lang
@@ -66,7 +67,7 @@ def languages_del(lang_id):
     Returns:
         a redirect to the language view page
     """
-    model = get_model()
+    model = util.get_model()
 
 
     langs = model.Language.query.filter_by(id=lang_id).all()
@@ -92,7 +93,7 @@ def add_lang():
     Returns:
         a redirect to the language view page
     """
-    model = get_model()
+    model = util.get_model()
 
     name = request.form.get("name")
     is_enabled = request.form.get("is_enabled")
@@ -143,7 +144,7 @@ def display_lang_add_form(lang_id):
     Returns:
         a rendered language add/edit template
     """
-    model = get_model()
+    model = util.get_model()
 
     if lang_id is None: # add
         return render_template("language/add_edit.html", action_label="Add")
@@ -162,25 +163,6 @@ def display_lang_add_form(lang_id):
 
 
 ## Util functions
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
-
-
 def is_dup_lang_name(name):
     """
     Checks if a name is a duplicate of another lang
@@ -191,7 +173,7 @@ def is_dup_lang_name(name):
     Returns:
         bool: True if the name is a duplicate, False otherwise
     """
-    model = get_model()
+    model = util.get_model()
     dup_lang = model.Language.query.filter_by(name=name).all()
     return len(dup_lang) > 0
 
