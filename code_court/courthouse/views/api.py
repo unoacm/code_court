@@ -61,6 +61,7 @@ def get_writ():
         "language": chosen_run.language.name,
         "run_script": chosen_run.language.run_script,
         "input": chosen_run.run_input,
+        "run_id": chosen_run.id,
         "return_url": url_for("api.submit_writ", run_id=chosen_run.id, _external=True)
     }
 
