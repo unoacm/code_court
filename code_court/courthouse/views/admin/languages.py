@@ -6,8 +6,9 @@ from flask import (
     abort,
     Blueprint,
     current_app,
-    render_template,
+    flash,
     redirect,
+    render_template,
     request,
     url_for,
 )
@@ -73,9 +74,11 @@ def languages_del(lang_id):
         current_app.logger.info("Can't delete lang %s, doesn't exist", lang_id)
         abort(400)
 
+    lang_name = langs[0].name
     model.db.session.delete(langs[0])
     model.db.session.commit()
 
+    flash("Deleted language {}".format(lang_name), "warning")
     return redirect(url_for("languages.languages_view"))
 
 
