@@ -288,6 +288,9 @@ class Run(db.Model):
     is_submission = db.Column(db.Boolean, nullable=False)
     """bool: if true the run is a submission, if false it's a test run"""
 
+    is_passed = db.Column(db.Boolean, nullable=True)
+    """bool: indicates whether or not a run has been judged as passing or failing"""
+
     @property
     def is_judging(self):
         return (self.started_execing_time is not None and
