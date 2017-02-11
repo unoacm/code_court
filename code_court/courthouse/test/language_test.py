@@ -21,58 +21,52 @@ class LanguageTestCase(unittest.TestCase):
     def test_language(self):
         """Tests language viewing, adding, editing, deleting"""
 
-        init_python_name = b"python2.7"
-        edit_python_name = b"python3.6"
-
-        rv = self.app.get('/admin/languages/')
-        self.assertEqual(rv.status_code, 200)
-        initial_python_count = rv.data.count(init_python_name)
+        init_lang_name = b"benscript45"
+        edit_lang_name = b"josiahscript37"
 
         # check adding
         rv = self.app.post('/admin/languages/add/', data={
-            "name": init_python_name,
+            "name": init_lang_name,
             "is_enabled": "on",
-            "run_script": "#!/bin/bash\npython $1",
+            "run_script": "#!/bin/bash\nruby $1",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
         self.assertEqual(rv.status_code, 200)
-        add_python_count = rv.data.count(init_python_name)
-        init_python3_count = rv.data.count(edit_python_name)
+        init_lang_count = rv.data.count(init_lang_name)
 
-        self.assertEqual(add_python_count, initial_python_count+1)
+        self.assertEqual(init_lang_count, 1)
 
         # check editing
         rv = self.app.post('/admin/languages/add/', data={
-            "lang_id": 1,
-            "name": edit_python_name,
+            "lang_id": model.Language.query.all()[-1].id,
+            "name": edit_lang_name,
             "is_enabled": "on",
-            "run_script": "#!/bin/bash\npython $1",
+            "run_script": "#!/bin/bash\njruby $1",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
         self.assertEqual(rv.status_code, 200)
-        edit_python_count = rv.data.count(init_python_name)
-        edit_python3_count = rv.data.count(edit_python_name)
+        edit_lang_count = rv.data.count(edit_lang_name)
+        init_lang_count = rv.data.count(init_lang_name)
 
-        self.assertEqual(edit_python_count, initial_python_count)
-        self.assertEqual(edit_python3_count, init_python3_count+1)
+        self.assertEqual(edit_lang_count, 1)
+        self.assertEqual(init_lang_count, 0)
 
         # check deleting
-        rv = self.app.get('/admin/languages/del/1/', follow_redirects=True)
+        rv = self.app.get('/admin/languages/del/2/', follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
         self.assertEqual(rv.status_code, 200)
-        del_python_count = rv.data.count(edit_python_name)
+        edit_lang_count = rv.data.count(edit_lang_name)
 
-        self.assertEqual(initial_python_count, del_python_count)
-        self.assertEqual(add_python_count-1, del_python_count)
+        self.assertEqual(edit_lang_count, 0)
 
     def tearDown(self):
-        pass
+        model.db.drop_all()
 
 if __name__ == '__main__':
     unittest.main()
