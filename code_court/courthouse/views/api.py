@@ -8,8 +8,9 @@ import re
 
 import six
 
-from flask_httpauth import HTTPBasicAuth
+import util
 
+from flask_httpauth import HTTPBasicAuth
 
 from flask import (
     abort,
@@ -29,7 +30,7 @@ executioner_auth = HTTPBasicAuth()
 # api auth
 @executioner_auth.get_password
 def get_pw(email):
-    model = get_model()
+    model = util.get_model()
     user = model.User.query.filter_by(email=email).first()
     if user is not None and "executioner" in [x.id for x in user.user_roles]:
         return user.password
@@ -44,7 +45,7 @@ def unauthorized():
 @executioner_auth.login_required
 def get_writ():
     """endpoint for executioners to get runs to execute"""
-    model = get_model()
+    model = util.get_model()
     # choose the oldest run
     chosen_run = model.Run.query.filter_by(started_execing_time=None)\
                                           .order_by(model.Run.submit_time.asc()).first()
@@ -77,7 +78,7 @@ def submit_writ(run_id):
         "output": "..."
     }
     """
-    model = get_model()
+    model = util.get_model()
     run = model.Run.query.filter_by(id=run_id).first()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s", run_id)
@@ -106,21 +107,3 @@ def submit_writ(run_id):
 @api.route("/", methods=["GET"])
 def index():
     return abort(404)
-
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
