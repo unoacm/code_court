@@ -44,7 +44,6 @@ def create_app():
     app.config['model'] = model
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
 
-
     db.init_app(app)
 
     app.logger.setLevel(logging.INFO)
@@ -102,7 +101,7 @@ def init_db(app):
                                   model.UserRole("judge"),
                                   model.UserRole("executioner")])
 
-        model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python2 $2')])
+        model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python $2\nexit $?')])
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool")])
