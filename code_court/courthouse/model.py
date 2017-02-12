@@ -219,7 +219,7 @@ class Contest(db.Model):
     users = db.relationship("User", secondary=contest_user, back_populates="contests")
     problems = db.relationship("Problem", secondary=contest_problem, back_populates="contests")
 
-    def __init__(self, name, start_time, end_time, is_public, activate_time=None, freeze_time=None, deactivate_time=None):
+    def __init__(self, name, start_time, end_time, is_public, activate_time=None, freeze_time=None, deactivate_time=None, users=None, problems=None):
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
@@ -227,6 +227,8 @@ class Contest(db.Model):
         self.activate_time = activate_time
         self.freeze_time = freeze_time
         self.deactivate_time = deactivate_time
+        self.users = users or []
+        self.problems = problems or []
 
     def __repr__(self):
         return "Contest({})".format(self.name)
