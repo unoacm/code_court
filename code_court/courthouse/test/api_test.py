@@ -86,7 +86,7 @@ def setup_contest():
     python = model.Language.query.filter_by(name="python").one()
     test_run = model.Run(test_contestant, test_contest, python, test_problem, model.str_to_dt("2017-02-05T23:00"),
                          'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
-                         test_problem.secret_input, True)
+                         test_problem.secret_input, test_problem.secret_output, True)
 
     model.db.session.add_all([test_executioner, test_contestant, test_contest, test_problem, test_run])
     model.db.session.commit()

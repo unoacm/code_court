@@ -98,11 +98,16 @@ def submit_writ(run_id):
 
     run.run_output = request.json['output']
     run.finished_execing_time = datetime.datetime.utcnow()
-    model.db.session.add(run)
-    model.db.session.commit()
 
-    # TODO: perform judging
+    is_correct = clean_output_string(run.run_output) == clean_output_string(run.correct_output)
+    run.is_passed = is_correct
+
+    model.db.session.commit()
     return "Good"
+
+def clean_output_string(s):
+    """Cleans up an output string for comparison"""
+    return s.replace("\r\n", "\n").strip()
 
 @api.route("/", methods=["GET"])
 def index():

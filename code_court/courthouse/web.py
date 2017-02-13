@@ -130,7 +130,7 @@ def dev_init_db(app):
         io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
         test_problem = model.Problem(io_problem_type, "fizzbuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
                                      "3", "1\n2\nFizz",
-                                     "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\n9\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
+                                     "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
         test_contest.problems.append(test_problem)
         test_contest.users.append(test_contestant)
 
@@ -139,7 +139,7 @@ def dev_init_db(app):
             test_run = model.Run(test_contestant, test_contest, python, test_problem,
                                  model.str_to_dt("2017-02-05T23:{}".format(i)),
                                  'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
-                                 test_problem.secret_input, True)
+                                 test_problem.secret_input, test_problem.secret_output, True)
             model.db.session.add(test_run)
         model.db.session.commit()
 
