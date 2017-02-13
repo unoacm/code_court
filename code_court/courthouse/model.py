@@ -282,6 +282,9 @@ class Run(db.Model):
     run_input = db.Column(db.String, nullable=False)
     """str: input text passed to the submitted program"""
 
+    correct_output = db.Column(db.String)
+    """str: the correct output of the submitted program"""
+
     run_output = db.Column(db.String)
     """str: the output of the submitted program"""
 
@@ -300,7 +303,7 @@ class Run(db.Model):
     def is_judged(self):
         return self.finished_execing_time is not None
 
-    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input, is_submission):
+    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input, correct_output, is_submission):
         self.user = user
         self.contest = contest
         self.language = language
@@ -308,6 +311,7 @@ class Run(db.Model):
         self.submit_time = submit_time
         self.source_code =  source_code
         self.run_input = run_input
+        self.correct_output = correct_output
         self.is_submission = is_submission
 
 

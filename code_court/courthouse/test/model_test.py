@@ -200,6 +200,7 @@ class ModelsTestCase(unittest.TestCase):
             "submit_time": model.str_to_dt('2017-01-26T10:45'),
             "source_code": "print('hello'*input())",
             "run_input": "5",
+            "correct_output": "hellohellohellohellohello",
             "is_submission": True,
         }
         run = model.Run(**RUN_ARGS)
