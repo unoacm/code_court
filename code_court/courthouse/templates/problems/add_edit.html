@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if action_label == "Add" %}
+    <h1>{{ action_label }}</h1>
+{% elif action_label == "Edit" %}
+    <h1>{{ action_label }} {{ problem.id }}</h1>
+{% endif %}
+
+<form action="{{ url_for('problems.problems_add') }}" method="POST" class="form">
+    {% if problem.id %}
+        <input type="hidden" name="problem_id" value="{{ problem.id }}">
+    {% endif %}
+    
+    <div class="form-group">
+        <label for="problem_type">Problem Type</label>
+        <select class="form-control" id="problem_type_id" name="problem_type_id">
+            {% for problemtype in problemtypes %}
+            {% if action_label == "Add" %}
+                <option value="{{ problemtype.id }}">{{ problemtype.name }}</option>
+            {% elif action_label == "Edit" %}
+                {% if problemtype.id == problem.problem_type.id %}
+                    <option value="{{ problemtype.id }}" selected>{{ problemtype.name }}</option>
+                {% else %}
+                    <option value="{{ problemtype.id }}">{{ problemtype.name }}</option>
+                {% endif %}
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ problem.name }}">
+    </div>
+    <div class="form-group">
+        <label for="problem_statement">Problem Statement</label>
+        <textarea type="text" class="form-control" id="problem_statement" name="problem_statement" placeholder="Problem Statement" rows="10">{{ problem.problem_statement }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="sample_input">Sample Input</label>
+        <textarea type="text" class="form-control" id="sample_input" name="sample_input" placeholder="Sample Input" rows="10">{{ problem.sample_input }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="sample_output">Sample Output</label>
+        <textarea type="text" class="form-control" id="sample_output" name="sample_output" placeholder="Sample Output" rows="10">{{ problem.sample_output }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="secret_input">Secret Input</label>
+        <textarea type="text" class="form-control" id="secret_input" name="secret_input" placeholder="Secret Input" rows="10">{{ problem.secret_input }}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="secret_output">Secret Output</label>
+        <textarea type="text" class="form-control" id="secret_output" name="secret_output" placeholder="Secret Output" rows="10">{{ problem.secret_output }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}
