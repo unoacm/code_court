@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ problem.name }}</h1>
+<br/>
+<h4>Problem Statement:</h4>
+<p>{{ problem.problem_statement }}</p>
+<br/>
+<h4>Sample Input:</h4>
+<p>{{ problem.sample_input }}</p>
+<br/>
+<h4>Sample Output:</h4>
+<p>{{ problem.sample_output }}</p>
+<br/>
+<form action="{{ url_for('defendant.problem', problem_id=problem.id) }}" method="POST" class="form">
+    <div class="form-group">
+        <!--label for="run_script">Run script</label-->
+        <textarea type="text" class="form-control" id="source_code" name="source_code" placeholder="Enter source code here..." rows="10">{{ source_code }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}

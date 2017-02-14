@@ -53,7 +53,8 @@ def create_app():
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(languages, url_prefix='/admin/languages')
     app.register_blueprint(defendant, url_prefix='/defendant')
-
+    app.register_blueprint(defendant, url_prefix="/defendant/problem")
+    
     @app.context_processor
     def inject_user():
         return {
