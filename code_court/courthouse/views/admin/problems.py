@@ -2,6 +2,8 @@ import json
 import re
 import sqlalchemy
 
+import util
+
 from flask import (
     abort,
     Blueprint,
@@ -26,7 +28,7 @@ def problems_view():
     Returns:
         a rendered problem view template
     """
-    model = get_model()
+    model = util.get_model()
 
     problems = model.Problem.query.all()
 
