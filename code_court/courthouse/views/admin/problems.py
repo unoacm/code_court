@@ -46,7 +46,7 @@ def problems_add(problem_id):
     Returns:
         a rendered add/edit template or a redirect to the problem view page
     """
-    model = until.get_model()
+    model = util.get_model()
     if request.method == "GET": # display add form
         return display_problem_add_form(problem_id)
     elif request.method == "POST": # process added/edited problem
@@ -67,7 +67,7 @@ def problems_del(problem_id):
     Returns:
         a redirect to the problem view page
     """
-    model = until.get_model()
+    model = util.get_model()
 
     problems = model.Problem.query.filter_by(id=problem_id).all()
     if len(problems) == 0:
@@ -90,7 +90,7 @@ def add_problem():
     Returns:
         a redirect to the problem view page
     """
-    model = until.get_model()
+    model = util.get_model()
 
     problem_type_id = request.form.get("problem_type_id")
     problem_type = model.ProblemType.query.filter_by(id=problem_type_id).one()
@@ -153,7 +153,7 @@ def display_problem_add_form(problem_id):
     Returns:
         a rendered problem add/edit template
     """
-    model = until.get_model()
+    model = util.get_model()
     problemtypes = model.ProblemType.query.all()
     
     if problem_id is None: # add
@@ -184,6 +184,6 @@ def is_dup_problem_name(name):
     Returns:
         bool: True if the name is a duplicate, False otherwise
     """
-    model = get_model()
+    model = util.get_model()
     dup_problem = model.Problem.query.filter_by(name=name).all()
     return len(dup_problem) > 0
