@@ -175,25 +175,6 @@ def display_problem_add_form(problem_id):
 
 
 ## Util functions
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
-
-
 def is_dup_problem_name(name):
     """
     Checks if a name is a duplicate of another problem
