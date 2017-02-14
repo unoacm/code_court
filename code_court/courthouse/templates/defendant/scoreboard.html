@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Scoreboard</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>name</th>
+            {% for problem in problems %}
+                <th>{{ problem.name }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.name }}</td>
+            {% for problem in problems %}
+                <td>
+                    {% for run in scores[user.id][problem.id] %}
+                        {% if run == RunState.passed %}
+                            <span class="green">&#10003;</span>
+                        {% elif run == RunState.failed %}
+                            <span class="red">&#215;</span>
+                        {% elif run == RunState.judging %}
+                            <span>&#8635;</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

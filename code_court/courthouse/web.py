@@ -4,6 +4,7 @@ The entrypoint to the courthouse application
 """
 import logging
 import os
+import random
 
 from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
@@ -119,10 +120,17 @@ def dev_init_db(app):
         app.logger.info("Initializing tables with dev data")
         roles = {x.id: x for x in model.UserRole.query.all()}
 
-        test_contestant = model.User("testuser@example.com", "Test User", "pass", user_roles=[roles['defendant']])
         model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
-                                  model.User("exec@example.com", "Executioner", "epass", user_roles=[roles['executioner']]),
-                                  test_contestant])
+                                  model.User("exec@example.com", "Executioner", "epass", user_roles=[roles['executioner']])])
+
+        contestants = []
+        names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
+        for i in range(1,11):
+            test_contestant = model.User("testuser{}@example.com".format(i),
+                                         names[i-1], "pass", user_roles=[roles['defendant']])
+            model.db.session.add(test_contestant)
+            contestants.append(test_contestant)
+
 
         # create test contest
         test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
@@ -130,19 +138,37 @@ def dev_init_db(app):
         model.db.session.add(test_contest)
 
         io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
-        test_problem = model.Problem(io_problem_type, "fizzbuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
-                                     "3", "1\n2\nFizz",
-                                     "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
-        test_contest.problems.append(test_problem)
-        test_contest.users.append(test_contestant)
+        problems = []
+        for problem_num in range(1,5):
+            test_problem = model.Problem(io_problem_type, "fizzbuzz{}".format(problem_num),
+                                         "## FizzBuzz{}\nPerform fizzbuzz up to the given number".format(problem_num),
+                                         "3", "1\n2\nFizz",
+                                         "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
+            problems.append(test_problem)
+            test_contest.problems.append(test_problem)
+            test_contest.users.append(test_contestant)
+            model.db.session.add(test_problem)
 
+        # insert submissions
         python = model.Language.query.filter_by(name="python").one()
-        for i in range(59):
-            test_run = model.Run(test_contestant, test_contest, python, test_problem,
-                                 model.str_to_dt("2017-02-05T23:{}".format(i)),
-                                 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
-                                 test_problem.secret_input, test_problem.secret_output, True)
-            model.db.session.add(test_run)
+        for user in contestants:
+            for problem in problems:
+                for i in range(10):
+                    src_code = 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))'
+                    is_submission = random.randint(1, 7) != 5
+
+                    is_correct = random.randint(1, 3) == 3
+                    if not is_correct:
+                        src_code = src_code.replace("3", "4")
+
+                    test_run = model.Run(user, test_contest, python, problem,
+                                         model.str_to_dt("2017-02-05T23:{}".format(i)),
+                                         src_code, test_problem.secret_input, test_problem.secret_output, is_submission)
+                    test_run.is_correct = is_correct
+
+                    if is_correct and is_submission:
+                        break
+                    model.db.session.add(test_run)
         model.db.session.commit()
 
 
