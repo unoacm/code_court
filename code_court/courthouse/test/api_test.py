@@ -53,12 +53,12 @@ class APITestCase(unittest.TestCase):
         self.assertIn('language', writ_data)
         self.assertIn('run_script', writ_data)
         self.assertIn('return_url', writ_data)
+        self.assertIn('run_id', writ_data)
         self.assertEqual(writ_data['status'], 'found')
 
         # submit writ
-        run_id = writ_data['return_url'].split("/")[-1]
         submit_data = {'output': 'run_output'}
-        rv = self.app.post('/api/submit-writ/{}'.format(run_id),
+        rv = self.app.post('/api/submit-writ/{}'.format(writ_data['run_id']),
                            headers=auth_headers, data=json.dumps(submit_data),
                            content_type='application/json')
         self.assertEqual(rv.status_code, 200)
