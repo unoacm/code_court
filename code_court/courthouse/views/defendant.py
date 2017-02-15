@@ -1,5 +1,8 @@
+import collections
 import json
 import re
+
+from enum import Enum
 
 import util
 
@@ -22,8 +25,7 @@ def index(lang_id):
     """
     The index page for the defendant frontend
     """
-
-    model = get_model()
+    model = util.get_model()
 
     languages = model.Language.query.all()
 
@@ -33,25 +35,36 @@ def index(lang_id):
         abort(400)
 
     selection = selected_language[0].name
-    return render_template("defendant_index.html", languages=languages, selection=selection)
+    return render_template("defendant/defendant_index.html", languages=languages, selection=selection)
 
+RunState = Enum("RunState", "judging passed failed")
 
+@defendant.route("/scoreboard", methods=["GET"])
+def scoreboard():
+    model = util.get_model()
 
-## Util functions
-def get_model():
-    """
-    Gets the model from the current app,
+    defendants = model.User.query.filter(model.User.user_roles.any(id="defendant")).all()
+    problems = model.Problem.query.all()
+    contest = model.Contest.query.first() #TODO: replace with correct contest
 
-    Note:
-        must be called from within a request context
+    # compute scoreboard
+    scores = collections.OrderedDict()
+    for user in defendants:
+        user_scores = collections.OrderedDict()
+        for problem in problems:
+            runs = model.Run.query.filter_by(is_submission=True, user=user, contest=contest, problem=problem).all()
 
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
+            grid = []
+            for run in runs:
+                if not run.is_judged:
+                    val = RunState.judging
+                elif run.is_passed:
+                    val = RunState.passed
+                else:
+                    val = RunState.failed
+                grid.append(val)
 
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
+            user_scores[problem.id] = grid
+        scores[user.id] = user_scores
+
+    return render_template("defendant/scoreboard.html", users=defendants, problems=problems, scores=scores, RunState=RunState)
