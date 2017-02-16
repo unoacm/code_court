@@ -19,7 +19,6 @@ defendant = Blueprint('defendant', __name__,
                   template_folder='templates')
 
 @defendant.route("/", methods=["GET"])
-#@defendant.route("/<int:lang_id>/", methods=["GET"])
 def index():
     """
     The index page for the defendant frontend
@@ -28,7 +27,7 @@ def index():
         a rendered defendant view template which shows all available problems
     """
 
-    model = get_model()
+    model = util.get_model()
 
     problems = model.Problem.query.all()
 
@@ -38,7 +37,7 @@ def index():
 @defendant.route("/problem/<problem_id>/", methods=["POST"])
 def problem(problem_id):
 
-    model = get_model()
+    model = util.get_model()
 
     problems = model.Problem.query.filter_by(id=problem_id).all()
     if len(problems) == 0:
@@ -63,8 +62,8 @@ def submit_code(problem):
     Returns:
         the submitted source_code as a string
     """
-    
-    model = get_model()
+
+    model = util.get_model()
 
     source_code = request.form.get("source_code")
     if source_code is None:
@@ -79,29 +78,11 @@ def submit_code(problem):
     test_contest = model.Contest.query.filter_by(name="test_contest").one()
     python = model.Language.query.filter_by(name="python").one()
 
-    #def __init__(self, user, contest, language, problem, submit_time, source_code, run_input, is_submission):
-    run = model.Run(test_user, test_contest, python, problem, current_time, source_code, problem.secret_input, True)
+    run = model.Run(test_user, test_contest,
+                    python, problem, current_time, source_code,
+                    problem.secret_input, problem.secret_output, True)
 
     model.db.session.add(run)
     model.db.session.commit()
 
     return source_code
-
-## Util functions
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
