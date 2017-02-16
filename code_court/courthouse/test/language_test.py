@@ -2,6 +2,8 @@ import os
 import unittest
 import tempfile
 
+from lxml import html
+
 import web
 
 from web import app, model
@@ -18,13 +20,7 @@ class LanguageTestCase(unittest.TestCase):
         with app.app_context():
             web.setup_database(app)
 
-    def test_language(self):
-        """Tests language viewing, adding, editing, deleting"""
-
-        init_lang_name = b"benscript45"
-        edit_lang_name = b"josiahscript37"
-
-        # check adding
+    def _lang_add(self, init_lang_name):
         rv = self.app.post('/admin/languages/add/', data={
             "name": init_lang_name,
             "is_enabled": "on",
@@ -33,37 +29,45 @@ class LanguageTestCase(unittest.TestCase):
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
-        self.assertEqual(rv.status_code, 200)
-        init_lang_count = rv.data.count(init_lang_name)
+        root = html.fromstring(rv.data)
+        page_lang_names = [x.text for x in root.cssselect(".lang_name")]
+        self.assertIn(init_lang_name, page_lang_names)
 
-        self.assertEqual(init_lang_count, 1)
+    def _lang_edit(self, old_name, new_name):
+        lang_id = model.Language.query.filter_by(name=old_name).one().id
 
-        # check editing
         rv = self.app.post('/admin/languages/add/', data={
-            "lang_id": model.Language.query.all()[-1].id,
-            "name": edit_lang_name,
+            "lang_id": lang_id,
+            "name": new_name,
             "is_enabled": "on",
-            "run_script": "#!/bin/bash\njruby $1",
+            "run_script": "#!/bin/bash\nruby $1",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
-        self.assertEqual(rv.status_code, 200)
-        edit_lang_count = rv.data.count(edit_lang_name)
-        init_lang_count = rv.data.count(init_lang_name)
+        root = html.fromstring(rv.data)
+        page_lang_names = [x.text for x in root.cssselect(".lang_name")]
+        self.assertIn(new_name, page_lang_names)
 
-        self.assertEqual(edit_lang_count, 1)
-        self.assertEqual(init_lang_count, 0)
+    def _lang_del(self, name):
+        lang_id = model.Language.query.filter_by(name=name).one().id
 
-        # check deleting
-        rv = self.app.get('/admin/languages/del/2/', follow_redirects=True)
+        rv = self.app.get('/admin/languages/del/{}'.format(lang_id), follow_redirects=True)
         self.assertEqual(rv.status_code, 200)
 
         rv = self.app.get('/admin/languages/')
-        self.assertEqual(rv.status_code, 200)
-        edit_lang_count = rv.data.count(edit_lang_name)
+        root = html.fromstring(rv.data)
+        page_lang_names = [x.text for x in root.cssselect(".lang_name")]
+        self.assertNotIn(name, page_lang_names)
 
-        self.assertEqual(edit_lang_count, 0)
+
+    def test_language_crud(self):
+        init_lang_name = "benscript49495885"
+        edit_lang_name = "josiahscript31231137"
+
+        self._lang_add(init_lang_name)
+        self._lang_edit(init_lang_name, edit_lang_name)
+        self._lang_del(edit_lang_name)
 
     def tearDown(self):
         model.db.drop_all()

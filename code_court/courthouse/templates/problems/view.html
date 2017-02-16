@@ -13,21 +13,19 @@
             <th>secret_input</th>
             <th>secret_output</th>
             <th></th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
         {% for problem in problems %}
         <tr>
-            <td>{{ problem.id }}</td>
-            <td>{{ problem.problem_type.name }}</td>
-            <td>{{ problem.name }}</td>
-            <td>{{ problem.problem_statement }}</td>
-            <td>{{ problem.sample_input }}</td>
-            <td>{{ problem.sample_output }}</td>
-            <td>{{ problem.secret_input }}</td>
-            <td>{{ problem.secret_output }}</td>
-            <td>...</td>
+            <td class="problem_id">{{ problem.id }}</td>
+            <td class="problem_type">{{ problem.problem_type.name }}</td>
+            <td class="problem_name">{{ problem.name }}</td>
+            <td class="problem_statement">{{ problem.problem_statement }}</td>
+            <td class="problem_sample_input">{{ problem.sample_input }}</td>
+            <td class="problem_sample_output">{{ problem.sample_output }}</td>
+            <td class="problem_secret_input">{{ problem.secret_input }}</td>
+            <td class="problem_secret_output">{{ problem.secret_output }}</td>
             <td>
                 <a href="{{ url_for('problems.problems_add', problem_id=problem.id) }}" class="btn btn-info btn-xs">edit</a>
                 <a href="{{ url_for('problems.problems_del', problem_id=problem.id) }}" class="btn btn-danger btn-xs">del</a>
