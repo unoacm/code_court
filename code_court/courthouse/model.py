@@ -45,6 +45,12 @@ class Language(db.Model):
     def __str__(self):
         return "Language({})".format(self.name)
 
+    def __repr__(self):
+        return "Language({})".format(self.name)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class ProblemType(db.Model):
     """Stores information about a problem type"""
@@ -61,6 +67,12 @@ class ProblemType(db.Model):
     def __init__(self, name, eval_script):
         self.name = name
         self.eval_script = eval_script
+
+    def __repr__(self):
+        return "ProblemType({})".format(self.name)
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class Problem(db.Model):
@@ -102,8 +114,11 @@ class Problem(db.Model):
         self.secret_input = secret_input
         self.secret_output = secret_output
 
+    def __repr__(self):
+        return "Problem({})".format(self.email)
+
     def __str__(self):
-        return "Problem({})".format(self.name)
+        return self.__repr__()
 
 class User(db.Model):
     """Stores information about a user"""
@@ -143,6 +158,12 @@ class User(db.Model):
         self.name = name
         self.password = password
         self.misc_data = misc_data
+
+    def __repr__(self):
+        return "User({})".format(self.email)
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class Contest(db.Model):
@@ -186,6 +207,13 @@ class Contest(db.Model):
         self.freeze_time = freeze_time
         self.deactivate_time = deactivate_time
 
+    def __repr__(self):
+        return "Contest({})".format(self.name)
+
+    def __str__(self):
+        return self.__repr__()
+
+
 
 class Configuration(db.Model):
     """Stores general configuration information"""
@@ -206,6 +234,12 @@ class Configuration(db.Model):
         self.key = key
         self.val = val
         self.valType = valType
+
+    def __repr__(self):
+        return "Configuration({}={})".format(self.key, self.val)
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class SavedCode(db.Model):
@@ -243,6 +277,12 @@ class SavedCode(db.Model):
         self.language = language
         self.source_code = source_code
         self.last_updated_time = last_updated_time
+
+    def __repr__(self):
+        return "SavedCode(id={})".format(self.id)
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class Run(db.Model):
@@ -314,6 +354,12 @@ class Run(db.Model):
         self.correct_output = correct_output
         self.is_submission = is_submission
 
+    def __repr__(self):
+        return "Run(id={})".format(self.id)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class Clarification(db.Model):
     """Stores information about a user or judge clarification"""
@@ -347,6 +393,12 @@ class Clarification(db.Model):
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
+    def __repr__(self):
+        return "Clarification(id={})".format(self.id)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class UserRole(db.Model):
     """Stores system user roles"""
@@ -358,6 +410,12 @@ class UserRole(db.Model):
 
     def __init__(self, name):
         self.id = name
+
+    def __repr__(self):
+        return "UserRole(id={})".format(self.id)
+
+    def __str__(self):
+        return self.__repr__()
 
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60 to datetime"""
