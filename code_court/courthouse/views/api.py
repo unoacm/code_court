@@ -28,13 +28,13 @@ api = Blueprint('api', __name__,
 executioner_auth = HTTPBasicAuth()
 
 # api auth
-@executioner_auth.get_password
-def get_pw(email):
+@executioner_auth.verify_password
+def verify_password(email, password):
     model = util.get_model()
     user = model.User.query.filter_by(email=email).first()
-    if user is not None and "executioner" in [x.id for x in user.user_roles]:
-        return user.password
-    return None
+    if not user or not user.verify_password(password):
+        return False
+    return True
 
 @executioner_auth.error_handler
 def unauthorized():

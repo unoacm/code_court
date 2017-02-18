@@ -3,6 +3,8 @@ import re
 
 import util
 
+from flask_login import login_required
+
 from flask import (
     abort,
     Blueprint,
@@ -21,6 +23,7 @@ class ModelMissingException(Exception):
     pass
 
 @languages.route("/", methods=["GET"])
+@util.login_required("operator")
 def languages_view():
     """
     The language view page
@@ -36,6 +39,7 @@ def languages_view():
 
 @languages.route("/add/", methods=["GET", "POST"], defaults={'lang_id': None})
 @languages.route("/edit/<int:lang_id>/", methods=["GET"])
+@util.login_required("operator")
 def languages_add(lang_id):
     """
     Displays the language adding and updating page and accepts form submits from those pages.
@@ -57,6 +61,7 @@ def languages_add(lang_id):
 
 
 @languages.route("/del/<lang_id>/", methods=["GET"])
+@util.login_required("operator")
 def languages_del(lang_id):
     """
     Deletes a language

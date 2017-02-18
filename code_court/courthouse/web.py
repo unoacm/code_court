@@ -12,6 +12,9 @@ from os import path
 
 from flask import Flask, render_template
 
+from flask_login import LoginManager, current_user
+from flask_debugtoolbar import DebugToolbarExtension
+
 import model
 
 from model import db
@@ -22,6 +25,7 @@ from views.admin.admin import admin
 from views.admin.languages import languages
 from views.admin.problems import problems
 from views.defendant import defendant
+from views.auth import auth
 
 # turn down log level for werkzeug
 wlog = logging.getLogger('werkzeug')
@@ -43,10 +47,23 @@ def create_app():
 
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db" #TODO: put this in config
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ECHO'] = False
     app.config['model'] = model
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
+    # app.debug = True
 
     db.init_app(app)
+
+    login_manager = LoginManager()
+    login_manager.init_app(app)
+
+    login_manager.login_view = "auth.login_view"
+
+    toolbar = DebugToolbarExtension(app)
+
+    @login_manager.user_loader
+    def load_user(user_email):
+        return model.User.query.filter_by(email=user_email).one()
 
     app.logger.setLevel(logging.INFO)
 
@@ -56,8 +73,8 @@ def create_app():
     app.register_blueprint(languages, url_prefix='/admin/languages')
     app.register_blueprint(problems, url_prefix='/admin/problems')
     app.register_blueprint(defendant, url_prefix='/defendant')
-    app.register_blueprint(defendant, url_prefix="/defendant/problem")
-    
+    app.register_blueprint(auth, url_prefix='')
+
     @app.context_processor
     def inject_user():
         return {
@@ -66,6 +83,13 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
+
+    @app.errorhandler(401)
+    @login_manager.unauthorized_handler
+    def unauthorized(callback=None):
+        if not current_user.is_authenticated:
+            return render_template('auth/login.html'), 401
+        return render_template('401.html'), 401
 
     return app
 
@@ -112,6 +136,10 @@ def init_db(app):
 
         model.db.session.add_all([model.ProblemType("input-output",
                                                     '#!/bin/bash\ntest "$1" = "$2"')])
+
+        roles = {x.id: x for x in model.UserRole.query.all()}
+        model.db.session.add(model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]))
+
         model.db.session.commit()
 
 def dev_init_db(app):
@@ -121,13 +149,12 @@ def dev_init_db(app):
         app.logger.info("Initializing tables with dev data")
         roles = {x.id: x for x in model.UserRole.query.all()}
 
-        model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
-                                  model.User("exec@example.com", "Executioner", "epass", user_roles=[roles['executioner']])])
+        model.db.session.add_all([model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']])])
 
         contestants = []
         names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
         for i in range(1,11):
-            test_contestant = model.User("testuser{}@example.com".format(i),
+            test_contestant = model.User("testuser{}@example.org".format(i),
                                          names[i-1], "pass", user_roles=[roles['defendant']])
             model.db.session.add(test_contestant)
             contestants.append(test_contestant)

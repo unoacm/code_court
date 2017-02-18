@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block page %}
+<div class="container" id="content">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+            <div class="messages">
+                {% for category, message in messages %}
+                    {% if category == "message" %}
+                        {% set category = "info" %}
+                    {% endif %}
+                    <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-offset-4 col-md-4">
+            <form action="{{ url_for("auth.login_submit") }}" method="POST" class="form-login">
+                <h3>Please login</h3>
+                <input type="email" class="form-control input-sm" placeholder="email" name="email" />
+                </br>
+                <input type="password" class="form-control input-sm" placeholder="password" name="password" />
+                </br>
+                <input type="submit" class="btn btn-primary btn-md" value="login" />
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

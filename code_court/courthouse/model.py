@@ -1,6 +1,9 @@
 import json
 import datetime
 
+import util
+
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import UniqueConstraint
 
@@ -115,12 +118,12 @@ class Problem(db.Model):
         self.secret_output = secret_output
 
     def __repr__(self):
-        return "Problem({})".format(self.email)
+        return "Problem({})".format(self.name)
 
     def __str__(self):
         return self.__repr__()
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     """Stores information about a user"""
     __tablename__ = 'user'
 
@@ -132,8 +135,8 @@ class User(db.Model):
     name = db.Column(db.String, nullable=False)
     """str: the user's full name, no specific format is assumed"""
 
-    password = db.Column(db.String, nullable=False)
-    """str: a hash of the user's password"""
+    hashed_password = db.Column(db.String, nullable=False)
+    """str: a bcrypt hash of the user's password"""
 
     creation_time = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow())
     """str: the creation time of the user"""
@@ -156,8 +159,26 @@ class User(db.Model):
 
         self.email = email
         self.name = name
-        self.password = password
+        self.hashed_password = util.hash_password(password)
         self.misc_data = misc_data
+
+    def verify_password(self, plainext_password):
+        return util.is_password_matching(plainext_password, self.hashed_password)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.email
 
     def __repr__(self):
         return "User({})".format(self.email)
