@@ -432,6 +432,22 @@ class UserRole(db.Model):
     def __init__(self, name):
         self.id = name
 
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if isinstance(other, self.__class__):
+            return self.id == other.id
+        elif isinstance(other, str):
+            return self.id == other
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not self.__eq__(other)
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self.id)
+
     def __repr__(self):
         return "UserRole(id={})".format(self.id)
 

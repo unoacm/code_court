@@ -149,7 +149,8 @@ def dev_init_db(app):
         app.logger.info("Initializing tables with dev data")
         roles = {x.id: x for x in model.UserRole.query.all()}
 
-        model.db.session.add_all([model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']])])
+        model.db.session.add_all([model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']]),
+                                  model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values()))])
 
         contestants = []
         names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
@@ -163,6 +164,7 @@ def dev_init_db(app):
         # create test contest
         test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
                                      model.str_to_dt("2030-01-01T11:11"), True)
+        test_contest.users += contestants
         model.db.session.add(test_contest)
 
         io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
@@ -174,7 +176,6 @@ def dev_init_db(app):
                                          "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
             problems.append(test_problem)
             test_contest.problems.append(test_problem)
-            test_contest.users.append(test_contestant)
             model.db.session.add(test_problem)
 
         # insert submissions
