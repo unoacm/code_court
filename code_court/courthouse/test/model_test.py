@@ -1,23 +1,13 @@
-import datetime
-import os
-import tempfile
-import unittest
-
 import web
 
-from web import app, model
+from base_test import BaseTest
 
-class ModelsTestCase(unittest.TestCase):
+from web import model
+
+class ModelsTestCase(BaseTest):
     """
     Contains tests for the database model
     """
-    def setUp(self):
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
-        app.config['TESTING'] = True
-        app.app_context().push()
-        self.app = app.test_client()
-        web.setup_database(app)
-
     def test_language(self):
         """test the language table"""
         LANG_ARGS = {
@@ -39,7 +29,7 @@ class ModelsTestCase(unittest.TestCase):
     def test_user(self):
         """test the user table"""
         USER_ARGS = {
-            "email": "testuser@example.com",
+            "email": "testuser@example.org",
             "name": "Test A. B. User",
             "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
             "creation_time": model.str_to_dt("2017-01-01T12:12"),
@@ -234,9 +224,6 @@ class ModelsTestCase(unittest.TestCase):
         model.db.session.add(user_role)
         model.db.session.commit()
 
-    def tearDown(self):
-        model.db.drop_all()
-
 def get_problem_type():
     """returns a test ProblemType"""
     PROBLEM_TYPE_ARGS = {
@@ -286,7 +273,7 @@ def get_language():
 def get_user():
     """returns a test user"""
     USER_ARGS = {
-        "email": "testuser@example.com",
+        "email": "testuser@example.org",
         "name": "Test A. B. User",
         "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
         "creation_time": model.str_to_dt("2017-01-01T12:12"),
@@ -318,8 +305,4 @@ def get_contest():
     model.db.session.commit()
 
     return CONTEST_ARGS, contest
-
-
-if __name__ == '__main__':
-    unittest.main()
 

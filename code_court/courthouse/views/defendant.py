@@ -108,7 +108,7 @@ def submit_code(problem):
     current_time = datetime.datetime.utcnow()
 
     # Hardcoded run details for the time being
-    test_user = model.User.query.filter_by(email="testuser1@example.com").one()
+    test_user = model.User.query.filter_by(email="testuser1@example.org").one()
     test_contest = model.Contest.query.filter_by(name="test_contest").one()
     python = model.Language.query.filter_by(name="python").one()
 

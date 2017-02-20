@@ -4,6 +4,8 @@ import sqlalchemy
 
 import util
 
+from flask_login import login_required
+
 from flask import (
     abort,
     Blueprint,
@@ -21,6 +23,7 @@ class ModelMissingException(Exception):
     pass
 
 @problems.route("/", methods=["GET"])
+@util.login_required("operator")
 def problems_view():
     """
     The problem view page
@@ -36,6 +39,7 @@ def problems_view():
 
 @problems.route("/add/", methods=["GET", "POST"], defaults={'problem_id': None})
 @problems.route("/edit/<int:problem_id>/", methods=["GET"])
+@util.login_required("operator")
 def problems_add(problem_id):
     """
     Displays the problem adding and updating page and accepts form submits from those pages.
@@ -57,6 +61,7 @@ def problems_add(problem_id):
 
 
 @problems.route("/del/<problem_id>/", methods=["GET"])
+@util.login_required("operator")
 def problems_del(problem_id):
     """
     Deletes a problem
@@ -128,12 +133,12 @@ def add_problem():
             current_app.logger.info("Tried to add a duplicate problem: %s", name)
             abort(400)
 
-        problem = model.Problem(problem_type, 
-                                name, 
-                                problem_statement, 
-                                sample_input, 
-                                sample_output, 
-                                secret_input, 
+        problem = model.Problem(problem_type,
+                                name,
+                                problem_statement,
+                                sample_input,
+                                sample_output,
+                                secret_input,
                                 secret_output)
         model.db.session.add(problem)
 
@@ -155,11 +160,11 @@ def display_problem_add_form(problem_id):
     """
     model = util.get_model()
     problemtypes = model.ProblemType.query.all()
-    
+
     if problem_id is None: # add
-        return render_template("problems/add_edit.html", 
-                               action_label="Add", 
-                               problem=None, 
+        return render_template("problems/add_edit.html",
+                               action_label="Add",
+                               problem=None,
                                problemtypes=problemtypes)
     else: # edit
         problems = model.Problem.query.filter_by(id=problem_id).all()

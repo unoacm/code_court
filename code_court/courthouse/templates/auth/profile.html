@@ -1,0 +1,25 @@
+{% extends "navbase.html" %}
+
+{% block content %}
+<table class="table">
+    <tbody>
+        <tr>
+            <td><strong>name</strong></td>
+            <td>{{ current_user.name }}</td>
+        </tr>
+        <tr>
+            <td><strong>email</strong></td>
+            <td>{{ current_user.email }}</td>
+        </tr>
+        <tr>
+            <td><strong>roles</strong></td>
+            <td>{{ current_user.user_roles | join(", ") }}</td>
+        </tr>
+        <tr>
+            <td><strong>contests</strong></td>
+            <td>{{ current_user.contests | join(", ") }}</td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}

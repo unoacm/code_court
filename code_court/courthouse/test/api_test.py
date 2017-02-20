@@ -1,27 +1,16 @@
 import json
-import os
-import tempfile
-import unittest
 
 from base64 import b64encode
 
-import web
+from base_test import BaseTest
 
-from web import app, model
+from web import model
 
 
-class APITestCase(unittest.TestCase):
+class APITestCase(BaseTest):
     """
     Contains tests for the api blueprint
     """
-    def setUp(self):
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
-        app.config['TESTING'] = True
-        app.app_context().push()
-        self.app = app.test_client()
-        with app.app_context():
-            web.setup_database(app)
-
     def test_executioner_deny(self):
         """Tests that authentication is needed to request writs"""
         setup_contest()
@@ -31,7 +20,7 @@ class APITestCase(unittest.TestCase):
         self.assertEqual(rv.status_code, 401)
 
         wrong_auth_headers = {
-            'Authorization': 'Basic %s' % b64encode(b"wronguser@example.com:wrongpass").decode("ascii")
+            'Authorization': 'Basic %s' % b64encode(b"wronguser@example.org:wrongpass").decode("ascii")
         }
         rv = self.app.get('/api/get-writ', headers=wrong_auth_headers)
         self.assertEqual(rv.status_code, 401)
@@ -41,7 +30,7 @@ class APITestCase(unittest.TestCase):
         setup_contest()
 
         auth_headers = {
-            'Authorization': 'Basic %s' % b64encode(b"testexec@example.com:epass").decode("ascii")
+            'Authorization': 'Basic %s' % b64encode(b"testexec@example.org:epass").decode("ascii")
         }
 
         # get writ
@@ -67,13 +56,10 @@ class APITestCase(unittest.TestCase):
         rv = self.app.get('/api/get-writ', headers=auth_headers)
         self.assertEqual(rv.status_code, 404)
 
-    def tearDown(self):
-        model.db.drop_all()
-
 def setup_contest():
     roles = {x.id: x for x in model.UserRole.query.all()}
-    test_contestant = model.User("testuser@xample.com", "Test User", "pass", user_roles=[roles['defendant']])
-    test_executioner = model.User("testexec@example.com", "Test Executioner", "epass", user_roles=[roles['executioner']])
+    test_contestant = model.User("testuser@xample.org", "Test User", "pass", user_roles=[roles['defendant']])
+    test_executioner = model.User("testexec@example.org", "Test Executioner", "epass", user_roles=[roles['executioner']])
     test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
                                  model.str_to_dt("2030-01-01T11:11"), True)
     io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
@@ -90,6 +76,3 @@ def setup_contest():
 
     model.db.session.add_all([test_executioner, test_contestant, test_contest, test_problem, test_run])
     model.db.session.commit()
-
-if __name__ == '__main__':
-    unittest.main()

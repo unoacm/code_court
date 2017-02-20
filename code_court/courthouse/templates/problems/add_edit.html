@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "navbase.html" %}
 {% block content %}
 
 {% if action_label == "Add" %}
@@ -11,7 +11,7 @@
     {% if problem.id %}
         <input type="hidden" name="problem_id" value="{{ problem.id }}">
     {% endif %}
-    
+
     <div class="form-group">
         <label for="problem_type">Problem Type</label>
         <select class="form-control" id="problem_type_id" name="problem_type_id">
