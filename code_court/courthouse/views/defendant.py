@@ -112,9 +112,12 @@ def submit_code(problem):
     test_contest = model.Contest.query.filter_by(name="test_contest").one()
     python = model.Language.query.filter_by(name="python").one()
 
+    button_action = request.form.get("action")
+    is_submission = button_action == "submit" and not button_action == "run"
+
     run = model.Run(test_user, test_contest,
                     python, problem, current_time, source_code,
-                    problem.secret_input, problem.secret_output, True)
+                    problem.secret_input, problem.secret_output, is_submission)
 
     model.db.session.add(run)
     model.db.session.commit()

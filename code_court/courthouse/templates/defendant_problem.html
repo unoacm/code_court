@@ -29,7 +29,8 @@
             <textarea class="form-control" id="source_code" name="source_code">{% if source_code != None %}{{ source_code }}{% endif %}</textarea>
         </div>
         <div class="panel-footer">
-            <button type="submit" class="btn btn-default">Submit</button>
+          <button type="submit" name="action" value="submit" class="btn btn-default">Submit</button>
+          <button type="submit" name="action" value="run" class="btn btn-default">Run</button>
         </div>
     </form>
 </div>
