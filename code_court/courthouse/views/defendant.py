@@ -83,7 +83,7 @@ def problem(problem_id):
     if request.method == "POST":
         source_code = submit_code(problem)
 
-    return render_template("defendant_problem.html", problem=problem,
+    return render_template("defendant/defendant_problem.html", problem=problem,
                             source_code=source_code)
 
 def submit_code(problem):
