@@ -171,7 +171,7 @@ def dev_init_db(app):
         problems = []
         for problem_num in range(1,5):
             test_problem = model.Problem(io_problem_type, "fizzbuzz{}".format(problem_num),
-                                         "## FizzBuzz{}\nPerform fizzbuzz up to the given number".format(problem_num),
+                                         "Perform fizzbuzz up to the given number".format(problem_num),
                                          "3", "1\n2\nFizz",
                                          "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
             problems.append(test_problem)
