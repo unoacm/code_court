@@ -3,6 +3,8 @@ import json
 import re
 import sqlalchemy
 
+import util
+
 from flask import (
     abort,
     Blueprint,
@@ -27,7 +29,7 @@ def contests_view():
     Returns:
         a rendered contest view template
     """
-    model = get_model()
+    model = util.get_model()
 
     contests = model.Contest.query.all()
 
@@ -45,7 +47,7 @@ def contests_add(contest_id):
     Returns:
         a rendered add/edit template or a redirect to the contest view page
     """
-    model = get_model()
+    model = util.get_model()
     if request.method == "GET": # display add form
         return display_contest_add_form(contest_id)
     elif request.method == "POST": # process added/edited contest
@@ -66,7 +68,7 @@ def contests_del(contest_id):
     Returns:
         a redirect to the contest view page
     """
-    model = get_model()
+    model = util.get_model()
 
 
     contests = model.Contest.query.filter_by(id=contest_id).all()
@@ -91,7 +93,6 @@ def date_time_string_to_datetime(date_time_string):
 def users_from_emails(emails, model):
     users = []
 
-    # Is this db querying problematic?
     for email in emails:
         db_users = model.User.query.filter_by(email=email).all()
         if len(db_users) != 0:
@@ -120,9 +121,8 @@ def add_contest():
     Returns:
         a redirect to the contest view page
     """
-    model = get_model()
+    model = util.get_model()
 
-    print("request.form", request.form)
     name = request.form.get("name")
     activate_time = request.form.get("activate_time")
     start_time = request.form.get("start_time")
@@ -194,7 +194,7 @@ def display_contest_add_form(contest_id):
     Returns:
         a rendered contest add/edit template
     """
-    model = get_model()
+    model = util.get_model()
 
     if contest_id is None: # add
         return render_template("contests/add_edit.html", action_label="Add", contest=None,
@@ -244,7 +244,7 @@ def is_dup_contest_name(name):
     Returns:
         bool: True if the name is a duplicate, False otherwise
     """
-    model = get_model()
+    model = util.get_model()
     dup_contest = model.Contest.query.filter_by(name=name).all()
     return len(dup_contest) > 0
 
