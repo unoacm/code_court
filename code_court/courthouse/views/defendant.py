@@ -2,6 +2,7 @@ import collections
 import json
 import re
 
+from markdown import markdown
 from enum import Enum
 
 import util
@@ -16,6 +17,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    Markup
 )
 
 defendant = Blueprint('defendant', __name__,
@@ -79,11 +81,15 @@ def problem(problem_id):
         abort(400)
     problem = problems[0]
 
+    markdown_statement = Markup(markdown(problem.problem_statement))
+
     source_code = None
     if request.method == "POST":
         source_code = submit_code(problem)
 
-    return render_template("defendant/defendant_problem.html", problem=problem,
+    return render_template("defendant/defendant_problem.html",
+                            problem=problem,
+                            markdown_statement=markdown_statement,
                             source_code=source_code)
 
 def submit_code(problem):
