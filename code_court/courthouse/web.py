@@ -53,6 +53,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
     # app.debug = True
 
+    # Add datetime to string filter to Jinja2
+    # http://flask.pocoo.org/docs/0.12/templating/
+    app.jinja_env.filters['dt_to_str'] = model.dt_to_str
+
     db.init_app(app)
 
     login_manager = LoginManager()

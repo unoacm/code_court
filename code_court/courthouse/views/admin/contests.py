@@ -5,6 +5,8 @@ import sqlalchemy
 
 import util
 
+from flask_login import login_required
+
 from flask import (
     abort,
     Blueprint,
@@ -18,10 +20,8 @@ from flask import (
 contests = Blueprint('contests', __name__,
                   template_folder='templates/contests')
 
-class ModelMissingException(Exception):
-    pass
-
 @contests.route("/", methods=["GET"])
+@util.login_required("operator")
 def contests_view():
     """
     The contest view page
@@ -37,6 +37,7 @@ def contests_view():
 
 @contests.route("/add/", methods=["GET", "POST"], defaults={'contest_id': None})
 @contests.route("/edit/<int:contest_id>/", methods=["GET"])
+@util.login_required("operator")
 def contests_add(contest_id):
     """
     Displays the contest adding and updating page and accepts form submits from those pages.
@@ -58,6 +59,7 @@ def contests_add(contest_id):
 
 
 @contests.route("/del/<contest_id>/", methods=["GET"])
+@util.login_required("operator")
 def contests_del(contest_id):
     """
     Deletes a contest
@@ -70,7 +72,6 @@ def contests_del(contest_id):
     """
     model = util.get_model()
 
-
     contests = model.Contest.query.filter_by(id=contest_id).all()
     if len(contests) == 0:
         current_app.logger.info("Can't delete contest %s, doesn't exist", contest_id)
@@ -80,14 +81,6 @@ def contests_del(contest_id):
     model.db.session.commit()
 
     return redirect(url_for("contests.contests_view"))
-
-
-def date_time_string_to_datetime(date_time_string):
-    """Convert "2016-11-30 13:59:30" into datetime.datetime(2016, 11, 30, 13, 59, 30)"""
-    date_string, time_string = date_time_string.split(" ")
-    year, month, day = map(int, date_string.split("-"))
-    hour, minute, second = map(int, time_string.split(":"))
-    return datetime.datetime(year, month, day, hour, minute, second)
 
 
 def users_from_emails(emails, model):
@@ -123,6 +116,7 @@ def add_contest():
     """
     model = util.get_model()
 
+    # TODO: Do more validation on inputs
     name = request.form.get("name")
     activate_time = request.form.get("activate_time")
     start_time = request.form.get("start_time")
@@ -140,7 +134,7 @@ def add_contest():
 
     # convert is_public to a bool
 
-    is_public_bool = checkbox_result_to_bool(is_public)
+    is_public_bool = util.checkbox_result_to_bool(is_public)
     if is_public_bool is None:
         # TODO: give better feedback for failure
         current_app.logger.info("Invalid contest is_public: %s", is_public)
@@ -152,11 +146,11 @@ def add_contest():
         contest.name = name
         contest.is_public = is_public_bool
 
-        contest.activate_time = date_time_string_to_datetime(activate_time)
-        contest.start_time = date_time_string_to_datetime(start_time)
-        contest.freeze_time = date_time_string_to_datetime(freeze_time)
-        contest.end_time = date_time_string_to_datetime(end_time)
-        contest.deactivate_time = date_time_string_to_datetime(deactivate_time)
+        contest.activate_time = model.str_to_dt(activate_time)
+        contest.start_time = model.str_to_dt(start_time)
+        contest.freeze_time = model.str_to_dt(freeze_time)
+        contest.end_time = model.str_to_dt(end_time)
+        contest.deactivate_time = model.str_to_dt(deactivate_time)
 
         contest.users = users_from_emails(user_emails.split(), model)
         contest.problems = problems_from_names(problem_names.split(), model)
@@ -169,11 +163,11 @@ def add_contest():
 
         contest = model.Contest(name=name,
                                 is_public=is_public_bool,
-                                activate_time = date_time_string_to_datetime(activate_time),
-                                start_time = date_time_string_to_datetime(start_time),
-                                freeze_time = date_time_string_to_datetime(freeze_time),
-                                end_time = date_time_string_to_datetime(end_time),
-                                deactivate_time = date_time_string_to_datetime(deactivate_time),
+                                activate_time = model.str_to_dt(activate_time),
+                                start_time = model.str_to_dt(start_time),
+                                freeze_time = model.str_to_dt(freeze_time),
+                                end_time = model.str_to_dt(end_time),
+                                deactivate_time = model.str_to_dt(deactivate_time),
                                 users = users_from_emails(user_emails.split(), model),
                                 problems = problems_from_names(problem_names.split(), model))
         model.db.session.add(contest)
@@ -215,25 +209,6 @@ def display_contest_add_form(contest_id):
 
 
 ## Util functions
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
-
-
 def is_dup_contest_name(name):
     """
     Checks if a name is a duplicate of another contest
@@ -247,19 +222,3 @@ def is_dup_contest_name(name):
     model = util.get_model()
     dup_contest = model.Contest.query.filter_by(name=name).all()
     return len(dup_contest) > 0
-
-def checkbox_result_to_bool(res):
-    """
-    Takes in a checkbox result from a form and converts it to a bool
-
-    Params:
-        res (str): the result string from a checkbox
-
-    Returns:
-        bool: the boolean value of res
-    """
-    if res == "on":
-        return True
-    elif res == "off" or res is None:
-        return False
-    return None

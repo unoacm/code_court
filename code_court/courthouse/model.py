@@ -459,3 +459,7 @@ class UserRole(db.Model):
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60 to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')
+
+def dt_to_str(dt):
+    """Converts a datetime to a string in format 2017-12-30T12:60"""
+    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M')
