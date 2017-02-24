@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import traceback
 import uuid
 
 import requests
@@ -17,30 +18,66 @@ from requests.auth import HTTPBasicAuth
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
 
 writ_url = "http://localhost:9191/api/get-writ"
-executioner_email = "exec@example.com"
+executioner_email = "exec@example.org"
 executioner_password = "epass"
 
 
+def _main():
+    try:
+        event_loop()
+    except KeyboardInterrupt:
+        logging.info("Exiting")
+        sys.exit(0)
+
+
+def event_loop():
+    logging.info("Looking for writs")
+    while True:
+        overall_stime = time.time()
+        try:
+            writ = get_writ()
+        except InvalidWritException as e:
+            print(traceback.format_exc())
+            time.sleep(1)
+            continue
+
+        if writ is None:
+            time.sleep(1)
+            continue
+
+        logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
+        stime = time.time()
+        out = run_writ(writ)
+
+        stime = time.time()
+        submit_writ(writ['return_url'], out)
+
+
 def get_writ():
-    r = requests.get(writ_url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    try:
+        r = requests.get(writ_url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    except Exception as e:
+        raise InvalidWritException("Writ request returned exception: %s" % traceback.format_exc())
+
     if r.status_code != 200:
-        return None
+        raise InvalidWritException("Received non-200 status code: %s" % r.status_code)
 
     writ = r.json()
+
     if writ['status'] != 'found':
         return None
 
     if 'source_code' not in writ:
-        return None
+        raise InvalidWritException("Received invalid writ, missing source_code")
 
     if 'run_script' not in writ:
-        return None
+        raise InvalidWritException("Received invalid writ, missing run_script")
 
     if 'input' not in writ:
-        return None
+        raise InvalidWritException("Received invalid writ, missing input")
 
     if 'return_url' not in writ:
-        return None
+        raise InvalidWritException("Received invalid writ, missing return_url")
 
     return writ
 
@@ -80,31 +117,8 @@ def submit_writ(return_url, out):
                            json={"output": out.decode("utf-8")}, auth=HTTPBasicAuth(executioner_email, executioner_password))
 
 
-def event_loop():
-    logging.info("Looking for writs")
-    while True:
-        try:
-            writ = get_writ()
-        except requests.exceptions.ConnectionError:
-            time.sleep(5)
-            continue
-
-        if writ is None:
-            time.sleep(1)
-            continue
-
-        logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
-        out = run_writ(writ)
-        submit_writ(writ['return_url'], out)
-
-
-def _main():
-    try:
-        event_loop()
-    except KeyboardInterrupt:
-        logging.info("Exiting")
-        sys.exit(0)
-
+class InvalidWritException(Exception):
+    pass
 
 if __name__ == '__main__':
     _main()
