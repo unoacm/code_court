@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "navbase.html" %}
 {% block content %}
 <h1>Contests</h2>
 <table class="table">
@@ -19,14 +19,14 @@
     <tbody>
         {% for contest in contests %}
         <tr>
-            <td>{{ contest.id }}</td>
-            <td>{{ contest.name }}</td>
-            <td>{{ contest.activate_time }}</td>
-            <td>{{ contest.start_time }}</td>
-            <td>{{ contest.freeze_time }}</td>
-            <td>{{ contest.end_time }}</td>
-            <td>{{ contest.deactivate_time }}</td>
-            <td>{{ contest.is_public }}</td>
+            <td class="contest_id">{{ contest.id }}</td>
+            <td class="contest_name">{{ contest.name }}</td>
+            <td class="contest_activate_time">{{ contest.activate_time }}</td>
+            <td class="contest_start_time">{{ contest.start_time }}</td>
+            <td class="contest_freeze_time">{{ contest.freeze_time }}</td>
+            <td class="contest_end_time">{{ contest.end_time }}</td>
+            <td class="contest_deactivate_time">{{ contest.deactivate_time }}</td>
+            <td class="contest_is_public">{{ contest.is_public }}</td>
             <td>
                 <a href="{{ url_for('contests.contests_add', contest_id=contest.id) }}" class="btn btn-info btn-xs">edit</a>
                 <a href="{{ url_for('contests.contests_del', contest_id=contest.id) }}" class="btn btn-danger btn-xs">del</a>

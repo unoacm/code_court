@@ -16,7 +16,7 @@ from flask import (
 )
 
 contests = Blueprint('contests', __name__,
-                  template_folder='templates/contest')
+                  template_folder='templates/contests')
 
 class ModelMissingException(Exception):
     pass
