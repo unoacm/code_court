@@ -8,7 +8,7 @@ class ContestsTestCase(BaseTest):
     """
     Contains tests for the contests blueprint
     """
-    def _contest_add(self, init_contest_name):
+    def _contest_add(self, init_contest_name, emails):
         rv = self.app.post('/admin/contests/add/', data={
             "name": init_contest_name,
             "activate_time": "2017-01-01 12:00:00",
@@ -17,7 +17,7 @@ class ContestsTestCase(BaseTest):
             "end_time": "2017-01-01 15:00:00",
             "deactivate_time": "2017-01-01 16:00:00",
             "is_public": "on",
-            "users": model.User.query.one().email,
+            "users": '\n'.join(emails),
             "problems": model.Problem.query.one().name,
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to add contest")
@@ -25,10 +25,9 @@ class ContestsTestCase(BaseTest):
         rv = self.app.get('/admin/contests/')
         root = html.fromstring(rv.data)
         page_contest_names = [x.text for x in root.cssselect(".contest_name")]
-        print ("page_contest_names", page_contest_names)
         self.assertIn(init_contest_name, page_contest_names, "Contest was not added")
 
-    def _contest_edit(self, old_name, new_name):
+    def _contest_edit(self, old_name, new_name, emails):
         contest_id = model.Contest.query.filter_by(name=old_name).one().id
 
         rv = self.app.post('/admin/contests/add/', data={
@@ -40,7 +39,7 @@ class ContestsTestCase(BaseTest):
             "end_time": "2017-01-01 15:00:00",
             "deactivate_time": "2017-01-01 16:00:00",
             "is_public": "on",
-            "users": model.User.query.one().email,
+            "users": '\n'.join(emails),
             "problems": model.Problem.query.one().name,
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to edit contest")
@@ -78,6 +77,15 @@ class ContestsTestCase(BaseTest):
             "secret_output": "4 5 6",
         }, follow_redirects=True)
 
-        self._contest_add(init_contest_name)
-        self._contest_edit(init_contest_name, edit_contest_name)
+        # Add test contestants:
+        roles = {x.id: x for x in model.UserRole.query.all()}
+        names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
+        emails = ["testuser{}@example.org".format(i) for i in range(1,11)]
+
+        for i in range(1,11):
+            test_contestant = model.User(emails[i-1], names[i-1], "pass", user_roles=[roles['defendant']])
+            model.db.session.add(test_contestant)
+
+        self._contest_add(init_contest_name, emails[0:7])
+        self._contest_edit(init_contest_name, edit_contest_name, emails[0:7])
         self._contest_del(edit_contest_name)
