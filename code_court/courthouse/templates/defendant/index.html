@@ -1,0 +1,13 @@
+{% extends "navbase.html" %}
+{% block content %}
+<h1>Defendant</h1>
+<div>
+  {% for problem in problems %}
+    <ul >
+      <a href="{{ url_for('defendant.problem', problem_id=problem.id) }}" class="btn btn-default">
+        {{ problem.name }}
+      </a>
+    </ul>
+  {% endfor %}
+</div>
+{% endblock %}

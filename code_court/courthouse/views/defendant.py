@@ -35,7 +35,7 @@ def index():
 
     problems = model.Problem.query.all()
 
-    return render_template("defendant/defendant_index.html", problems=problems)
+    return render_template("defendant/index.html", problems=problems)
 
 RunState = Enum("RunState", "judging passed failed")
 
@@ -87,7 +87,7 @@ def problem(problem_id):
     if request.method == "POST":
         source_code = submit_code(problem)
 
-    return render_template("defendant/defendant_problem.html",
+    return render_template("defendant/problem.html",
                             problem=problem,
                             markdown_statement=markdown_statement,
                             source_code=source_code)
