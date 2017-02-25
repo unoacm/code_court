@@ -43,7 +43,7 @@ def hash_password(plaintext_password):
         # reduce number of rounds for quicker tests
         num_rounds = 4
     else:
-        num_rounds = 12
+        num_rounds = 10
 
     hashed_password = bcrypt.hashpw(plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))
     return hashed_password
