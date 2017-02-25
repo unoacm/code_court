@@ -1,0 +1,57 @@
+{% extends "navbase.html" %}
+{% block content %}
+
+{% if action_label == "Add" %}
+    <h1>{{ action_label }} Contest</h2>
+{% elif action_label == "Edit" %}
+    <h1>{{ action_label }} Contest {{ contest.name }} (id: {{ contest.id }})</h2>
+{% endif %}
+
+<form action="{{ url_for('contests.contests_add') }}" method="POST" class="form">
+    {% if contest.id %}
+        <input type="hidden" name="contest_id" value="{{ contest.id }}">
+    {% endif %}
+    
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ contest.name }}">
+    </div>
+    <div class="form-group">
+        <label for="activate_time">Activate Time</label>
+        <input type="text" class="form-control" id="activate_time" name="activate_time" placeholder="Activate Time" value="{{ contest.activate_time|dt_to_str }}">
+    </div>
+    <div class="form-group">
+        <label for="start_time">Start Time</label>
+        <input type="text" class="form-control" id="start_time" name="start_time" placeholder="Start Time" value="{{ contest.start_time|dt_to_str }}">
+    </div>
+    <div class="form-group">
+        <label for="freeze_time">Freeze Time</label>
+        <input type="text" class="form-control" id="freeze_time" name="freeze_time" placeholder="Freeze Time" value="{{ contest.freeze_time|dt_to_str }}">
+    </div>
+    <div class="form-group">
+        <label for="end_time">End Time</label>
+        <input type="text" class="form-control" id="end_time" name="end_time" placeholder="End Time" value="{{ contest.end_time|dt_to_str }}">
+    </div>
+    <div class="form-group">
+        <label for="deactivate_time">Deactivate Time</label>
+        <input type="text" class="form-control" id="deactivate_time" name="deactivate_time" placeholder="Deactivate Time" value="{{ contest.deactivate_time|dt_to_str }}">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="is_public" {% if contest.is_public == True %}checked="checked"{% endif %}> is_public?
+        </label>
+    </div>
+    <div class="form-group">
+        <label for="users">Users</label> — Choose from: {{ user_emails }}
+        <textarea type="text" class="form-control" id="users" name="users" placeholder="Users" rows="10">{% for user in contest.users %}{{ user.email }}
+{% endfor %}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="problems">Problems</label> — Choose from: {{ problem_names }}
+        <textarea type="text" class="form-control" id="problems" name="problems" placeholder="Problems" rows="10">{% for problem in contest.problems %}{{ problem.name }}
+{% endfor %}</textarea>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}

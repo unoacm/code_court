@@ -46,7 +46,6 @@ class ProblemsTestCase(BaseTest):
         self.assertIn(new_name, page_problem_names, "Problem was not edited")
 
     def _problem_del(self, name):
-        self.login("admin@example.org", "pass")
         problem_id = model.Problem.query.filter_by(name=name).one().id
 
         rv = self.app.get('/admin/problems/del/{}'.format(problem_id), follow_redirects=True)
