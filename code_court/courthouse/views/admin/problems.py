@@ -19,9 +19,6 @@ from flask import (
 problems = Blueprint('problems', __name__,
                   template_folder='templates/problems')
 
-class ModelMissingException(Exception):
-    pass
-
 @problems.route("/", methods=["GET"])
 @util.login_required("operator")
 def problems_view():

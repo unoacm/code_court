@@ -74,7 +74,6 @@ def languages_del(lang_id):
     """
     model = util.get_model()
 
-
     langs = model.Language.query.filter_by(id=lang_id).all()
     if len(langs) == 0:
         current_app.logger.info("Can't delete lang %s, doesn't exist", lang_id)
@@ -111,7 +110,7 @@ def add_lang():
 
     # convert is_enabled to a bool
 
-    is_enabled_bool = checkbox_result_to_bool(is_enabled)
+    is_enabled_bool = util.checkbox_result_to_bool(is_enabled)
     if is_enabled_bool is None:
         # TODO: give better feedback for failure
         current_app.logger.info("Invalid language is_enabled: %s", is_enabled)
@@ -181,19 +180,3 @@ def is_dup_lang_name(name):
     model = util.get_model()
     dup_lang = model.Language.query.filter_by(name=name).all()
     return len(dup_lang) > 0
-
-def checkbox_result_to_bool(res):
-    """
-    Takes in a checkbox result from a form and converts it to a bool
-
-    Params:
-        res (str): the result string from a checkbox
-
-    Returns:
-        bool: the boolean value of res
-    """
-    if res == "on":
-        return True
-    elif res == "off" or res is None:
-        return False
-    return None

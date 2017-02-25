@@ -24,6 +24,7 @@ from views.api import api
 from views.admin.admin import admin
 from views.admin.languages import languages
 from views.admin.problems import problems
+from views.admin.contests import contests
 from views.defendant import defendant
 from views.auth import auth
 
@@ -52,6 +53,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
     # app.debug = True
 
+    # Add datetime to string filter to Jinja2
+    # http://flask.pocoo.org/docs/0.12/templating/
+    app.jinja_env.filters['dt_to_str'] = model.dt_to_str
+
     db.init_app(app)
 
     login_manager = LoginManager()
@@ -72,6 +77,7 @@ def create_app():
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(languages, url_prefix='/admin/languages')
     app.register_blueprint(problems, url_prefix='/admin/problems')
+    app.register_blueprint(contests, url_prefix='/admin/contests')
     app.register_blueprint(defendant, url_prefix='/defendant')
     app.register_blueprint(auth, url_prefix='')
 
@@ -162,8 +168,13 @@ def dev_init_db(app):
 
 
         # create test contest
-        test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
-                                     model.str_to_dt("2030-01-01T11:11"), True)
+        test_contest = model.Contest(name = "test_contest",
+                                     start_time = model.str_to_dt("2017-02-05T22:04"),
+                                     end_time = model.str_to_dt("2030-01-01T11:11"),
+                                     is_public = True,
+                                     activate_time = model.str_to_dt("2018-02-05T22:04"),
+                                     freeze_time = model.str_to_dt("2019-02-05T22:04"),
+                                     deactivate_time = model.str_to_dt("2031-02-05T22:04"))
         test_contest.users += contestants
         model.db.session.add(test_contest)
 

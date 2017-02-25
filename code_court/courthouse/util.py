@@ -78,3 +78,19 @@ def login_required(role="ANY"):
             return fn(*args, **kwargs)
         return decorated_view
     return wrapper
+
+def checkbox_result_to_bool(res):
+    """
+    Takes in a checkbox result from a form and converts it to a bool
+
+    Params:
+        res (str): the result string from a checkbox
+
+    Returns:
+        bool: the boolean value of res
+    """
+    if res == "on":
+        return True
+    elif res == "off" or res is None:
+        return False
+    return None
