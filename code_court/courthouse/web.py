@@ -180,30 +180,68 @@ def dev_init_db(app):
 
         io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
         problems = []
-        for problem_num in range(1,5):
-            test_problem = model.Problem(io_problem_type, "fizzbuzz{}".format(problem_num),
-                                         "Perform fizzbuzz up to the given number".format(problem_num),
-                                         "3", "1\n2\nFizz",
-                                         "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
-            problems.append(test_problem)
-            test_contest.problems.append(test_problem)
-            model.db.session.add(test_problem)
+
+        hello_world = model.Problem(io_problem_type, "Hello, World!",
+                                    'Print the string "Hello, World!"',
+                                    "", "Hello, World!",
+                                    "", "Hello, World!")
+        problems.append(hello_world)
+        test_contest.problems.append(hello_world)
+        model.db.session.add(hello_world)
+
+        hello_worlds = model.Problem(io_problem_type, "Hello, Worlds!",
+                                          'Print the string "Hello, World!" n times',
+                                          "3", "Hello, World!\nHello, World!\nHello, World!",
+                                          "5", "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n")
+        problems.append(hello_worlds)
+        test_contest.problems.append(hello_worlds)
+        model.db.session.add(hello_worlds)
+
+        fizzbuzz = model.Problem(io_problem_type, "FizzBuzz",
+                                     "Perform fizzbuzz up to the given number",
+                                     "3", "1\n2\nFizz",
+                                     "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
+        problems.append(fizzbuzz)
+        test_contest.problems.append(fizzbuzz)
+        model.db.session.add(fizzbuzz)
+
+        fibonacci = model.Problem(io_problem_type, "Fibonacci",
+                                  "Give the nth number in the Fibonacci sequence",
+                                  "3", "2",
+                                  "5", "5")
+        problems.append(fibonacci)
+        test_contest.problems.append(fibonacci)
+        model.db.session.add(fibonacci)
+
+        ext_fibonacci = model.Problem(io_problem_type, "Extended Fibonacci",
+                                      "Give the the numbers of the Fibonacci sequence between 0 and n, inclusive.\nIf n is positive, the range is [0,n].\nIf n is negative, the range is [n,0].",
+                                      "-3", "2\n-1\n1\n0",
+                                      "-5", "5\n-3\n2\n-1\n1\n0")
+        problems.append(ext_fibonacci)
+        test_contest.problems.append(ext_fibonacci)
+        model.db.session.add(ext_fibonacci)
 
         # insert submissions
         python = model.Language.query.filter_by(name="python").one()
+
+        solutions = {"Hello, World!": "print('Hello, World!')",
+                     "Hello, Worlds!": "for i in range(int(input())):\n\tprint('Hello, World!')",
+                     "FizzBuzz": 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
+                     "Fibonacci": "fib = lambda n: n if n < 2 else fib(n-1) + fib(n-2)\nprint(fib(int(input())))",
+                     "Extended Fibonacci": "print('5\\n-\\n2\\n-1\\n1\\n0')"}
         for user in contestants:
             for problem in problems:
                 for i in range(10):
-                    src_code = 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))'
+                    src_code = solutions[problem.name]
                     is_submission = random.randint(1, 7) != 5
 
                     is_correct = random.randint(1, 3) == 3
                     if not is_correct:
-                        src_code = src_code.replace("3", "4")
+                        src_code = src_code + "\nprint('Wait this isn\\'t correct')"
 
                     test_run = model.Run(user, test_contest, python, problem,
                                          model.str_to_dt("2017-02-05T23:{}".format(i)),
-                                         src_code, test_problem.secret_input, test_problem.secret_output, is_submission)
+                                         src_code, problem.secret_input, problem.secret_output, is_submission)
                     test_run.is_correct = is_correct
 
                     if is_correct and is_submission:
