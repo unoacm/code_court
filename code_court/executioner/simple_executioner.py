@@ -59,6 +59,9 @@ def get_writ():
     except Exception as e:
         raise InvalidWritException("Writ request returned exception: %s" % traceback.format_exc())
 
+    if r.status_code == 404:
+        return None
+
     if r.status_code != 200:
         raise InvalidWritException("Received non-200 status code: %s" % r.status_code)
 
