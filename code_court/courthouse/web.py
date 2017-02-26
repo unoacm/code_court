@@ -71,7 +71,7 @@ def create_app():
     def load_user(user_email):
         return model.User.query.filter_by(email=user_email).one()
 
-    app.logger.setLevel(logging.INFO)
+    app.logger.setLevel(logging.DEBUG)
 
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
@@ -264,12 +264,12 @@ def setup_logging(app):
     if not path.isdir(path.dirname(log_location)):
         os.makedirs(path.dirname(log_location))
     file_handler = RotatingFileHandler(log_location, maxBytes=10000, backupCount=1)
-    file_handler.setLevel(logging.INFO)
+    file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     app.logger.addHandler(file_handler)
 
     stdout_handler = StreamHandler()
-    stdout_handler.setLevel(logging.INFO)
+    stdout_handler.setLevel(logging.DEBUG)
     stdout_handler.setFormatter(formatter)
     app.logger.addHandler(stdout_handler)
 
