@@ -24,6 +24,7 @@ from views.api import api
 from views.admin.admin import admin
 from views.admin.languages import languages
 from views.admin.problems import problems
+from views.admin.runs import runs
 from views.admin.contests import contests
 from views.defendant import defendant
 from views.auth import auth
@@ -77,6 +78,7 @@ def create_app():
     app.register_blueprint(admin, url_prefix='/admin')
     app.register_blueprint(languages, url_prefix='/admin/languages')
     app.register_blueprint(problems, url_prefix='/admin/problems')
+    app.register_blueprint(runs, url_prefix='/admin/runs')
     app.register_blueprint(contests, url_prefix='/admin/contests')
     app.register_blueprint(defendant, url_prefix='/defendant')
     app.register_blueprint(auth, url_prefix='')

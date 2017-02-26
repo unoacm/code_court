@@ -1,0 +1,99 @@
+{% extends "navbase.html" %}
+{% block content %}
+
+<h1>Run {{ run.id }}</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>user</th>
+            <th>language</th>
+            <th>problem</th>
+            <th>submit_time</th>
+            <th>started_execing_time</th>
+            <th>finished_execing_time</th>
+            <th>is_submission</th>
+            <th>is_passed</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="run_id">{{ run.id }}</td>
+            <td class="run_user">{{ run.user.name }}</td>
+            <td class="run_name">{{ run.language.name }}</td>
+            <td class="run_problem">{{ run.problem.name }}</td>
+            <td class="run_submit_time">{{ run.submit_time }}</td>
+            <td class="run_started_execing_time">{{ run.started_execing_time }}</td>
+            <td class="run_finished_execing_time">{{ run.finished_execing_time }}</td>
+            <td class="run_is_submission">{{ run.is_submission }}</td>
+            <td class="run_is_passed">
+                {% if run.is_submission == False %}
+                {% elif run.is_passed == False %}
+                    <span class="red">&#215;</span>
+                {% elif run.is_passed == True %}
+                    <span class="green">&#10003;</span>
+                {% else %}
+                    <span>&#8635;</span>
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/mode/python/python.js') }}"></script>
+<script src="{{ url_for('main.send_static', path='js/diff_match_patch.js') }}"></script>
+<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
+
+<div class="row">
+    <label for="source_code">Source Code</label>
+    <textarea class="col-md-12" id="source_code" name="source_code">{{ run.source_code }}</textarea>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <label for="run_input">Input</label>
+        <textarea class="form-control" id="run_input" name="run_input">{{ run.run_input }}</textarea>
+    </div>
+    <div class="col-md-8">
+        <div class="row">
+            <label class="col-md-6" for="run_output">Output</label>
+            <label class="col-md-6" for="run_output">Expected</label>
+        </div>
+        <div id="run_output"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        var source = CodeMirror.fromTextArea(document.getElementById("source_code"),
+        {lineNumbers: true, readOnly: "nocursor"});
+    });
+     
+    $(document).ready(function(){
+        var input = CodeMirror.fromTextArea(document.getElementById("run_input"),
+        {lineNumbers: true, readOnly: "nocursor"});
+    });
+</script>
+
+<meta id="runs" data-output="{{run.run_output}}" data-expected="{{run.correct_output}}">
+<script>
+    window.onload = function() {
+        var output = CodeMirror.MergeView(document.getElementById("run_output"), 
+        { 
+        value: $('#runs').data().output,
+        origRight: $('#runs').data().expected,
+        lineNumbers: true,
+        mode: "python",
+        showDifferences: true,
+        connect: null,
+        collapseIdentical: false,
+        readOnly: "nocursor",
+        revertButtons: false
+        });
+    };
+</script>
+
+{% endblock %}
