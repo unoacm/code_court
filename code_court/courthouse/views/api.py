@@ -111,7 +111,6 @@ def return_without_run(run_id):
     """Allows for executors to return a writ without running if they are
     experiencing errors or are shutting down
     """
-    print("Hello")
     model = util.get_model()
     run = model.Run.query.filter_by(id=run_id).first()
     if not run:
