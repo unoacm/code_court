@@ -32,6 +32,7 @@ EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
 RUN_TIMEOUT = 5
 writ_url = "http://localhost:9191/api/get-writ"
+RETURN_URL = "http://localhost:9191/api/return-without-run"
 executioner_email = "exec@example.org"
 executioner_password = "epass"
 IDEAL_NUM_EXECUTORS = cpu_count()*2
@@ -39,7 +40,7 @@ IDEAL_NUM_EXECUTORS = cpu_count()*2
 def event_loop():
     # make sure that processes ignore SIGINT
     original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-    pool = Pool(cpu_count()*2)
+    pool = Pool(IDEAL_NUM_EXECUTORS)
     signal.signal(signal.SIGINT, original_sigint_handler)
 
     if len(get_executor_containers()) > 0:
@@ -130,7 +131,7 @@ def execute_writ(writ):
         # TODO: check what happens if tons of output is sent
         stream = container.exec_run("/share/runner", stream=True)
 
-        timer = Timer(RUN_TIMEOUT, timout_container, [container.id, writ['run_id']])
+        timer = Timer(RUN_TIMEOUT, timeout_container, [container.id, writ['run_id']])
         try:
             timer.start()
             out = []
@@ -140,15 +141,11 @@ def execute_writ(writ):
             if is_container_running(container.id):
                 container.kill()
 
+
             submit_writ(writ, "".join(out))
         finally:
             timer.cancel()
-    except:
-        if container:
-            container.remove(force=True)
-            shutil.rmtree(container_shared_data_dir)
-        raise
-    else:
+    finally:
         if container:
             container.remove(force=True)
             shutil.rmtree(container_shared_data_dir)
@@ -237,6 +234,9 @@ def get_writ():
 
     return writ
 
+def get_writ_id_from_container_name(name):
+    return name.split("-", 3)[1]
+
 def kill_all_executors():
     client = docker.from_env()
     for c in get_executor_containers():
@@ -246,6 +246,16 @@ def kill_all_executors():
             c.remove(force=True)
         except docker.errors.NotFound:
             pass
+
+        return_writ_without_output(c.name)
+
+def return_writ_without_output(container_name):
+    run_id = get_writ_id_from_container_name(container_name)
+
+    logging.info("Returning writ without output: %s", run_id)
+
+    url = RETURN_URL + "/" + run_id
+    status = requests.post(url, auth=HTTPBasicAuth(executioner_email, executioner_password))
 
 def submit_writ(writ, out):
     logging.info("Submitting writ %s", writ['run_id'])
