@@ -100,6 +100,7 @@ def submissions():
     model = util.get_model()
 
     submissions = model.Run.query.filter_by(user=current_user, is_submission=True).all()
+    submissions.reverse()
 
     return render_template("defendant/submissions.html", submissions=submissions)
 
