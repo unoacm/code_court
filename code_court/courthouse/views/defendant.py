@@ -9,6 +9,7 @@ import util
 
 import datetime
 
+from flask_login import current_user
 from flask import (
     abort,
     Blueprint,
@@ -35,7 +36,7 @@ def index():
 
     problems = model.Problem.query.all()
 
-    return render_template("defendant/defendant_index.html", problems=problems)
+    return render_template("defendant/index.html", problems=problems)
 
 RunState = Enum("RunState", "judging passed failed")
 
@@ -87,10 +88,20 @@ def problem(problem_id):
     if request.method == "POST":
         source_code = submit_code(problem)
 
-    return render_template("defendant/defendant_problem.html",
+    return render_template("defendant/problem.html",
                             problem=problem,
                             markdown_statement=markdown_statement,
                             source_code=source_code)
+
+
+@defendant.route("/submissions", methods=["GET"])
+def submissions():
+
+    model = util.get_model()
+
+    submissions = model.Run.query.filter_by(user=current_user, is_submission=True).all()
+
+    return render_template("defendant/submissions.html", submissions=submissions)
 
 def submit_code(problem):
     """
