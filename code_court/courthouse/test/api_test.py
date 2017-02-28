@@ -45,6 +45,20 @@ class APITestCase(BaseTest):
         self.assertIn('run_id', writ_data)
         self.assertEqual(writ_data['status'], 'found')
 
+        # verify no more writs
+        rv = self.app.get('/api/get-writ', headers=auth_headers)
+        self.assertEqual(rv.status_code, 404)
+
+        # give back writ
+        rv = self.app.post('/api/return-without-run/{}'.format(writ_data['run_id']),
+                          headers=auth_headers)
+        self.assertEqual(rv.status_code, 200)
+
+        # get writ again
+        rv = self.app.get('/api/get-writ', headers=auth_headers)
+        self.assertEqual(rv.status_code, 200)
+        writ_data = json.loads(rv.data.decode("utf-8"))
+
         # submit writ
         submit_data = {'output': 'run_output'}
         rv = self.app.post('/api/submit-writ/{}'.format(writ_data['run_id']),
@@ -55,6 +69,7 @@ class APITestCase(BaseTest):
         # verify no more writs
         rv = self.app.get('/api/get-writ', headers=auth_headers)
         self.assertEqual(rv.status_code, 404)
+
 
 def setup_contest():
     roles = {x.id: x for x in model.UserRole.query.all()}

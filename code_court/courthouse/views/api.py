@@ -105,6 +105,27 @@ def submit_writ(run_id):
     model.db.session.commit()
     return "Good"
 
+@api.route("/return-without-run/<run_id>", methods=["POST"])
+@executioner_auth.login_required
+def return_without_run(run_id):
+    """Allows for executors to return a writ without running if they are
+    experiencing errors or are shutting down
+    """
+    model = util.get_model()
+    run = model.Run.query.filter_by(id=run_id).first()
+    if not run:
+        current_app.logger.debug("Received writ without valid run, id: %s", run_id)
+        abort(404)
+
+    if run.finished_execing_time:
+        current_app.logger.warning("Received return for already returned writ, id: %s", run_id)
+        abort(400)
+
+    run.started_execing_time = None
+    model.db.session.commit()
+
+    return "Good"
+
 def clean_output_string(s):
     """Cleans up an output string for comparison"""
     return s.replace("\r\n", "\n").strip()

@@ -383,6 +383,15 @@ class Run(db.Model):
     def __str__(self):
         return self.__repr__()
 
+    @staticmethod
+    def get_judging_runs():
+        return Run.query.filter(Run.started_execing_time != None).\
+                         filter(Run.finished_execing_time == None).all()
+
+    @staticmethod
+    def get_unjudged_runs():
+        return Run.query.filter(Run.finished_execing_time == None).all()
+
 
 class Clarification(db.Model):
     """Stores information about a user or judge clarification"""
