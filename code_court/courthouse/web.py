@@ -230,7 +230,7 @@ def dev_init_db(app):
                      "Hello, Worlds!": "for i in range(int(input())):\n\tprint('Hello, World!')",
                      "FizzBuzz": 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
                      "Fibonacci": "fib = lambda n: n if n < 2 else fib(n-1) + fib(n-2)\nprint(fib(int(input())))",
-                     "Extended Fibonacci": "print('5\\n-\\n2\\n-1\\n1\\n0')"}
+                     "Extended Fibonacci": "print('5\\n-3\\n2\\n-1\\n1\\n0')"}
         for user in contestants:
             for problem in problems:
                 for i in range(10):

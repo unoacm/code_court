@@ -2,6 +2,10 @@
 {% block content %}
 <h1>Defendant</h1>
 <div>
+  <ul>
+    <a href="{{ url_for('defendant.submissions') }}" class="btn btn-info">See all submissions</a>
+  </ul>
+  <br/>
   {% for problem in problems %}
     <ul >
       <a href="{{ url_for('defendant.problem', problem_id=problem.id) }}" class="btn btn-default">
