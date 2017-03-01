@@ -28,11 +28,10 @@
             <td class="run_finished_execing_time">{{ run.finished_execing_time }}</td>
             <td class="run_is_submission">{{ run.is_submission }}</td>
             <td class="run_is_passed">
-                {% if run.is_submission == False %}
+                {% if run.is_submission == True %}
+                    <span class="green">&#10003;</span>
                 {% elif run.is_passed == False %}
                     <span class="red">&#215;</span>
-                {% elif run.is_passed == True %}
-                    <span class="green">&#10003;</span>
                 {% else %}
                     <span>&#8635;</span>
                 {% endif %}
@@ -71,7 +70,7 @@
         var source = CodeMirror.fromTextArea(document.getElementById("source_code"),
         {lineNumbers: true, readOnly: "nocursor"});
     });
-     
+
     $(document).ready(function(){
         var input = CodeMirror.fromTextArea(document.getElementById("run_input"),
         {lineNumbers: true, readOnly: "nocursor"});
@@ -81,8 +80,8 @@
 <meta id="runs" data-output="{{run.run_output}}" data-expected="{{run.correct_output}}">
 <script>
     window.onload = function() {
-        var output = CodeMirror.MergeView(document.getElementById("run_output"), 
-        { 
+        var output = CodeMirror.MergeView(document.getElementById("run_output"),
+        {
         value: $('#runs').data().output,
         origRight: $('#runs').data().expected,
         lineNumbers: true,

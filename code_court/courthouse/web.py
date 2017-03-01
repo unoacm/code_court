@@ -2,6 +2,7 @@
 """
 The entrypoint to the courthouse application
 """
+import datetime
 import logging
 import os
 import random
@@ -233,7 +234,7 @@ def dev_init_db(app):
                      "Extended Fibonacci": "print('5\\n-3\\n2\\n-1\\n1\\n0')"}
         for user in contestants:
             for problem in problems:
-                for i in range(10):
+                for i in range(5):
                     src_code = solutions[problem.name]
                     is_submission = random.randint(1, 7) != 5
 
@@ -242,7 +243,7 @@ def dev_init_db(app):
                         src_code = src_code + "\nprint('Wait this isn\\'t correct')"
 
                     test_run = model.Run(user, test_contest, python, problem,
-                                         model.str_to_dt("2017-02-05T23:{}".format(i)),
+                                         datetime.datetime.utcnow(),
                                          src_code, problem.secret_input, problem.secret_output, is_submission)
                     test_run.is_correct = is_correct
 

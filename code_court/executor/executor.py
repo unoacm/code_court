@@ -126,7 +126,8 @@ def execute_writ(writ):
                                                  "tail -f /dev/null",
                                                  detach=True,
                                                  volumes=shared_volumes,
-                                                 name=container_name)
+                                                 name=container_name,
+                                                 network_disabled=True)
 
         # TODO: check what happens if tons of output is sent
         stream = container.exec_run("/share/runner", stream=True)
@@ -145,6 +146,9 @@ def execute_writ(writ):
             submit_writ(writ, "".join(out))
         finally:
             timer.cancel()
+    except:
+        logging.exception("Exception while executing writ")
+        raise
     finally:
         if container:
             container.remove(force=True)
