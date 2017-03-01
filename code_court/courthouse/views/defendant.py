@@ -99,7 +99,9 @@ def submissions():
 
     model = util.get_model()
 
-    submissions = model.Run.query.filter_by(user=current_user, is_submission=True).all()
+    submissions = model.Run.query.filter_by(user=current_user, is_submission=True)\
+                                 .order_by(model.Run.submit_time.desc())\
+                                 .all()
 
     return render_template("defendant/submissions.html", submissions=submissions)
 
