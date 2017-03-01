@@ -36,19 +36,17 @@ def runs_view():
     runs_filter = request.form.get("filter")
 
     if runs_filter == "submissions":
-        runs = model.Run.query.filter_by(is_submission=True).all()
+        run_query = model.Run.query.filter_by(is_submission=True)
     elif runs_filter == "judged":
-        runs = []
-        query = model.Run.query.filter_by(is_submission=True).all()
-        for run in query:
-            if run.is_judged:
-                runs.append(run)
+        run_query = model.Run.query.filter(model.Run.finished_execing_time != None)
     elif runs_filter == "not_judged":
-        runs = model.Run.query.filter_by(is_submission=True, finished_execing_time=None).all()
+        run_query = model.Run.query.filter_by(finished_execing_time=None)
     elif runs_filter == "tests":
-        runs = model.Run.query.filter_by(is_submission=False).all()
+        run_query = model.Run.query.filter_by(is_submission=False)
     else:
-        runs = model.Run.query.all()
+        run_query = model.Run.query
+
+    runs = run_query.order_by(model.Run.submit_time.desc()).all()
 
     return render_template("runs/view.html", runs=runs, runs_filter=runs_filter)
 
