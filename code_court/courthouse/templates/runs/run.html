@@ -28,7 +28,7 @@
             <td class="run_finished_execing_time">{{ run.finished_execing_time }}</td>
             <td class="run_is_submission">{{ run.is_submission }}</td>
             <td class="run_is_passed">
-                {% if run.is_submission == True %}
+                {% if run.is_passed == True %}
                     <span class="green">&#10003;</span>
                 {% elif run.is_passed == False %}
                     <span class="red">&#215;</span>
