@@ -48,14 +48,16 @@
 <link rel="stylesheet" href="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
 
 <div class="row">
-    <label for="source_code">Source Code</label>
-    <textarea class="col-md-12" id="source_code" name="source_code">{{ run.source_code }}</textarea>
+    <div class="col-md-12">
+        <label for="source_code">Source Code</label>
+        <textarea id="source_code">{{ run.source_code }}</textarea>
+    </div>
 </div>
 
 <div class="row">
     <div class="col-md-4">
         <label for="run_input">Input</label>
-        <textarea class="form-control" id="run_input" name="run_input">{{ run.run_input }}</textarea>
+        <textarea id="run_input">{{ run.run_input }}</textarea>
     </div>
     <div class="col-md-8">
         <div class="row">
@@ -86,7 +88,7 @@
         value: $('#runs').data().output,
         origRight: $('#runs').data().expected,
         lineNumbers: true,
-        mode: "python",
+        mode: "text",
         showDifferences: true,
         connect: null,
         collapseIdentical: false,
