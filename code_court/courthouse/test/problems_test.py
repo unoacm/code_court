@@ -11,6 +11,7 @@ class ProblemsTestCase(BaseTest):
     def _problem_add(self, init_problem_name):
         rv = self.app.post('/admin/problems/add/', data={
             "problem_type_id": model.ProblemType.query.filter_by(name="input-output").one().id,
+            "slug": "initprob",
             "name": init_problem_name,
             "problem_statement": "## is there a problem here",
             "sample_input": "1",
@@ -31,6 +32,7 @@ class ProblemsTestCase(BaseTest):
         rv = self.app.post('/admin/problems/add/', data={
             "problem_id": problem_id,
             "problem_type_id": model.ProblemType.query.filter_by(name="input-output").one().id,
+            "slug": "initprob",
             "name": new_name,
             "problem_statement": "## there is a problem here",
             "sample_input": "1",

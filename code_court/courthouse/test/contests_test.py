@@ -66,9 +66,10 @@ class ContestsTestCase(BaseTest):
 
         self.login("admin@example.org", "pass")
 
-        # Need to have a problem (or do we?) to test a contest:
+        # Need to have a problem to test a contest:
         self.app.post('/admin/problems/add/', data={
             "problem_type_id": model.ProblemType.query.filter_by(name="input-output").one().id,
+            "slug": "2plus2",
             "name": "2 + 2",
             "problem_statement": "## is there a problem here",
             "sample_input": "1",

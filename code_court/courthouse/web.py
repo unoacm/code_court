@@ -15,6 +15,7 @@ from flask import Flask, render_template
 
 from flask_login import LoginManager, current_user
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_cors import CORS
 
 import model
 
@@ -60,6 +61,7 @@ def create_app():
     app.jinja_env.filters['dt_to_str'] = model.dt_to_str
 
     db.init_app(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -184,7 +186,7 @@ def dev_init_db(app):
         io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
         problems = []
 
-        hello_world = model.Problem(io_problem_type, "Hello, World!",
+        hello_world = model.Problem(io_problem_type, "hello-world", "Hello, World!",
                                     'Print the string "Hello, World!"',
                                     "", "Hello, World!",
                                     "", "Hello, World!")
@@ -192,7 +194,7 @@ def dev_init_db(app):
         test_contest.problems.append(hello_world)
         model.db.session.add(hello_world)
 
-        hello_worlds = model.Problem(io_problem_type, "Hello, Worlds!",
+        hello_worlds = model.Problem(io_problem_type, "hello-worlds", "Hello, Worlds!",
                                           'Print the string "Hello, World!" n times',
                                           "3", "Hello, World!\nHello, World!\nHello, World!",
                                           "5", "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n")
@@ -200,15 +202,15 @@ def dev_init_db(app):
         test_contest.problems.append(hello_worlds)
         model.db.session.add(hello_worlds)
 
-        fizzbuzz = model.Problem(io_problem_type, "FizzBuzz",
-                                     "Perform fizzbuzz up to the given number",
+        fizzbuzz = model.Problem(io_problem_type, "fizzbuzz", "FizzBuzz",
+                                     "Perform fizzbuzz up to the given number\n\nMore info can be found [here](https://en.wikipedia.org/wiki/Fizz_buzz)",
                                      "3", "1\n2\nFizz",
                                      "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
         problems.append(fizzbuzz)
         test_contest.problems.append(fizzbuzz)
         model.db.session.add(fizzbuzz)
 
-        fibonacci = model.Problem(io_problem_type, "Fibonacci",
+        fibonacci = model.Problem(io_problem_type, "fibonoacci", "Fibonacci",
                                   "Give the nth number in the Fibonacci sequence",
                                   "3", "2",
                                   "5", "5")
@@ -216,7 +218,7 @@ def dev_init_db(app):
         test_contest.problems.append(fibonacci)
         model.db.session.add(fibonacci)
 
-        ext_fibonacci = model.Problem(io_problem_type, "Extended Fibonacci",
+        ext_fibonacci = model.Problem(io_problem_type, "ext-fib", "Extended Fibonacci",
                                       "Give the the numbers of the Fibonacci sequence between 0 and n, inclusive.\nIf n is positive, the range is [0,n].\nIf n is negative, the range is [n,0].",
                                       "-3", "2\n-1\n1\n0",
                                       "-5", "5\n-3\n2\n-1\n1\n0")

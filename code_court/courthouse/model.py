@@ -45,6 +45,14 @@ class Language(db.Model):
         self.is_enabled = is_enabled
         self.run_script = run_script
 
+    def get_output_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "is_enabled": self.is_enabled,
+            "run_script": self.run_script
+        }
+
     def __str__(self):
         return "Language({})".format(self.name)
 
@@ -71,6 +79,13 @@ class ProblemType(db.Model):
         self.name = name
         self.eval_script = eval_script
 
+    def get_output_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "eval_script": self.eval_script,
+        }
+
     def __repr__(self):
         return "ProblemType({})".format(self.name)
 
@@ -87,7 +102,11 @@ class Problem(db.Model):
     problem_type_id = db.Column(db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
-    name = db.Column(db.String, unique=True, nullable=False)
+    slug = db.Column(db.String(10), unique=True, nullable=False)
+    """str: the problem's slug, this is a short (<11 chars) string that is used to identify
+            a problem. It can only contain the following characters: a-z, A-Z, 0-1, -, _"""
+
+    name = db.Column(db.String, nullable=False)
     """str: the problem's name"""
 
     problem_statement = db.Column(db.String, nullable=False)
@@ -107,15 +126,27 @@ class Problem(db.Model):
 
     contests = db.relationship("Contest", secondary=contest_problem, back_populates="problems")
 
-    def __init__(self, problem_type, name, problem_statement, sample_input,
+    def __init__(self, problem_type, slug, name, problem_statement, sample_input,
                  sample_output, secret_input, secret_output):
         self.problem_type = problem_type
+        self.slug = slug
         self.name = name
         self.problem_statement = problem_statement
         self.sample_input = sample_input
         self.sample_output = sample_output
         self.secret_input = secret_input
         self.secret_output = secret_output
+
+    def get_output_dict(self):
+        return {
+            "id": self.id,
+            "problem_type": self.problem_type.get_output_dict(),
+            "slug": self.slug,
+            "name": self.name,
+            "problem_statement": self.problem_statement,
+            "sample_input": self.sample_input,
+            "sample_output": self.sample_output,
+        }
 
     def __repr__(self):
         return "Problem({})".format(self.name)
@@ -180,6 +211,13 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return self.email
 
+    def get_output_dict(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "name": self.name,
+        }
+
     def __repr__(self):
         return "User({})".format(self.email)
 
@@ -230,6 +268,11 @@ class Contest(db.Model):
         self.users = users or []
         self.problems = problems or []
 
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
+
     def __repr__(self):
         return "Contest({})".format(self.name)
 
@@ -257,6 +300,11 @@ class Configuration(db.Model):
         self.key = key
         self.val = val
         self.valType = valType
+
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
 
     def __repr__(self):
         return "Configuration({}={})".format(self.key, self.val)
@@ -300,6 +348,11 @@ class SavedCode(db.Model):
         self.language = language
         self.source_code = source_code
         self.last_updated_time = last_updated_time
+
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
 
     def __repr__(self):
         return "SavedCode(id={})".format(self.id)
@@ -377,6 +430,11 @@ class Run(db.Model):
         self.correct_output = correct_output
         self.is_submission = is_submission
 
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
+
     def __repr__(self):
         return "Run(id={})".format(self.id)
 
@@ -425,6 +483,11 @@ class Clarification(db.Model):
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
+
     def __repr__(self):
         return "Clarification(id={})".format(self.id)
 
@@ -442,6 +505,11 @@ class UserRole(db.Model):
 
     def __init__(self, name):
         self.id = name
+
+    def get_output_dict(self):
+        return {
+            "id": self.id
+        }
 
     def __eq__(self, other):
         """Override the default Equals behavior"""

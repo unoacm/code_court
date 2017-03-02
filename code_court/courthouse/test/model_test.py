@@ -138,6 +138,7 @@ class ModelsTestCase(BaseTest):
 
         PROBLEM_ARGS = {
             "problem_type": problem_type,
+            "slug": "ioprob",
             "name": "The Input/Output Problem",
             "problem_statement": "Print the string 'Hello, World!' n times",
             "sample_input": "3",
@@ -241,6 +242,7 @@ def get_problem():
     problem_type_args, problem_type = get_problem_type()
     PROBLEM_ARGS = {
         "problem_type": problem_type,
+        "slug": "ioprob",
         "name": "The Input/Output Problem",
         "problem_statement": "Print the string 'Hello, World!' n times",
         "sample_input": "3",
