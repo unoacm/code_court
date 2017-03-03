@@ -96,6 +96,7 @@ def add_problem():
 
     problem_type_id = request.form.get("problem_type_id")
     problem_type = model.ProblemType.query.filter_by(id=problem_type_id).one()
+    slug = request.form.get("slug")
     name = request.form.get("name")
     problem_statement = request.form.get("problem_statement")
     sample_input = request.form.get("sample_input")
@@ -117,6 +118,7 @@ def add_problem():
     if problem_id: # edit
         problem = model.Problem.query.filter_by(id=problem_id).one()
         problem.problem_type = problem_type
+        problem.slug = slug
         problem.name = name
         problem.problem_statement = problem_statement
         problem.sample_input = sample_input
@@ -131,6 +133,7 @@ def add_problem():
             abort(400)
 
         problem = model.Problem(problem_type,
+                                slug,
                                 name,
                                 problem_statement,
                                 sample_input,

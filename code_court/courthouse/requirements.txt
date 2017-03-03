@@ -4,9 +4,11 @@ cffi==1.9.1
 click==6.7
 colorama==0.3.7
 cookies==2.2.1
+coverage==4.3.4
 cssselect==1.0.1
 decorator==4.0.11
 Flask==0.12
+Flask-Cors==3.0.2
 Flask-DebugToolbar==0.10.1
 Flask-HTTPAuth==3.2.2
 Flask-Login==0.3.2

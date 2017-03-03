@@ -78,7 +78,7 @@ def setup_contest():
     test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
                                  model.str_to_dt("2030-01-01T11:11"), True)
     io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
-    test_problem = model.Problem(io_problem_type, "fizzbuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
+    test_problem = model.Problem(io_problem_type, "fizzbuzz", "FizzBuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
                                  "3", "1\n2\nFizz",
                                  "15", "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\n9\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n")
     test_contest.problems.append(test_problem)
