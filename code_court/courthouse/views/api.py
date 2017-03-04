@@ -11,6 +11,9 @@ import six
 import util
 
 from flask_httpauth import HTTPBasicAuth
+from flask_login import current_user, login_user, logout_user
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+
 
 from flask import (
     abort,
@@ -125,6 +128,77 @@ def return_without_run(run_id):
     model.db.session.commit()
 
     return "Good"
+
+@api.route('/login', methods=['POST'])
+def login():
+    model = util.get_model()
+
+    email = request.json.get('email', None)
+    password = request.json.get('password', None)
+
+    user = model.User.query.filter_by(email=email).scalar()
+
+    if user and user.verify_password(password):
+        ret = {'access_token': create_access_token(identity=user.id)}
+        return jsonify(ret), 200
+    else:
+        return jsonify({"msg": "Bad username or password"}), 401
+
+@api.route("/problem/<slug>", methods=["GET"])
+def get_problem(slug):
+    model = util.get_model()
+
+    problem = model.Problem.query.filter_by(slug=slug).first()
+
+    return make_response(jsonify(problem.get_output_dict()), 200)
+
+@api.route("/problems", methods=["GET"])
+def get_all_problems():
+    model = util.get_model()
+
+    problems = model.Problem.query.all()
+
+    return make_response(jsonify({x.slug: x.get_output_dict() for x in problems}), 200)
+
+@api.route("/current-user", methods=["GET"])
+@jwt_required
+def get_current_user():
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    resp = None
+    if current_user:
+        resp = current_user.get_output_dict()
+
+    return make_response(jsonify(resp), 200)
+
+@api.route("/submit-run", methods=["POST"])
+@jwt_required
+def submit_run():
+    model = util.get_model()
+
+    lang = request.json.get('lang', None)
+    problem_slug = request.json.get('problem_slug', None)
+    source_code = request.json.get('source_code', None)
+
+    current_user_id = get_jwt_identity()
+    user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    lang = model.Language.query.filter_by(name="python").one()
+    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+    contest = model.Contest.query.first()
+
+    run = model.Run(user, contest,
+                    lang, problem, datetime.datetime.utcnow(), source_code,
+                    problem.secret_input, problem.secret_output, is_submission=True)
+
+    model.db.session.add(run)
+    model.db.session.commit()
+
+    return "good"
+
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""

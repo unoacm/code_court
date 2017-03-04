@@ -13,11 +13,13 @@ from os import path
 
 from flask import Flask, render_template
 
-from flask_login import LoginManager, current_user
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_cors import CORS
+from flask_debugtoolbar import DebugToolbarExtension
+from flask_jwt_extended import JWTManager
+from flask_login import LoginManager, current_user
 
 import model
+import util
 
 from model import db
 
@@ -61,7 +63,9 @@ def create_app():
     app.jinja_env.filters['dt_to_str'] = model.dt_to_str
 
     db.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app)
+
+    jwt = JWTManager(app)
 
     login_manager = LoginManager()
     login_manager.init_app(app)
