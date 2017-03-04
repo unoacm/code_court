@@ -6,11 +6,9 @@
     <h2>Sample Input</h2>
     <pre>{{ problem.sample_input }}</pre>
 
-    <h2>Sample Output</h2>
-    <pre>{{ problem.sample_output }}</pre>
-
     <h2>Code</h2>
-    <textarea v-model="source_code" class="form-control" name="code"></textarea>
+    <Editor></Editor>
+
     <br/>
     <button v-on:click="submitCode" class="btn btn-primary">Run</button>
   </div>
@@ -19,6 +17,7 @@
 <script>
 import marked from 'marked'
 import axios from 'axios'
+import Editor from '@/components/Editor'
 
 export default {
   data () {
@@ -46,6 +45,9 @@ export default {
         console.log(error)
       })
     }
+  },
+  components: {
+    Editor
   }
 }
 </script>
