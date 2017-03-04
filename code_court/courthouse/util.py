@@ -94,3 +94,14 @@ def checkbox_result_to_bool(res):
     elif res == "off" or res is None:
         return False
     return None
+
+def jwt_authenticate(email, password):
+    user = model.User.query.filter_by(email=email).first()
+    if user and user.verify_password(password):
+        return user
+
+def jwt_identity(payload):
+    model = get_model()
+    user_id = payload['identity']
+
+    return model.User.query.filter_by(id=user_id).first()
