@@ -2,7 +2,7 @@
   "name": "defendant-frontend",
   "version": "1.0.0",
   "description": "A Vue.js project",
-  "author": "Ben Doan <ben@bendoan.me>",
+  "author": "UNOACM <ben@bendoan.me>",
   "private": true,
   "scripts": {
     "dev": "node build/dev-server.js",
@@ -15,6 +15,7 @@
     "axios": "^0.15.3",
     "bootstrap": "^3.3.7",
     "bootstrap-webpack": "0.0.5",
+    "brace": "^0.10.0",
     "exports-loader": "^0.6.4",
     "imports-loader": "^0.7.1",
     "jquery": "^3.1.1",
@@ -23,7 +24,6 @@
     "marked": "^0.3.6",
     "style-loader": "^0.13.2",
     "vue": "^2.2.1",
-    "vue-axios": "^1.2.2",
     "vue-router": "^2.2.0",
     "vuex": "^2.2.1",
     "vuex-router-sync": "^4.1.2"
