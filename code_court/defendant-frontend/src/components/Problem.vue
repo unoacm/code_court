@@ -6,8 +6,13 @@
     <h2>Sample Input</h2>
     <pre>{{ problem.sample_input }}</pre>
 
+    <h2>Sample Output</h2>
+    <pre>{{ problem.sample_output }}</pre>
+
+    {{ source_code }}
+
     <h2>Code</h2>
-    <Editor></Editor>
+    <Editor v-model="source_code"></Editor>
 
     <br/>
     <button v-on:click="submitCode" class="btn btn-primary">Run</button>
