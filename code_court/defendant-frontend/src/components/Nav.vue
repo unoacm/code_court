@@ -43,7 +43,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 ul.navigation {
   list-style: none;
   overflow: hidden;
