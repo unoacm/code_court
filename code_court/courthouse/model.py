@@ -431,9 +431,22 @@ class Run(db.Model):
         self.is_submission = is_submission
 
     def get_output_dict(self):
-        return {
-            "id": self.id
+        d = {
+            "id": self.id,
+            "source_code": self.source_code,
+            "submit_time": self.submit_time,
+            "started_execing_time": self.started_execing_time,
+            "finished_execing_time": self.finished_execing_time,
+            "is_submission": self.is_submission,
+            "is_passed": self.is_passed,
         }
+
+        if not self.is_submission:
+            d["run_input"] = self.run_input
+            d["run_output"] = self.run_output
+            d["correct_output"] = self.correct_output
+
+        return d
 
     def __repr__(self):
         return "Run(id={})".format(self.id)

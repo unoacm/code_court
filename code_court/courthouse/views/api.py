@@ -148,17 +148,31 @@ def login():
 def get_problem(slug):
     model = util.get_model()
 
-    problem = model.Problem.query.filter_by(slug=slug).first()
+    problem = model.Problem.query.filter_by(slug=slug).scalar()
 
     return make_response(jsonify(problem.get_output_dict()), 200)
 
 @api.route("/problems", methods=["GET"])
+@jwt_required
 def get_all_problems():
     model = util.get_model()
 
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
     problems = model.Problem.query.all()
 
-    return make_response(jsonify({x.slug: x.get_output_dict() for x in problems}), 200)
+    resp = {}
+    for problem in problems:
+        problem_runs = model.Run.query.filter_by(user=current_user, problem=problem).all()
+        problem_run_dicts = [x.get_output_dict() for x in problem_runs]
+
+        problem_dict = problem.get_output_dict()
+        problem_dict['runs'] = problem_run_dicts
+
+        resp[problem.slug] = problem_dict
+
+    return make_response(jsonify(resp), 200)
 
 @api.route("/current-user", methods=["GET"])
 @jwt_required
@@ -182,6 +196,7 @@ def submit_run():
     lang = request.json.get('lang', None)
     problem_slug = request.json.get('problem_slug', None)
     source_code = request.json.get('source_code', None)
+    is_submission = request.json.get('is_submission', False)
 
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=current_user_id).scalar()
@@ -192,7 +207,7 @@ def submit_run():
 
     run = model.Run(user, contest,
                     lang, problem, datetime.datetime.utcnow(), source_code,
-                    problem.secret_input, problem.secret_output, is_submission=True)
+                    problem.secret_input, problem.secret_output, is_submission)
 
     model.db.session.add(run)
     model.db.session.commit()
