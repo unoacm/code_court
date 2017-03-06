@@ -56,6 +56,7 @@ def create_app():
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['model'] = model
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
     # app.debug = True
 
     # Add datetime to string filter to Jinja2

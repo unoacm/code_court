@@ -3,13 +3,15 @@
     <div class="col-md-offset-4 col-md-4">
       <h3>Please login</h3>
       <form @submit.prevent="login()">
-        <input v-model="email" type="email" class="form-control input-sm" placeholder="email" name="email" />
-        </br>
+        <p class="control">
+          <input v-model="email" type="email" class="input" placeholder="email" name="email" />
+        </p>
 
-        <input v-model="password" type="password" class="form-control input-sm" placeholder="password" name="password" />
-        </br>
+        <p class="control">
+          <input v-model="password" type="password" class="input" placeholder="password" name="password" />
+        </p>
 
-        <input type="submit" class="btn btn-primary btn-md" value="login" />
+        <input type="submit" class="button is-primary" value="login" />
       </form>
       </div>
     </div>

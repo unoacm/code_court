@@ -1,21 +1,28 @@
 <template>
   <div>
     <div class="container">
-      <ul class="navigation">
-        <li><router-link to="/scoreboard">Scoreboard</router-link></li>
-        <li v-if="user"><router-link to="/clarifications">Clarification</router-link></li>
-        <li>&nbsp;&nbsp;</li>
-        <li v-if="user" v-for="(problem, slug) in problems">
-          <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
-            {{ slug }}
-          </router-link>
-        </li>
-        <li>&nbsp;&nbsp;</li>
-        <li v-if="!user"><router-link to="/login">Login</router-link></li>
-        <li v-if="user"><button v-on:click="logout" class="logout">Logout {{ user.email }}</button></li>
-      </ul>
-      <hr>
+      <div class="navigation level">
+        <div class="level-left">
+          <span><router-link to="/scoreboard">Scoreboard</router-link></span>
+          <span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>
+        </div>
+
+        <div class="is-centered">
+          <span v-if="user" v-for="(problem, slug) in problems">
+            <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
+              {{ slug }}
+            </router-link>
+          </span>
+        </div>
+
+        <div class="level-right">
+          <span v-if="!user"><router-link to="/login">Login</router-link></span>
+          <span v-if="user"><a @click.prevent="logout()" class="logout">Logout {{ user.email }}</a></span>
+        </div>
+      </div>
     </div>
+    <hr>
+
     <div class="container">
       <router-view></router-view>
     </div>
@@ -44,61 +51,57 @@ export default {
 </script>
 
 <style scoped>
-ul.navigation {
-  list-style: none;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
+.navigation {
   margin-top: 3px;
   border-bottom: 2px solid black;
 }
 
-ul.navigation li {
-  float:left;
-}
-
-ul.navigation li a,
-ul.navigation li button {
+.navigation div a,
+.navigation div button {
   display: inline-block;
-  padding: 15px 15px;
+  padding: 10px;
   margin: 0px 1px;
   border-top: 1px solid black;
   border-left: 1px solid black;
   border-right: 1px solid black;
   border-bottom: none;
   text-decoration: none;
-  background-color: #eee;
+  background-color: #EFECCA;
   transition: 0.3s;
   color: #000;
+  border-radius: 5px 5px 0px 0px;
 }
 
-ul.navigation li a:hover {
+.navigation div a:hover {
   background-color: #ccc;
 }
 
-ul.navigation li a.problem-link {
-  background-color: #c4daef;
+.navigation div a.problem-link {
+  background-color: #046380;
+  color: #fff;
 }
 
-ul.navigation li a.problem-link.router-link-active {
+.navigation div a.problem-link.router-link-active {
   background-color: #fff;
+  color: #000;
 }
 
-ul.navigation li a.problem-link.router-link-active:hover {
+.navigation div a.problem-link.router-link-active:hover {
   background-color: #fff;
+  color: #000;
 }
 
 
-ul.navigation li a.problem-link:hover {
-  background-color: #aad1f7;
+.navigation div a.problem-link:hover {
+  background-color: #002F2F;
 }
 
-ul.navigation li button.logout {
+.navigation div a.logout {
   color: #fff;
   background-color: #b22525;
 }
 
-ul.navigation li button.logout:hover {
+.navigation div a.logout:hover {
   background-color: #872323;
 }
 

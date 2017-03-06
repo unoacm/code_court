@@ -17,13 +17,14 @@ const store = new Vuex.Store({
       })
     },
     LOAD_USER: function (context) {
-      if (context.getters.is_logged_in) {
-        axios.get('http://localhost:9191/api/current-user').then((response) => {
-          context.commit('SET_USER', { user: response.data })
-        })
-      } else {
-        context.commit('SET_USER', { user: null })
-      }
+      axios.get('http://localhost:9191/api/current-user').then((response) => {
+        context.commit('SET_USER', { user: response.data })
+      })
+    },
+    LOAD_RUNS: function (context) {
+      axios.get('http://localhost:9191/api/current-user-runs').then((response) => {
+        context.commit('SET_RUNS', { runs: response.data })
+      })
     },
     LOGIN: function (context, creds) {
       axios.post('http://localhost:9191/api/login', {
@@ -55,6 +56,7 @@ const store = new Vuex.Store({
     },
     LOGOUT: (state) => {
       state.isLoggedIn = false
+      state.user = null
     }
   },
   getters: {
