@@ -1,6 +1,6 @@
 <template>
   <div>
-    <pre>{{ runs }}</pre>
+    <pre><code>{{ runs }}</code></pre>
   </div>
 </template>
 

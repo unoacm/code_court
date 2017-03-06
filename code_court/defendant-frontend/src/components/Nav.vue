@@ -12,7 +12,7 @@
         </li>
         <li>&nbsp;&nbsp;</li>
         <li v-if="!user"><router-link to="/login">Login</router-link></li>
-        <li v-if="user"><button v-on:click="logout" class="logout">Logout {{ user.email }}</button></li>
+        <li v-if="user"><a @click.prevent="logout()" class="logout">Logout {{ user.email }}</a></li>
       </ul>
       <hr>
     </div>
@@ -93,12 +93,12 @@ ul.navigation li a.problem-link:hover {
   background-color: #aad1f7;
 }
 
-ul.navigation li button.logout {
+ul.navigation li a.logout {
   color: #fff;
   background-color: #b22525;
 }
 
-ul.navigation li button.logout:hover {
+ul.navigation li a.logout:hover {
   background-color: #872323;
 }
 

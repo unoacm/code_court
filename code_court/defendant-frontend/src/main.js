@@ -6,10 +6,7 @@ import router from './router'
 import store from './store'
 
 import axios from 'axios'
-import VueAxios from 'vue-axios'
 import { sync } from 'vuex-router-sync'
-
-Vue.use(VueAxios, axios)
 
 sync(store, router)
 

@@ -1,24 +1,28 @@
 <template>
   <div v-if="problem">
-    <h1>{{ problem.name }}</h1>
+    <h1 class="title is-1">{{ problem.name }}</h1>
     <div v-html="convertToMarkdown(problem.problem_statement)"></div>
+    </br>
 
-    <h2>Sample Input</h2>
-    <pre>{{ problem.sample_input }}</pre>
+    <h3 class="subtitle is-3">Sample Input</h3>
+    <pre><code>{{ problem.sample_input }}</code></pre>
+    </br>
 
-    <h2>Sample Output</h2>
-    <pre>{{ problem.sample_output }}</pre>
+    <h3 class="subtitle is-3">Sample Output</h3>
+    <pre><code>{{ problem.sample_output }}</code></pre>
+    <br/>
 
-    <h2>Code</h2>
+    <h3 class="subtitle is-3">Code</h3>
     <Editor v-model="source_code"></Editor>
-
-    <br/>
-    <button v-on:click="submitCode(false)" class="btn btn-primary">Run</button>
-    <button v-on:click="submitCode(true)" class="btn btn-primary">Submit</button>
-
     <br/>
 
-    <h2>Runs</h2>
+    <div>
+      <button v-on:click="submitCode(false)" class="button is-info">Run</button>
+      <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
+    </div>
+    <br/>
+
+    <h3 class="subtitle is-3">Runs</h3>
     <Runs :runs="problem.runs"></Runs>
 
   </div>

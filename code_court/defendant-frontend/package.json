@@ -13,9 +13,8 @@
   },
   "dependencies": {
     "axios": "^0.15.3",
-    "bootstrap": "^3.3.7",
-    "bootstrap-webpack": "0.0.5",
     "brace": "^0.10.0",
+    "bulma": "^0.3.2",
     "exports-loader": "^0.6.4",
     "imports-loader": "^0.7.1",
     "jquery": "^3.1.1",
