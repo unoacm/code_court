@@ -7,10 +7,14 @@
           <span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>
         </div>
 
-        <div class="is-centered">
+        <div>
           <span v-if="user" v-for="(problem, slug) in problems">
             <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
               {{ slug }}
+              <span v-if="is_passed(problem)"
+                    class="icon is-small">
+                <i class="fa fa-check"></i>
+              </span>
             </router-link>
           </span>
         </div>
@@ -45,6 +49,14 @@ export default {
   methods: {
     logout: function () {
       this.$store.dispatch('LOGOUT')
+    },
+    is_passed: function (problem) {
+      for (var run of problem.runs) {
+        if (run.is_submission && run.is_passed) {
+          return true
+        }
+      }
+      return false
     }
   }
 }
@@ -81,19 +93,18 @@ export default {
   color: #fff;
 }
 
-.navigation div a.problem-link.router-link-active {
-  background-color: #fff;
-  color: #000;
-}
-
-.navigation div a.problem-link.router-link-active:hover {
-  background-color: #fff;
-  color: #000;
-}
-
-
 .navigation div a.problem-link:hover {
   background-color: #002F2F;
+}
+
+.navigation div a.router-link-active {
+  background-color: #fff;
+  color: #000;
+}
+
+.navigation div a.router-link-active:hover {
+  background-color: #fff;
+  color: #000;
 }
 
 .navigation div a.logout {
