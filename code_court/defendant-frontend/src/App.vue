@@ -1,5 +1,15 @@
 <template>
   <div id="app">
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container has-text-centered">
+          <h1 class="title">
+            code_court
+          </h1>
+        </div>
+      </div>
+    </section>
+    <br/>
     <nav-disp></nav-disp>
   </div>
 </template>
@@ -22,5 +32,9 @@ export default {
 </script>
 
 <style>
+.hero.is-primary {
+  background-color: #046380;
+}
+
 @import "../node_modules/bulma/css/bulma.css"
 </style>

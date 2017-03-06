@@ -3,7 +3,8 @@
     <div class="container">
       <ul class="navigation">
         <li><router-link to="/scoreboard">Scoreboard</router-link></li>
-        <li v-if="user"><router-link to="/clarifications">Clarification</router-link></li>
+        <li v-if="user"><router-link to="/clarifications">Clarification <span class="tag is-dark">5</span>
+</router-link></li>
         <li>&nbsp;&nbsp;</li>
         <li v-if="user" v-for="(problem, slug) in problems">
           <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
@@ -60,16 +61,17 @@ ul.navigation li {
 ul.navigation li a,
 ul.navigation li button {
   display: inline-block;
-  padding: 15px 15px;
+  padding: 10px;
   margin: 0px 1px;
   border-top: 1px solid black;
   border-left: 1px solid black;
   border-right: 1px solid black;
   border-bottom: none;
   text-decoration: none;
-  background-color: #eee;
+  background-color: #EFECCA;
   transition: 0.3s;
   color: #000;
+  border-radius: 5px 5px 0px 0px;
 }
 
 ul.navigation li a:hover {
@@ -77,20 +79,23 @@ ul.navigation li a:hover {
 }
 
 ul.navigation li a.problem-link {
-  background-color: #c4daef;
+  background-color: #046380;
+  color: #fff;
 }
 
 ul.navigation li a.problem-link.router-link-active {
   background-color: #fff;
+  color: #000;
 }
 
 ul.navigation li a.problem-link.router-link-active:hover {
   background-color: #fff;
+  color: #000;
 }
 
 
 ul.navigation li a.problem-link:hover {
-  background-color: #aad1f7;
+  background-color: #002F2F;
 }
 
 ul.navigation li a.logout {

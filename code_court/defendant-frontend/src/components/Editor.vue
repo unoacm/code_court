@@ -1,31 +1,58 @@
 <template>
-  <div style="height:500px" id="braceEditor"></div>
+  <div v-bind:style="{ height: height + 'px' }" v-bind:id="id"></div>
 </template>
 
 <script>
 import brace from 'brace'
 
 import 'brace/mode/python'
+import 'brace/theme/chrome'
 import 'brace/theme/solarized_light'
 
 export default {
   data () {
     return {
-      editor: null,
-      modeList: null,
-      themeList: null
+      editor: null
     }
   },
-  props: ['value'],
+  props: {
+    value: String,
+    id: String,
+    height: Number,
+    readOnly: {
+      type: Boolean,
+      default: false
+    },
+    theme: {
+      type: String,
+      default: 'chrome'
+    },
+    initText: {
+      type: String,
+      default: null
+    }
+  },
   methods: {
     getEditor: function () {
-      var editor = brace.edit('braceEditor')
+      var editor = brace.edit(this.id)
 
       editor.getSession().setMode('ace/mode/python')
-      editor.setTheme('ace/theme/solarized_light')
+      editor.setTheme('ace/theme/' + this.theme)
 
       editor.getSession().setUseWorker(false)
-      editor.setAutoScrollEditorIntoView(true)
+
+      if (this.readOnly) {
+        editor.setReadOnly(true)
+        editor.renderer.$cursorLayer.element.style.display = 'none'
+        editor.setOptions({ highlightActiveLine: false, highlightGutterLine: false })
+        editor.$highlightTagPending = false
+        editor.$highlightPending = false
+      }
+
+      if (this.initText) {
+        editor.setValue(this.initText)
+        editor.clearSelection()
+      }
 
       editor.getSession().on('change', this.emitCode)
 

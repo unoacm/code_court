@@ -13,7 +13,10 @@
     <br/>
 
     <h3 class="subtitle is-3">Code</h3>
-    <Editor v-model="source_code"></Editor>
+    <Editor v-model="source_code"
+            id="main-editor"
+            theme="solarized_light"
+            :height="500" />
     <br/>
 
     <div>
@@ -23,7 +26,10 @@
     <br/>
 
     <h3 class="subtitle is-3">Runs</h3>
-    <Runs :runs="problem.runs"></Runs>
+    <RunCollapse v-for="(run, i) in problem.runs.slice().reverse()"
+                 :key="run.id"
+                 :run="run"
+                 :init-is-toggled="i == 0 ? true : false"/>
 
   </div>
 </template>
@@ -33,7 +39,7 @@ import marked from 'marked'
 import axios from 'axios'
 
 import Editor from '@/components/Editor'
-import Runs from '@/components/Runs'
+import RunCollapse from '@/components/RunCollapse'
 
 export default {
   data () {
@@ -65,7 +71,7 @@ export default {
   },
   components: {
     Editor,
-    Runs
+    RunCollapse
   }
 }
 </script>

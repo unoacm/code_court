@@ -16,6 +16,8 @@
     "brace": "^0.10.0",
     "bulma": "^0.3.2",
     "exports-loader": "^0.6.4",
+    "font-awesome": "^4.7.0",
+    "font-awesome-webpack": "0.0.5-beta.2",
     "imports-loader": "^0.7.1",
     "jquery": "^3.1.1",
     "less": "^2.7.2",

@@ -8,6 +8,8 @@ import store from './store'
 import axios from 'axios'
 import { sync } from 'vuex-router-sync'
 
+require('font-awesome-webpack')
+
 sync(store, router)
 
 Vue.config.productionTip = false
