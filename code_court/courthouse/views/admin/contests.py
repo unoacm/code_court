@@ -93,12 +93,12 @@ def users_from_emails(emails, model):
     return users
 
 
-def problems_from_names(problem_names, model):
+def problems_from_slugs(problem_slugs, model):
     problems = []
 
     # Is this db querying problematic?
-    for name in problem_names:
-        db_problems = model.Problem.query.filter_by(name=name).all()
+    for slug in problem_slugs:
+        db_problems = model.Problem.query.filter_by(slug=slug).all()
         if len(db_problems) != 0:
             problems.append(db_problems[0])
     return problems
@@ -130,7 +130,7 @@ def add_contest():
     deactivate_time = request.form.get("deactivate_time")
     is_public = request.form.get("is_public")
     user_emails = request.form.get("users")
-    problem_names = request.form.get("problems")
+    problem_slugs = request.form.get("problems")
 
     if name is None:
         # TODO: give better feedback for failure
@@ -158,7 +158,7 @@ def add_contest():
         contest.deactivate_time = model.strs_to_dt(deactivate_date, deactivate_time)
 
         contest.users = users_from_emails(user_emails.split(), model)
-        contest.problems = problems_from_names(problem_names.split(), model)
+        contest.problems = problems_from_slugs(problem_slugs.split(), model)
     else: # add
         # check if is duplicate
         if is_dup_contest_name(name):
@@ -174,7 +174,7 @@ def add_contest():
                                 end_time = model.strs_to_dt(end_date, end_time),
                                 deactivate_time = model.strs_to_dt(deactivate_date, deactivate_time),
                                 users = users_from_emails(user_emails.split(), model),
-                                problems = problems_from_names(problem_names.split(), model))
+                                problems = problems_from_slugs(problem_slugs.split(), model))
         model.db.session.add(contest)
 
     model.db.session.commit()
@@ -198,7 +198,7 @@ def display_contest_add_form(contest_id):
     if contest_id is None: # add
         return render_template("contests/add_edit.html", action_label="Add", contest=None,
                                user_emails=[user.email for user in model.User.query.all()],
-                               problem_names=[a.name for a in model.Problem.query.all()])
+                               problem_slugs=[a.slug for a in model.Problem.query.all()])
     else: # edit
         contest_list = model.Contest.query.filter_by(id=contest_id).all()
         if len(contest_list) == 0:
@@ -209,7 +209,7 @@ def display_contest_add_form(contest_id):
                                action_label="Edit",
                                contest=contest_list[0],
                                user_emails=[user.email for user in model.User.query.all()],
-                               problem_names=[a.name for a in model.Problem.query.all()])
+                               problem_slugs=[a.slug for a in model.Problem.query.all()])
 
 
 
