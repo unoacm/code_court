@@ -23,6 +23,10 @@ export default {
   },
   mounted: function () {
     this.$store.dispatch('LOAD_PROBLEMS')
+    setInterval(function () {
+      this.$store.dispatch('LOAD_PROBLEMS')
+    }.bind(this), 3000)
+
     this.$store.dispatch('LOAD_USER')
   },
   components: {
