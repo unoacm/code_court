@@ -62,6 +62,8 @@ def create_app():
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
     app.jinja_env.filters['dt_to_str'] = model.dt_to_str
+    app.jinja_env.filters['dt_to_date_str'] = model.dt_to_date_str
+    app.jinja_env.filters['dt_to_time_str'] = model.dt_to_time_str
 
     db.init_app(app)
     CORS(app)
