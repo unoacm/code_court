@@ -10,9 +10,13 @@
 
         <title>code_court</title>
 
-        <script src="{{ url_for('main.send_static', path='js/jquery-3.1.1.min.js') }}"></script>
+        <script src="{{ url_for('main.send_static', path='js/jquery-2.2.4.min.js') }}"></script>
         <script src="{{ url_for('main.send_static', path='js/bootstrap.min.js') }}"></script>
         <script src="{{ url_for('main.send_static', path='codemirror-5.23.0/codemirror.js') }}"></script>
+        <script src="{{ url_for('main.send_static', path='js-webshim/minified/polyfiller.js') }}"></script>
+        <script>
+            webshim.polyfill('forms-ext');
+        </script>
 
         <link href="{{ url_for('main.send_static', path='codemirror-5.23.0/codemirror.css') }}" rel="stylesheet">
         <link href="{{ url_for('main.send_static', path='css/bootstrap.min.css') }}" rel="stylesheet">
