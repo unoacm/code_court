@@ -118,10 +118,15 @@ def add_contest():
 
     # TODO: Do more validation on inputs
     name = request.form.get("name")
+    activate_date = request.form.get("activate_date")
     activate_time = request.form.get("activate_time")
+    start_date = request.form.get("start_date")
     start_time = request.form.get("start_time")
+    freeze_date = request.form.get("freeze_date")
     freeze_time = request.form.get("freeze_time")
+    end_date = request.form.get("end_date")
     end_time = request.form.get("end_time")
+    deactivate_date = request.form.get("deactivate_date")
     deactivate_time = request.form.get("deactivate_time")
     is_public = request.form.get("is_public")
     user_emails = request.form.get("users")
@@ -146,11 +151,11 @@ def add_contest():
         contest.name = name
         contest.is_public = is_public_bool
 
-        contest.activate_time = model.str_to_dt(activate_time)
-        contest.start_time = model.str_to_dt(start_time)
-        contest.freeze_time = model.str_to_dt(freeze_time)
-        contest.end_time = model.str_to_dt(end_time)
-        contest.deactivate_time = model.str_to_dt(deactivate_time)
+        contest.activate_time = model.strs_to_dt(activate_date, activate_time)
+        contest.start_time = model.strs_to_dt(start_date, start_time)
+        contest.freeze_time = model.strs_to_dt(freeze_date, freeze_time)
+        contest.end_time = model.strs_to_dt(end_date, end_time)
+        contest.deactivate_time = model.strs_to_dt(deactivate_date, deactivate_time)
 
         contest.users = users_from_emails(user_emails.split(), model)
         contest.problems = problems_from_names(problem_names.split(), model)
@@ -163,11 +168,11 @@ def add_contest():
 
         contest = model.Contest(name=name,
                                 is_public=is_public_bool,
-                                activate_time = model.str_to_dt(activate_time),
-                                start_time = model.str_to_dt(start_time),
-                                freeze_time = model.str_to_dt(freeze_time),
-                                end_time = model.str_to_dt(end_time),
-                                deactivate_time = model.str_to_dt(deactivate_time),
+                                activate_time = model.strs_to_dt(activate_date, activate_time),
+                                start_time = model.strs_to_dt(start_date, start_time),
+                                freeze_time = model.strs_to_dt(freeze_date, freeze_time),
+                                end_time = model.strs_to_dt(end_date, end_time),
+                                deactivate_time = model.strs_to_dt(deactivate_date, deactivate_time),
                                 users = users_from_emails(user_emails.split(), model),
                                 problems = problems_from_names(problem_names.split(), model))
         model.db.session.add(contest)

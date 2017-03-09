@@ -550,6 +550,22 @@ def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60 to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')
 
+def strs_to_dt(date_string, time_string):
+    """Converts two strings in formats "2017-12-30" and "12:60" to datetime"""
+    return str_to_dt(date_string + "T" + time_string)
+
+def time_str_to_dt(s):
+    """Converts a string in format 12:59 to datetime"""
+    return datetime.datetime.strptime(s, '%H:%M')
+
 def dt_to_str(dt):
     """Converts a datetime to a string in format 2017-12-30T12:60"""
     return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M')
+
+def dt_to_date_str(dt):
+    """Converts a datetime to a string in format 2017-12-30"""
+    return datetime.datetime.strftime(dt, '%Y-%m-%d')
+
+def dt_to_time_str(dt):
+    """Converts a datetime to a string in format 12:59"""
+    return datetime.datetime.strftime(dt, '%H:%M')
