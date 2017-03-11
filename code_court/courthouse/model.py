@@ -434,6 +434,7 @@ class Run(db.Model):
         d = {
             "id": self.id,
             "source_code": self.source_code,
+            "language": self.language.name,
             "submit_time": self.submit_time,
             "started_execing_time": self.started_execing_time,
             "finished_execing_time": self.finished_execing_time,

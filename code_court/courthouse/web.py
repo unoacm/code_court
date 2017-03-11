@@ -6,6 +6,7 @@ import datetime
 import logging
 import os
 import random
+import textwrap
 
 from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
@@ -147,7 +148,20 @@ def init_db(app):
                                   model.UserRole("judge"),
                                   model.UserRole("executioner")])
 
-        model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python $2\nexit $?')])
+        model.db.session.add_all([model.
+            Language("python",
+                     True,
+                     textwrap.dedent('''#!/bin/bash
+                                        cat $1 | python $2
+                                        exit $?'''
+            )),
+            model.Language("ruby",
+                           True,
+                           textwrap.dedent('''#!/bin/bash
+                                              cat $1 | ruby $2
+                                              exit $?'''
+            ))])
+        # model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python $2\nexit $?')])
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool")])

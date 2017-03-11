@@ -11,9 +11,9 @@ class ModelsTestCase(BaseTest):
     def test_language(self):
         """test the language table"""
         LANG_ARGS = {
-            "name": "ruby",
+            "name": "fakelang",
             "is_enabled": True,
-            "run_script": "#!/bin/bash\nruby $1",
+            "run_script": "#!/bin/bash\nfakelang $1",
         }
 
         # create and add python lang
@@ -260,9 +260,9 @@ def get_problem():
 def get_language():
     """returns a test Language"""
     LANG_ARGS = {
-        "name": "ruby",
+        "name": "fakelang",
         "is_enabled": True,
-        "run_script": "#!/bin/bash\nruby $1",
+        "run_script": "#!/bin/bash\nfakelang $1",
     }
 
     # create and add python lang

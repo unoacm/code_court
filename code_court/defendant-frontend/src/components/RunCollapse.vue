@@ -4,6 +4,7 @@
       <div class="message-header" v-on:click="isToggled = !isToggled">
         <p>Run #{{ run.id }}</p>
         <a  class="card-header-icon">
+          <span class="tag">{{ run.language }}</span>
           <span v-if="run.is_passed == null" class="tag is-info">Judging</span>
           <span v-if="run.is_submission" class="tag is-warning">Submission</span>
           <span v-if="!run.is_submission" class="tag">Test Run</span>
@@ -18,16 +19,17 @@
                 :init-text="run.source_code"
                 :id="'run-editor-' + run.id"
                 :read-only="true"
-                :height="100"/>
+                :lang="run.language"
+                :height="300"/>
 
         <div v-if="run.run_input != null">
           <h5 class="subtitle is-5">Input</h5>
-          <pre><code>{{ run.run_input }}</code></pre>
+          <pre class="input-text"><code>{{ run.run_input }}</code></pre>
         </div>
 
         <div v-if="run.run_output != null">
           <h5 class="subtitle is-5">Output</h5>
-          <pre><code>{{ run.run_output }}</code></pre>
+          <pre class="output-text"><code>{{ run.run_output }}</code></pre>
         </div>
       </div>
     </article>
@@ -87,5 +89,15 @@ export default {
 
 .message-header a .tag {
   margin-right:3px;
+}
+
+.input-text {
+  max-height:500px;
+  overflow: auto;
+}
+
+.output-text {
+  max-height:500px;
+  overflow: auto;
 }
 </style>

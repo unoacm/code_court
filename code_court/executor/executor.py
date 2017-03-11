@@ -117,6 +117,8 @@ def execute_writ(writ):
     container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
     os.makedirs(container_shared_data_dir)
 
+    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
+
     shared_volumes = {
         container_shared_data_dir: {
             "bind": "/share",
@@ -126,7 +128,6 @@ def execute_writ(writ):
 
     container_name = "executor-{}".format(container_ident)
 
-    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
 
     container = None
     try:

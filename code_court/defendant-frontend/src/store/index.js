@@ -8,6 +8,7 @@ const store = new Vuex.Store({
   state: {
     problems: {},
     user: null,
+    langs: [],
     isLoggedIn: !!localStorage.getItem('token')
   },
   actions: {
@@ -19,6 +20,11 @@ const store = new Vuex.Store({
     LOAD_USER: function (context) {
       axios.get('http://localhost:9191/api/current-user').then((response) => {
         context.commit('SET_USER', { user: response.data })
+      })
+    },
+    LOAD_LANGS: function (context) {
+      axios.get('http://localhost:9191/api/languages').then((response) => {
+        context.commit('SET_LANGS', { langs: response.data })
       })
     },
     LOAD_RUNS: function (context) {
@@ -50,6 +56,9 @@ const store = new Vuex.Store({
     },
     SET_USER: (state, { user }) => {
       state.user = user
+    },
+    SET_LANGS: (state, { langs }) => {
+      state.langs = langs
     },
     LOGIN: (state) => {
       state.isLoggedIn = true

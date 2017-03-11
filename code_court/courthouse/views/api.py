@@ -174,6 +174,15 @@ def get_all_problems():
 
     return make_response(jsonify(resp), 200)
 
+@api.route("/languages", methods=["GET"])
+def get_languages():
+    model = util.get_model()
+
+    langs = model.Language.query.all()
+    filter_langs = [x.get_output_dict() for x in langs if x.is_enabled]
+
+    return make_response(jsonify(filter_langs), 200)
+
 @api.route("/current-user", methods=["GET"])
 @jwt_required
 def get_current_user():
@@ -193,7 +202,7 @@ def get_current_user():
 def submit_run():
     model = util.get_model()
 
-    lang = request.json.get('lang', None)
+    lang_name = request.json.get('lang', None)
     problem_slug = request.json.get('problem_slug', None)
     source_code = request.json.get('source_code', None)
     is_submission = request.json.get('is_submission', False)
@@ -201,7 +210,7 @@ def submit_run():
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    lang = model.Language.query.filter_by(name="python").one()
+    lang = model.Language.query.filter_by(name=lang_name).one()
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
     contest = model.Contest.query.first()
 

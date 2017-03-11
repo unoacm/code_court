@@ -13,14 +13,23 @@
     <br/>
 
     <h3 class="subtitle is-3">Code</h3>
-    <Editor v-model="source_code"
+    <label class="label" for="lang">Language:</label>
+    <p class="control">
+      <span class="select">
+        <select id="lang" v-model="lang">
+          <option v-for="lang in langs" :value="lang['name']">{{ lang['name'] }}</option>
+        </select>
+      </span>
+    </p>
+    <Editor v-model="sourceCode"
             id="main-editor"
             theme="solarized_light"
+            :lang="lang"
             :height="500" />
     <br/>
 
     <div>
-      <button v-on:click="submitCode(false)" class="button is-info">Run</button>
+      <button v-on:click="submitCode(false)" class="button is-info">Test</button>
       <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
     </div>
     <br/>
@@ -44,12 +53,16 @@ import RunCollapse from '@/components/RunCollapse'
 export default {
   data () {
     return {
-      source_code: ''
+      sourceCode: '',
+      lang: 'python'
     }
   },
   computed: {
     problem () {
       return this.$store.state.problems[this.$route.params.slug]
+    },
+    langs () {
+      return this.$store.state.langs
     }
   },
   methods: {
@@ -57,11 +70,10 @@ export default {
       return marked(s)
     },
     submitCode: function (isSubmission) {
-      console.log(this.source_code)
       axios.post('http://localhost:9191/api/submit-run', {
-        lang: 'python',
+        lang: this.lang,
         problem_slug: this.problem.slug,
-        source_code: this.source_code,
+        source_code: this.sourceCode,
         is_submission: isSubmission
       }).then((response) => {
       }).catch(function (error) {
