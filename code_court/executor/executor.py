@@ -30,12 +30,20 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
-RUN_TIMEOUT = 5
+IDEAL_NUM_EXECUTORS = cpu_count()*2
+
 writ_url = "http://localhost:9191/api/get-writ"
 RETURN_URL = "http://localhost:9191/api/return-without-run"
 executioner_email = "exec@example.org"
 executioner_password = "epass"
-IDEAL_NUM_EXECUTORS = cpu_count()*2
+
+RUN_TIMEOUT = 5
+CPU_QUOTA = 50000 # 50% of a cpu
+MEM_LIMIT = "128m"
+KERNEL_MEM = "50m"
+PID_LIMIT = 20
+MEM_SWAPPINESS = 0 # disable container swapping
+CONTAINER_USER = "user"
 
 def event_loop():
     # make sure that processes ignore SIGINT
@@ -87,8 +95,8 @@ def get_and_dispatch_writ(pool):
     return pool.apply_async(execute_writ, [writ])
 
 def cleanup(pool):
-    logging.info("Waiting %s seconds for workers to finish", RUN_TIMEOUT+1)
-    time.sleep(RUN_TIMEOUT+1)
+    logging.info("Waiting %s seconds for workers to finish", RUN_TIMEOUT+10)
+    time.sleep(RUN_TIMEOUT+10)
 
     pool.terminate()
     pool.join()
@@ -109,16 +117,17 @@ def execute_writ(writ):
     container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
     os.makedirs(container_shared_data_dir)
 
+    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
+
     shared_volumes = {
         container_shared_data_dir: {
             "bind": "/share",
-            "mode": "rw"
+            "mode": "ro"
         }
     }
 
     container_name = "executor-{}".format(container_ident)
 
-    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
 
     container = None
     try:
@@ -127,10 +136,17 @@ def execute_writ(writ):
                                                  detach=True,
                                                  volumes=shared_volumes,
                                                  name=container_name,
-                                                 network_disabled=True)
+                                                 user=CONTAINER_USER,
+                                                 network_disabled=True,
+                                                 read_only=True,
+                                                 mem_swappiness=MEM_SWAPPINESS,
+                                                 pids_limit=PID_LIMIT,
+                                                 mem_limit=MEM_LIMIT)
+        container.update(cpu_quota=CPU_QUOTA,
+                         kernel_memory=KERNEL_MEM)
 
         # TODO: check what happens if tons of output is sent
-        stream = container.exec_run("/share/runner", stream=True)
+        stream = container.exec_run("/share/runner", stream=True, user=CONTAINER_USER)
 
         timer = Timer(RUN_TIMEOUT, timeout_container, [container.id, writ['run_id']])
         try:
@@ -248,7 +264,7 @@ def kill_all_executors():
 
         try:
             c.remove(force=True)
-        except docker.errors.NotFound:
+        except (docker.errors.NotFound, docker.errors.APIError):
             pass
 
         return_writ_without_output(c.name)

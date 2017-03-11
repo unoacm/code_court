@@ -28,6 +28,7 @@ export default {
     }.bind(this), 3000)
 
     this.$store.dispatch('LOAD_USER')
+    this.$store.dispatch('LOAD_LANGS')
   },
   components: {
     'nav-disp': Nav

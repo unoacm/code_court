@@ -1,11 +1,15 @@
 <template>
-  <div v-bind:style="{ height: height + 'px' }" v-bind:id="id"></div>
+  <div>
+    <div v-bind:style="{ height: height + 'px' }" v-bind:id="id"></div>
+  </div>
 </template>
 
 <script>
 import brace from 'brace'
 
 import 'brace/mode/python'
+import 'brace/mode/ruby'
+
 import 'brace/theme/chrome'
 import 'brace/theme/solarized_light'
 
@@ -18,6 +22,7 @@ export default {
   props: {
     value: String,
     id: String,
+    lang: String,
     height: Number,
     readOnly: {
       type: Boolean,
@@ -32,11 +37,13 @@ export default {
       default: null
     }
   },
+  computed: {
+  },
   methods: {
     getEditor: function () {
       var editor = brace.edit(this.id)
 
-      editor.getSession().setMode('ace/mode/python')
+      editor.getSession().setMode('ace/mode/' + this.lang)
       editor.setTheme('ace/theme/' + this.theme)
 
       editor.getSession().setUseWorker(false)
@@ -60,6 +67,11 @@ export default {
     },
     emitCode: function () {
       this.$emit('input', this.editor.getValue())
+    }
+  },
+  watch: {
+    lang: function () {
+      this.editor.getSession().setMode('ace/mode/' + this.lang)
     }
   },
   mounted: function () {
