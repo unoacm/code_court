@@ -33,22 +33,29 @@ def runs_view():
     """
     model = util.get_model()
 
-    runs_filter = request.form.get("filter")
+    run_type = request.form.get("run_type")
+    run_status = request.form.get("run_status")
 
-    if runs_filter == "submissions":
+    num_pending = model.Run.query.filter_by(finished_execing_time=None).count()
+
+    if run_type == "submissions":
         run_query = model.Run.query.filter_by(is_submission=True)
-    elif runs_filter == "judged":
-        run_query = model.Run.query.filter(model.Run.finished_execing_time != None)
-    elif runs_filter == "not_judged":
-        run_query = model.Run.query.filter_by(finished_execing_time=None)
-    elif runs_filter == "tests":
+    elif run_type == "tests":
         run_query = model.Run.query.filter_by(is_submission=False)
     else:
         run_query = model.Run.query
 
+    if run_status == "judged":
+        run_query = run_query.filter(model.Run.finished_execing_time != None)
+    elif run_status == "pending":
+        run_query = run_query.filter_by(finished_execing_time=None)
+
     runs = run_query.order_by(model.Run.submit_time.desc()).all()
 
-    return render_template("runs/view.html", runs=runs, runs_filter=runs_filter)
+    return render_template("runs/view.html", runs=runs, 
+                                             run_type=run_type, 
+                                             run_status=run_status, 
+                                             num_pending=num_pending)
 
 
 @runs.route("/<int:run_id>/", methods=["GET"])

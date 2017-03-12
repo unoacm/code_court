@@ -2,32 +2,37 @@
 {% block content %}
 <h1>Runs</h1>
 
+<p class="text-info">Total Runs Pending Execution: <b>{{ num_pending }}</b></p>
+
 <form action="{{ url_for('runs.runs_view') }}" method="POST" class="form">
-    <div class="form-group">
-        <label for="filter">Filter:</label>
-        <select class="form-control" id="filter" name="filter" onchange="this.form.submit()">
-            <option value="all_runs" {% if runs_filter == "all_runs" %}selected{% endif %}>All Runs</option>
-            <option value="submissions" {% if runs_filter == "submissions" %}selected{% endif %}>Submissions</option>
-            <option value="judged" {% if runs_filter == "judged" %}selected{% endif %}>Judged</option>
-            <option value="not_judged" {% if runs_filter == "not_judged" %}selected{% endif %}>Not Judged</option>
-            <option value="tests" {% if runs_filter == "tests" %}selected{% endif %}>Tests</option>
-        </select>
+    <div class="row">
+        <div class="form-group col-md-6">
+            <select class="form-control" id="run_type" name="run_type" onchange="this.form.submit()">
+                <option value="run_type" {% if run_type == "run_type" %}selected{% endif %}><span class="text-">Select Run Type</option>
+                <option value="submissions" {% if run_type == "submissions" %}selected{% endif %}>Submissions</option>
+                <option value="tests" {% if run_type == "tests" %}selected{% endif %}>Tests</option>
+            </select>
+        </div>
+        <div class="form-group col-md-6">
+            <select class="form-control" id="run_status" name="run_status" onchange="this.form.submit()">
+                <option value="run_status" {% if run_type == "run_status" %}selected{% endif %}>Select Run Status</option>
+                <option value="judged" {% if run_status == "judged" %}selected{% endif %}>Judged</option>
+                <option value="pending" {% if run_status == "pending" %}selected{% endif %}>Pending</option>
+            </select>
+        </div>
     </div>
 </form>
 
 <table class="table">
     <thead>
         <tr>
-            <th>Run_ID</th>
-            <th>User</th>  
-            <th>Language</th>
-            <th>Problem</th> 
-            <th>Submit_time</th>
-            <th>Started_execing_time</th>
-            <th>Finished_execing_time</th>
-            <th>Run_input</th>
-            <th>Run_output</th>
-            <th>Correct_output</th>
+            <th>id</th>
+            <th>user</th>
+            <th>language</th>
+            <th>problem</th>
+            <th>submit_time</th>
+            <th>started_execing_time</th>
+            <th>finished_execing_time</th>
             <th>is_submission</th>
             <th>is_passed</th>
             <th></th>
@@ -40,20 +45,16 @@
             <td class="run_id">{{ run.id }}</td>
             <td class="run_user">{{ run.user.name }}</td>
             <td class="run_name">{{ run.language.name }}</td>
-            <td class="run_problem">{{ run.problem.name }}</td>
+            <td class="run_problem">{{ run.problem.slug }}</td>
             <td class="run_submit_time">{{ run.submit_time }}</td>
             <td class="run_started_execing_time">{{ run.started_execing_time }}</td>
             <td class="run_finished_execing_time">{{ run.finished_execing_time }}</td>
-            <td class="run_run_input">{{ run.run_input }}</td>
-            <td class="run_run_output">{{ run.run_output }}</td>
-            <td class="run_correct_output">{{ run.correct_output }}</td>
             <td class="run_is_submission">{{ run.is_submission }}</td>
             <td class="run_is_passed">
-                {% if run.is_submission == False %}
+                {% if run.is_passed == True %}
+                    <span class="green">&#10003;</span>
                 {% elif run.is_passed == False %}
                     <span class="red">&#215;</span>
-                {% elif run.is_passed == True %}
-                    <span class="green">&#10003;</span>
                 {% else %}
                     <span>&#8635;</span>
                 {% endif %}
