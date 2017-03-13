@@ -2,14 +2,18 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 
+import createPersistedState from 'vuex-persistedstate'
+
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
+  plugins: [createPersistedState()],
   state: {
     problems: {},
     user: null,
     langs: [],
-    isLoggedIn: !!localStorage.getItem('token')
+    sourceCodes: {},
+    loginToken: ''
   },
   actions: {
     LOAD_PROBLEMS: function ({ commit }) {
@@ -37,17 +41,20 @@ const store = new Vuex.Store({
         email: creds.email,
         password: creds.password
       }).then((response) => {
-        localStorage.setItem('token', response.data.access_token)
-        context.commit('LOGIN')
+        context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
         context.dispatch('LOAD_USER')
+        context.dispatch('LOAD_PROBLEMS')
       }).catch(function (error) {
         console.log(error)
       })
     },
     LOGOUT: function (context) {
-      localStorage.setItem('token', '')
-      context.commit('LOGOUT')
-      context.dispatch('LOAD_USER')
+      // add timeout to make logout feel more real
+      setTimeout(function () {
+        context.commit('SET_LOGIN_TOKEN', { token: '' })
+        context.commit('SET_USER', { user: null })
+        context.commit('SET_PROBLEMS', { problems: {} })
+      }, 200)
     }
   },
   mutations: {
@@ -60,18 +67,28 @@ const store = new Vuex.Store({
     SET_LANGS: (state, { langs }) => {
       state.langs = langs
     },
-    LOGIN: (state) => {
-      state.isLoggedIn = true
+    SET_LOGIN_TOKEN: (state, { token }) => {
+      state.loginToken = token
+    },
+    UPDATE_SOURCE_CODE: (state, { problemSlug, sourceCode }) => {
+      state.sourceCodes[problemSlug] = sourceCode
     },
     LOGOUT: (state) => {
-      state.isLoggedIn = false
+      state.loginToken = false
       state.user = null
     }
   },
   getters: {
     get_problem: (state, { slug }) => state.problems[slug],
-    get_auth: (state) => localStorage.getItem('token'),
-    is_logged_in: (state) => state.isLoggedIn
+    isLoggedIn: (state) => !!state.user,
+    getSourceCode: (state, getters) => (problemSlug) => {
+      var code = state.sourceCodes[problemSlug]
+      if (code) {
+        return code
+      } else {
+        return ''
+      }
+    }
   }
 })
 

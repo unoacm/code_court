@@ -11,10 +11,6 @@
           <span v-if="user" v-for="(problem, slug) in problems">
             <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
               {{ slug }}
-              <span v-if="is_passed(problem)"
-                    class="icon is-small">
-                <i class="fa fa-check"></i>
-              </span>
             </router-link>
           </span>
         </div>
@@ -63,6 +59,22 @@ export default {
 </script>
 
 <style scoped>
+.slide-left-enter, .slide-right-leave-active {
+  opacity: 0;
+  transform: translate(30px, 0);
+}
+.slide-left-leave-active, .slide-right-enter {
+  opacity: 0;
+  transform: translate(-30px, 0);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
 .navigation {
   margin-top: 3px;
   border-bottom: 2px solid black;

@@ -1,4 +1,5 @@
 <template>
+  <transition name="fade">
   <div class="row">
     <div class="col-md-offset-4 col-md-4">
       <h3>Please login</h3>
@@ -16,6 +17,7 @@
       </div>
     </div>
   </div>
+  </transition>
 </template>
 
 <script>
@@ -41,4 +43,10 @@ export default {
 </script>
 
 <style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 </style>

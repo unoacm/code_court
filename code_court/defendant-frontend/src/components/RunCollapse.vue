@@ -1,19 +1,19 @@
 <template>
   <div>
-    <article class="message" v-bind:class="run_status">
-      <div class="message-header" v-on:click="isToggled = !isToggled">
+    <article class="message" :class="run_status">
+      <div class="message-header" :class="{ hasToggle: !disableToggle }" v-on:click="isToggled = !isToggled">
         <p>Run #{{ run.id }}</p>
-        <a  class="card-header-icon">
+        <a class="card-header-icon">
           <span class="tag">{{ run.language }}</span>
           <span v-if="run.is_passed == null" class="tag is-info">Judging</span>
           <span v-if="run.is_submission" class="tag is-warning">Submission</span>
           <span v-if="!run.is_submission" class="tag">Test Run</span>
-          <span class="icon">
+          <span class="icon" v-if="!disableToggle">
             <i class="fa fa-angle-down"></i>
           </span>
         </a>
       </div>
-      <div class="message-body" v-if="isToggled">
+      <div class="message-body" v-if="disableToggle || isToggled">
         <h5 class="subtitle is-5">Code</h5>
         <Editor v-model="run.source_code"
                 :init-text="run.source_code"
@@ -46,7 +46,7 @@ export default {
       isToggled: false
     }
   },
-  props: ['run', 'initIsToggled'],
+  props: ['run', 'disableToggle'],
   computed: {
     istoggled () {
       return this.isToggled
@@ -79,7 +79,7 @@ export default {
   opacity: 0;
 }
 
-.message-header {
+.message-header.hasToggle {
   cursor: pointer;
 }
 

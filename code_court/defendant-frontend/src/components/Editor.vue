@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-bind:style="{ height: height + 'px' }" v-bind:id="id"></div>
+    <div :style="{ height: height + 'px' }" :id="id"></div>
   </div>
 </template>
 
@@ -42,6 +42,7 @@ export default {
   methods: {
     getEditor: function () {
       var editor = brace.edit(this.id)
+      editor.$blockScrolling = Infinity
 
       editor.getSession().setMode('ace/mode/' + this.lang)
       editor.setTheme('ace/theme/' + this.theme)
@@ -72,6 +73,12 @@ export default {
   watch: {
     lang: function () {
       this.editor.getSession().setMode('ace/mode/' + this.lang)
+    },
+    value: function () {
+      var pos = this.editor.session.selection.toJSON()
+      this.editor.setValue(this.value)
+      this.editor.clearSelection()
+      this.editor.session.selection.fromJSON(pos)
     }
   },
   mounted: function () {
