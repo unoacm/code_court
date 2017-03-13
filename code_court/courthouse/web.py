@@ -148,11 +148,18 @@ def init_db(app):
                                   model.UserRole("judge"),
                                   model.UserRole("executioner")])
 
-        model.db.session.add_all([model.
-            Language("python",
+        # TODO: extract these out into a folder
+        model.db.session.add_all([
+            model.Language("python",
                      True,
                      textwrap.dedent('''#!/bin/bash
-                                        cat $1 | python $2
+                                        cat $1 | python3 $2
+                                        exit $?'''
+            )),
+            model.Language("python2",
+                     True,
+                     textwrap.dedent('''#!/bin/bash
+                                        cat $1 | python2 $2
                                         exit $?'''
             )),
             model.Language("ruby",

@@ -22,10 +22,15 @@ export default {
   created: function () {
   },
   mounted: function () {
-    this.$store.dispatch('LOAD_PROBLEMS')
-    setInterval(function () {
+    if (this.$store.getters.isLoggedIn) {
       this.$store.dispatch('LOAD_PROBLEMS')
-    }.bind(this), 3000)
+    }
+
+    setInterval(function () {
+      if (this.$store.getters.isLoggedIn) {
+        this.$store.dispatch('LOAD_PROBLEMS')
+      }
+    }.bind(this), 1000)
 
     this.$store.dispatch('LOAD_USER')
     this.$store.dispatch('LOAD_LANGS')
