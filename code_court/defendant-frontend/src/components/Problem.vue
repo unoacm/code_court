@@ -33,6 +33,7 @@
         <button v-on:click="submitCode(false)" class="button is-info">Test</button>
         <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
       </div>
+
       <br/>
 
       <h3 class="subtitle is-3">Runs</h3>
@@ -91,6 +92,16 @@ export default {
       }).then((response) => {
       }).catch(function (error) {
         console.log(error)
+      })
+
+      // add a fake entry to runs
+      this.$store.commit('ADD_FAKE_RUN', {
+        id: this.problem.runs[this.problem.runs.length - 1].id + 1,
+        problemSlug: this.problem.slug,
+        language: this.lang,
+        source_code: this.sourceCode,
+        run_input: this.problem.sample_input,
+        is_submission: isSubmission
       })
     }
   },

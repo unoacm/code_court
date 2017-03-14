@@ -31,11 +31,6 @@ const store = new Vuex.Store({
         context.commit('SET_LANGS', { langs: response.data })
       })
     },
-    LOAD_RUNS: function (context) {
-      axios.get('http://localhost:9191/api/current-user-runs').then((response) => {
-        context.commit('SET_RUNS', { runs: response.data })
-      })
-    },
     LOGIN: function (context, creds) {
       axios.post('http://localhost:9191/api/login', {
         email: creds.email,
@@ -66,6 +61,9 @@ const store = new Vuex.Store({
     },
     SET_LANGS: (state, { langs }) => {
       state.langs = langs
+    },
+    ADD_FAKE_RUN: (state, run) => {
+      state.problems[run.problemSlug].runs.push(run)
     },
     SET_LOGIN_TOKEN: (state, { token }) => {
       state.loginToken = token
