@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div :style="{ height: height + 'px' }" :id="id"></div>
+    <div :id="id"></div>
   </div>
 </template>
 
@@ -23,10 +23,17 @@ export default {
     value: String,
     id: String,
     lang: String,
-    height: Number,
     readOnly: {
       type: Boolean,
       default: false
+    },
+    minLines: {
+      type: Number,
+      default: 15
+    },
+    maxLines: {
+      type: Number,
+      default: 35
     },
     theme: {
       type: String,
@@ -36,8 +43,6 @@ export default {
       type: String,
       default: null
     }
-  },
-  computed: {
   },
   methods: {
     getEditor: function () {
@@ -57,6 +62,11 @@ export default {
         editor.$highlightPending = false
       }
 
+      editor.setOptions({
+        minLines: this.minLines,
+        maxLines: this.maxLines
+      })
+
       if (this.initText) {
         editor.setValue(this.initText)
         editor.clearSelection()
@@ -68,6 +78,12 @@ export default {
     },
     emitCode: function () {
       this.$emit('input', this.editor.getValue())
+    },
+    updateEditorContents: function () {
+      var pos = this.editor.session.selection.toJSON()
+      this.editor.setValue(this.value)
+      this.editor.clearSelection()
+      this.editor.session.selection.fromJSON(pos)
     }
   },
   watch: {
@@ -75,14 +91,12 @@ export default {
       this.editor.getSession().setMode('ace/mode/' + this.lang)
     },
     value: function () {
-      var pos = this.editor.session.selection.toJSON()
-      this.editor.setValue(this.value)
-      this.editor.clearSelection()
-      this.editor.session.selection.fromJSON(pos)
+      this.updateEditorContents()
     }
   },
   mounted: function () {
     this.editor = this.getEditor()
+    this.updateEditorContents()
   }
 }
 </script>

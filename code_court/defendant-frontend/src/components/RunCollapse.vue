@@ -5,7 +5,10 @@
         <p>Run #{{ run.id }}</p>
         <a class="card-header-icon">
           <span class="tag">{{ run.language }}</span>
-          <span v-if="run.is_passed == null" class="tag is-info">Judging</span>
+          <span v-if="run.is_passed == null" class="tag is-info">
+            Judging <pulse-loader :loading="true" size="4px" color="#fff" />
+          </span>
+
           <span v-if="run.is_submission" class="tag is-warning">Submission</span>
           <span v-if="!run.is_submission" class="tag">Test Run</span>
           <span class="icon" v-if="!disableToggle">
@@ -20,7 +23,8 @@
                 :id="'run-editor-' + run.id"
                 :read-only="true"
                 :lang="run.language"
-                :height="300"/>
+                :minLines="5"
+                :maxLines="30" />
 
         <div v-if="run.run_input != null">
           <h5 class="subtitle is-5">Input</h5>
@@ -29,7 +33,7 @@
 
         <div v-if="run.run_output != null">
           <h5 class="subtitle is-5">Output</h5>
-          <pre class="output-text"><code>{{ run.run_output }}</code></pre>
+          <pre class="output-text"><code>{{ truncate(run.run_output, 500) }}</code></pre>
         </div>
       </div>
     </article>
@@ -39,6 +43,7 @@
 
 <script>
 import Editor from '@/components/Editor'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
 export default {
   data () {
@@ -64,8 +69,19 @@ export default {
   created: function () {
     this.isToggled = this.initIsToggled
   },
+  methods: {
+    truncate: function (str, maxLines) {
+      let lines = str.split('\n')
+      if (lines.length > maxLines) {
+        return lines.slice(0, maxLines).join('\n') + '\n...'
+      } else {
+        return str
+      }
+    }
+  },
   components: {
-    Editor
+    Editor,
+    PulseLoader
   }
 }
 </script>

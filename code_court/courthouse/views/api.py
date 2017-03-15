@@ -214,9 +214,16 @@ def submit_run():
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
     contest = model.Contest.query.first()
 
+    if is_submission:
+        run_input = problem.secret_input
+        run_output = problem.secret_output
+    else:
+        run_input = problem.sample_input
+        run_output = problem.sample_output
+
     run = model.Run(user, contest,
                     lang, problem, datetime.datetime.utcnow(), source_code,
-                    problem.secret_input, problem.secret_output, is_submission)
+                    run_input, run_output, is_submission)
 
     model.db.session.add(run)
     model.db.session.commit()

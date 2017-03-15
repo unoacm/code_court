@@ -30,7 +30,7 @@ export default {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
-    }.bind(this), 1000)
+    }.bind(this), 10000)
 
     this.$store.dispatch('LOAD_USER')
     this.$store.dispatch('LOAD_LANGS')
