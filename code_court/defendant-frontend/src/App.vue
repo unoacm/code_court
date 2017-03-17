@@ -22,11 +22,13 @@ export default {
   created: function () {
   },
   mounted: function () {
+    this.$store.dispatch('LOAD_SCORES')
     if (this.$store.getters.isLoggedIn) {
       this.$store.dispatch('LOAD_PROBLEMS')
     }
 
     setInterval(function () {
+      this.$store.dispatch('LOAD_SCORES')
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }

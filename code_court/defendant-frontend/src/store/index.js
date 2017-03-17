@@ -10,6 +10,7 @@ const store = new Vuex.Store({
   plugins: [createPersistedState()],
   state: {
     problems: {},
+    scores: [],
     user: null,
     langs: [],
     sourceCodes: {},
@@ -19,6 +20,11 @@ const store = new Vuex.Store({
     LOAD_PROBLEMS: function ({ commit }) {
       axios.get('http://localhost:9191/api/problems').then((response) => {
         commit('SET_PROBLEMS', { problems: response.data })
+      })
+    },
+    LOAD_SCORES: function ({ commit }) {
+      axios.get('http://localhost:9191/api/scores').then((response) => {
+        commit('SET_SCORES', { scores: response.data })
       })
     },
     LOAD_USER: function (context) {
@@ -58,6 +64,9 @@ const store = new Vuex.Store({
     },
     SET_USER: (state, { user }) => {
       state.user = user
+    },
+    SET_SCORES: (state, { scores }) => {
+      state.scores = scores
     },
     SET_LANGS: (state, { langs }) => {
       state.langs = langs

@@ -25,8 +25,7 @@
       <Editor v-model="sourceCode"
               :id="'main-editor-' + problem.slug"
               theme="solarized_light"
-              :lang="lang"
-              :height="500" />
+              :lang="lang" />
       <br/>
 
       <div>
