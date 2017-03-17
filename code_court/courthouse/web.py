@@ -306,11 +306,12 @@ def setup_logging(app):
 
 
 app = create_app()
+
+# TODO: Moving setup functions here causes them to be executed repeatedly when nosetests is run
+setup_logging(app)
+setup_database(app)
+
 if __name__ == "__main__":
     PORT = 9191
-
-    setup_logging(app)
-    setup_database(app)
-
     app.logger.info("Running on port %s", PORT)
     app.run(host="0.0.0.0", port=PORT, debug=True)

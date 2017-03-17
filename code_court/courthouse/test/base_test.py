@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from flask_login import current_user
@@ -9,6 +10,7 @@ class BaseTest(unittest.TestCase):
     Contains tests for the problems blueprint
     """
     def setUp(self):
+        logging.disable(logging.CRITICAL)
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
         app.config['TESTING'] = True
         app.app_context().push()
