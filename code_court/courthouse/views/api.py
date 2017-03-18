@@ -208,34 +208,44 @@ def get_current_user():
 def submit_run():
     model = util.get_model()
 
-    lang_name = request.json.get('lang', None)
-    problem_slug = request.json.get('problem_slug', None)
-    source_code = request.json.get('source_code', None)
-    is_submission = request.json.get('is_submission', False)
-
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    lang = model.Language.query.filter_by(name=lang_name).one()
-    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
-    contest = model.Contest.query.first()
+    max_runs = 5
+    time_limit = 1
 
-    if is_submission:
-        run_input = problem.secret_input
-        run_output = problem.secret_output
+    run_count = model.Run.query.filter_by(user_id=user.id)\
+                                .filter(model.Run.submit_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=time_limit))\
+                                .count()
+
+    if(run_count < max_runs):
+
+        lang_name = request.json.get('lang', None)
+        problem_slug = request.json.get('problem_slug', None)
+        source_code = request.json.get('source_code', None)
+        is_submission = request.json.get('is_submission', False)
+
+        lang = model.Language.query.filter_by(name=lang_name).one()
+        problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+        contest = model.Contest.query.first()
+
+        if is_submission:
+            run_input = problem.secret_input
+            run_output = problem.secret_output
+        else:
+            run_input = problem.sample_input
+            run_output = problem.sample_output
+
+        run = model.Run(user, contest,
+                        lang, problem, datetime.datetime.utcnow(), source_code,
+                        run_input, run_output, is_submission)
+
+        model.db.session.add(run)
+        model.db.session.commit()
+
+        return "good"
     else:
-        run_input = problem.sample_input
-        run_output = problem.sample_output
-
-    run = model.Run(user, contest,
-                    lang, problem, datetime.datetime.utcnow(), source_code,
-                    run_input, run_output, is_submission)
-
-    model.db.session.add(run)
-    model.db.session.commit()
-
-    return "good"
-
+        return make_response(jsonify({'error': 'Submission rate limit exceeded'}), 400)
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""
