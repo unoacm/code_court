@@ -178,7 +178,7 @@ class User(db.Model, UserMixin):
     contests = db.relationship("Contest", secondary=contest_user, back_populates="users")
     user_roles = db.relationship("UserRole", secondary=user_user_role, back_populates="users")
 
-    def __init__(self, email, name, password, creation_time=None, misc_data=None, user_roles=None):
+    def __init__(self, email, name, password, creation_time=None, misc_data=None, contests=None, user_roles=None):
         if misc_data is None:
             misc_data = json.dumps({})
 
@@ -187,6 +187,9 @@ class User(db.Model, UserMixin):
 
         if user_roles is not None:
             self.user_roles = user_roles
+
+        if contests is not None:
+            self.contests = contests
 
         self.email = email
         self.name = name

@@ -8,14 +8,18 @@
     <div class="row">
         <div class="form-group col-md-6">
             <select class="form-control" id="run_type" name="run_type" onchange="this.form.submit()">
-                <option value="run_type" {% if run_type == "run_type" %}selected{% endif %}><span class="text-">Select Run Type</option>
+                <option value="" disabled selected><span class="text-muted">Filter Run Type</span></option>
+                <option value="" disabled>---------------</option>
+                <option value="all" {% if run_type == "all" %}selected{% endif %}>All Run Types</option>
                 <option value="submissions" {% if run_type == "submissions" %}selected{% endif %}>Submissions</option>
                 <option value="tests" {% if run_type == "tests" %}selected{% endif %}>Tests</option>
             </select>
         </div>
         <div class="form-group col-md-6">
             <select class="form-control" id="run_status" name="run_status" onchange="this.form.submit()">
-                <option value="run_status" {% if run_type == "run_status" %}selected{% endif %}>Select Run Status</option>
+                <option value="" disabled selected><span class="text-muted">Filter Run Status</span></option>
+                <option value="" disabled>-----------------</option>
+                <option value="all" {% if run_type == "all" %}selected{% endif %}>All Run Statuses</option>
                 <option value="judged" {% if run_status == "judged" %}selected{% endif %}>Judged</option>
                 <option value="pending" {% if run_status == "pending" %}selected{% endif %}>Pending</option>
             </select>
