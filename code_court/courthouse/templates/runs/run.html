@@ -15,6 +15,7 @@
             <th>finished_execing_time</th>
             <th>is_submission</th>
             <th>is_passed</th>
+            <th>is_priority</th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,7 @@
                     <span>&#8635;</span>
                 {% endif %}
             </td>
+            <td class="run_is_priority">{{ run.is_priority }}</td>
         </tr>
     </tbody>
 </table>
@@ -46,17 +48,32 @@
 
 <link rel="stylesheet" href="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
 
+<a style="float: right;" href="{{ url_for('runs.toggle_priority', run_id=run.id) }}"
+   {% if run.is_judged == False %}
+      class="btn btn-default"
+   {% else %}
+      class="btn btn-default disabled"
+   {% endif %}>Toggle Priority</a>
+
 <div class="row">
     <div class="col-md-12">
-        <label for="source_code">Source Code</label>
-        <textarea id="source_code">{{ run.source_code }}</textarea>
+        <div class="row">
+            <label for="source_code">Source Code</label>
+        </div>
+        <div class="row">
+            <textarea readonly id="source_code">{{ run.source_code }}</textarea>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-4">
-        <label for="run_input">Input</label>
-        <textarea id="run_input">{{ run.run_input }}</textarea>
+        <div class="row">
+            <label for="run_input">Input</label>
+        </div>
+        <div class="row">
+            <textarea readonly id="run_input">{{ run.run_input }}</textarea>
+        </div>
     </div>
     <div class="col-md-8">
         <div class="row">

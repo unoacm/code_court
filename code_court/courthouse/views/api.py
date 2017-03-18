@@ -49,9 +49,15 @@ def unauthorized():
 def get_writ():
     """endpoint for executioners to get runs to execute"""
     model = util.get_model()
-    # choose the oldest run
-    chosen_run = model.Run.query.filter_by(started_execing_time=None)\
-                                          .order_by(model.Run.submit_time.asc()).first()
+
+    # choose oldest priority run
+    chosen_run = model.Run.query.filter_by(is_priority=True, started_execing_time=None)\
+                                .order_by(model.Run.submit_time.asc()).first()
+
+    # if no priority runs, choose oldest non-priority run
+    if chosen_run is None:
+        chosen_run = model.Run.query.filter_by(started_execing_time=None)\
+                                    .order_by(model.Run.submit_time.asc()).first()
     if chosen_run is None:
         return make_response(jsonify({'status': 'unavailable'}), 404)
 

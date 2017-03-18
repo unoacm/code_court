@@ -272,10 +272,13 @@ def dev_init_db(app):
                     if not is_correct:
                         src_code = src_code + "\nprint('Wait this isn\\'t correct')"
 
+                    is_priority = random.randint(1, 9) == 7
+
                     test_run = model.Run(user, test_contest, python, problem,
                                          datetime.datetime.utcnow(),
                                          src_code, problem.secret_input, problem.secret_output, is_submission)
                     test_run.is_correct = is_correct
+                    test_run.is_priority = is_priority
 
                     if is_correct and is_submission:
                         break
