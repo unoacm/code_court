@@ -1,29 +1,25 @@
 <template>
   <div>
-    <table class="table is-striped">
-      <thead>
-        <tr>
-          <th></th>
-          <th>Defendant</th>
-          <th>Score</th>
-          <th>Penalty</th>
-          <th v-for="prob in problems">{{ prob.slug }}</th>
-        </tr>
-      </thead>
-      <tbody is="transition-group" name="flip-list" tag="tbody">
-        <tr v-for="(row, i) in scores" key="i">
-          <td>{{ i+1 }}</td>
-          <td :title="row.user.email">{{ row.user.name }}</td>
-          <td>{{ row.num_solved }}</td>
-          <td>{{ row.penalty }}</td>
-          <td v-for="prob in problems">
-            <span v-if="row.problem_states[prob.slug]" class="icon">
+    <transition-group class="ul-table" name="table-row" tag="ul">
+      <li class="table-row-item" key="0">
+          <span></span>
+          <span>Defendant</span>
+          <span>Score</span>
+          <span>Penalty</span>
+          <span v-for="(state, prob) in scores[0].problem_states">{{ prob }}</span>
+      </li>
+      <li v-for="(row, i) in scores" :key="row.user.email" class="table-row-item" >
+          <span>{{ i+1 }}</span>
+          <span :title="row.user.email">{{ row.user.name }}</span>
+          <span>{{ row.num_solved }}</span>
+          <span>{{ row.penalty }}</span>
+          <span v-for="(state, prob) in row.problem_states" :class="{'correct': state}">
+            <div v-if="prob" class="icon">
               <i class="fa fa-check"></i>
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </div>
+          </span>
+      </li>
+    </transition-group>
   </div>
 </template>
 
@@ -34,9 +30,6 @@ export default {
     }
   },
   computed: {
-    problems () {
-      return this.$store.state.problems
-    },
     scores () {
       return this.$store.state.scores
     }
@@ -47,5 +40,49 @@ export default {
 <style scoped>
 .flip-list-move {
   transition: transform 1s;
+}
+.table-row-move {
+  transition: all 1s;
+}
+
+.table-row-item {
+  backface-visibility: hidden;
+}
+
+.table-row-item {
+  backface-visibility: hidden;
+}
+
+.ul-table {
+  width: 100%;
+  display: table;
+  border: 1px solid black;
+}
+
+.ul-table li:first-child {
+  font-weight: bold;
+}
+
+.ul-table li {
+  display: table-row;
+
+}
+
+.ul-table span {
+  display: table-cell;
+  padding: 10px;
+  border: 1px solid black;
+}
+
+.ul-table span:first-child {
+  width: 1%;
+}
+
+.correct {
+  background-color:#60e760;
+}
+
+.incorrect {
+  background-color:#e87272;
 }
 </style>

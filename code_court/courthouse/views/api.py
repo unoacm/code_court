@@ -265,11 +265,11 @@ def get_scoreboard():
         problem_states = {}
         penalty = 0
         for problem in problems:
-            is_passed = None != model.Run.query.filter_by(is_submission=True,
+            is_passed = 0 < len(model.Run.query.filter_by(is_submission=True,
                                                     is_passed=True,
                                                     user=user,
                                                     contest=contest,
-                                                    problem=problem).scalar()
+                                                    problem=problem).all())
             problem_states[problem.slug] = is_passed
 
             failed_subs = model.Run.query.filter_by(is_submission=True,
@@ -291,7 +291,6 @@ def get_scoreboard():
 
     return make_response(jsonify(user_points))
 
->>>>>>> implemented scorboard in defendant frontend
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""

@@ -22,16 +22,16 @@ export default {
   created: function () {
   },
   mounted: function () {
-    this.$store.dispatch('LOAD_SCORES')
     if (this.$store.getters.isLoggedIn) {
       this.$store.dispatch('LOAD_PROBLEMS')
     }
+    this.$store.dispatch('LOAD_SCORES')
 
     setInterval(function () {
-      this.$store.dispatch('LOAD_SCORES')
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
+      this.$store.dispatch('LOAD_SCORES')
     }.bind(this), 10000)
 
     this.$store.dispatch('LOAD_USER')

@@ -262,27 +262,31 @@ def dev_init_db(app):
                      "FizzBuzz": 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
                      "Fibonacci": "fib = lambda n: n if n < 2 else fib(n-1) + fib(n-2)\nprint(fib(int(input())))",
                      "Extended Fibonacci": "print('5\\n-3\\n2\\n-1\\n1\\n0')"}
-        for user in contestants:
-            for problem in problems:
-                for i in range(5):
-                    src_code = solutions[problem.name]
-                    is_submission = random.randint(1, 7) != 5
 
-                    is_correct = random.randint(1, 3) == 3
-                    if not is_correct:
-                        src_code = src_code + "\nprint('Wait this isn\\'t correct')"
+        problem_subs = []
+        for problem in problems:
+            for user in contestants:
+                for _ in range(10):
+                    problem_subs.append((problem, user))
 
-                    is_priority = random.randint(1, 9) == 7
+        random.shuffle(problem_subs)
 
-                    test_run = model.Run(user, test_contest, python, problem,
-                                         datetime.datetime.utcnow(),
-                                         src_code, problem.secret_input, problem.secret_output, is_submission)
-                    test_run.is_correct = is_correct
-                    test_run.is_priority = is_priority
+        for problem, user in problem_subs:
+            src_code = solutions[problem.name]
+            is_submission = random.randint(1, 7) != 5
 
-                    if is_correct and is_submission:
-                        break
-                    model.db.session.add(test_run)
+            is_priority = random.randint(1, 9) == 7
+            is_correct = random.randint(1, 3) == 3
+            if not is_correct:
+                src_code = src_code + "\nprint('Wait this isn\\'t correct')"
+
+            test_run = model.Run(user, test_contest, python, problem,
+                                 datetime.datetime.utcnow(),
+                                 src_code, problem.secret_input, problem.secret_output, is_submission)
+            test_run.is_correct = is_correct
+            test_run.is_priority = is_priority
+
+            model.db.session.add(test_run)
         model.db.session.commit()
 
 
