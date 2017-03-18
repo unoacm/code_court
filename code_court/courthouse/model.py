@@ -410,6 +410,9 @@ class Run(db.Model):
     is_passed = db.Column(db.Boolean, nullable=True)
     """bool: indicates whether or not a run has been judged as passing or failing"""
 
+    is_priority = db.Column(db.Boolean, default=False)
+    """bool: indicates whether or not a run has priority status, which expedites execution"""
+
     @property
     def is_judging(self):
         return (self.started_execing_time is not None and
@@ -440,6 +443,7 @@ class Run(db.Model):
             "finished_execing_time": self.finished_execing_time,
             "is_submission": self.is_submission,
             "is_passed": self.is_passed,
+            "is_priority": self.is_priority,
         }
 
         if not self.is_submission:

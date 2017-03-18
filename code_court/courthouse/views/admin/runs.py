@@ -52,9 +52,9 @@ def runs_view():
 
     runs = run_query.order_by(model.Run.submit_time.desc()).all()
 
-    return render_template("runs/view.html", runs=runs, 
-                                             run_type=run_type, 
-                                             run_status=run_status, 
+    return render_template("runs/view.html", runs=runs,
+                                             run_type=run_type,
+                                             run_status=run_status,
                                              num_pending=num_pending)
 
 
@@ -75,3 +75,15 @@ def runs_run(run_id):
     run = model.Run.query.filter_by(id=run_id).one()
 
     return render_template("runs/run.html", run=run)
+
+@runs.route("/<int:run_id>/priority", methods=["GET"])
+def toggle_priority(run_id):
+    model = util.get_model()
+
+    run = model.Run.query.filter_by(id=run_id).one()
+    run.is_priority = not run.is_priority
+
+    model.db.session.add(run)
+    model.db.session.commit()
+
+    return redirect(url_for("runs.runs_run", run_id=run_id))
