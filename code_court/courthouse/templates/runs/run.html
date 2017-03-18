@@ -48,15 +48,23 @@
 
 <div class="row">
     <div class="col-md-12">
-        <label for="source_code">Source Code</label>
-        <textarea id="source_code">{{ run.source_code }}</textarea>
+        <div class="row">
+            <label for="source_code">Source Code</label>
+        </div>
+        <div class="row">
+            <textarea readonly id="source_code">{{ run.source_code }}</textarea>
+        </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-4">
-        <label for="run_input">Input</label>
-        <textarea id="run_input">{{ run.run_input }}</textarea>
+        <div class="row">
+            <label for="run_input">Input</label>
+        </div>
+        <div class="row">
+            <textarea readonly id="run_input">{{ run.run_input }}</textarea>
+        </div>
     </div>
     <div class="col-md-8">
         <div class="row">
