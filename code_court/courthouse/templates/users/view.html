@@ -14,9 +14,7 @@
     </div>
     <div class="form-group">
         <select class="form-control" id="user_role" name="user_role" onchange="this.form.submit()">
-            <option value="" disabled selected><span class="text-muted">Filter User Role</span></option>
-            <option value="" disabled>---------------</option>
-            <option value="all" {% if user_role == "all" %}selected{% endif %}>All User Roles</option>
+            <option value="all" {% if user_role == "all" %}selected{% endif %}>Any User Role</option>
             <option value="operator" {% if user_role == "operator" %}selected{% endif %}>Operator</option>
             <option value="judge" {% if user_role == "judge" %}selected{% endif %}>Judge</option>
             <option value="defendant" {% if user_role == "defendant" %}selected{% endif %}>Defendant</option>
