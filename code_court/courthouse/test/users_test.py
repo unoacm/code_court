@@ -4,9 +4,9 @@ from base_test import BaseTest
 
 from web import model
 
-class UserTestCase(BaseTest):
+class UsersTestCase(BaseTest):
     """
-    Contains tests for the userslan blueprint
+    Contains tests for the users blueprint
     """
     def _user_add(self, init_user_email):
         rv = self.app.post('/admin/users/add/', data={

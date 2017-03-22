@@ -52,17 +52,14 @@ def users_view():
                 if role.id == user_role:
                     users.append(user)
 
-    metrics = collections.OrderedDict() 
+    metrics = {}
     for user in users:
-        user_metrics = collections.OrderedDict()
+        user_metrics = {}
          
         run_query = model.Run.query.filter_by(user_id=user.id)
-        runs = run_query.order_by(model.Run.submit_time.desc()).all()
         
-        user_metrics["num_runs"] = len(runs)
-
-        if len(runs) != 0:
-            user_metrics["last_submit_time"] = runs[0].submit_time
+        user_metrics["num_runs"] = run_query.count();
+        user_metrics["last_submit_time"] = run_query.order_by(model.Run.submit_time.desc()).limit(1).first()
 
         metrics[user.id] = user_metrics
 
@@ -109,12 +106,12 @@ def users_del(user_id):
     """
     model = util.get_model()
 
-    users = model.User.query.filter_by(id=user_id).all()
-    if len(users) == 0:
+    user = model.User.query.filter_by(id=user_id).scalar()
+    if user is None:
         current_app.logger.info("Can't delete user %s, doesn't exist", user_id)
         abort(400)
 
-    model.db.session.delete(users[0])
+    model.db.session.delete(user)
     model.db.session.commit()
 
     return redirect(url_for("users.users_view"))
@@ -186,14 +183,14 @@ def display_user_add_form(user_id):
                                action_label="Add",
                                user=None)
     else: # edit
-        users = model.User.query.filter_by(id=user_id).all()
-        if len(users) == 0:
+        user = model.User.query.filter_by(id=user_id).scalar()
+        if user is None:
             # TODO: give better feedback for failure
             current_app.logger.info("Tried to edit non-existant user, id:%s", user_id)
             abort(400)
         return render_template("users/add_edit.html",
                                action_label="Edit",
-                               user=users[0])
+                               user=user)
 
 
 ## Util functions
@@ -208,8 +205,11 @@ def is_dup_user_email(email):
         bool: True if the email is a duplicate, False otherwise
     """
     model = util.get_model()
-    dup_user = model.User.query.filter_by(email=email).all()
-    return len(dup_user) > 0
+    dup_user = model.User.query.filter_by(email=email).scalar()
+    if dup_user:
+        return True
+    else:
+        return False
 
 
 def retrieve_by_ids(ids, table):
@@ -226,8 +226,8 @@ def retrieve_by_ids(ids, table):
     rows = []
 
     for id in ids:
-        row = table.query.filter_by(id=id).all()
-        if len(row) != 0:
-            rows.append(row[0])
+        row = table.query.filter_by(id=id).scalar()
+        if row:
+            rows.append(row)
     return rows
 

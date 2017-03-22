@@ -72,9 +72,10 @@ def runs_run(run_id):
     """
     model = util.get_model()
 
-    run = model.Run.query.filter_by(id=run_id).one()
+    run = model.Run.query.filter_by(id=run_id).scalar()
 
     return render_template("runs/run.html", run=run)
+
 
 @runs.route("/<int:run_id>/priority", methods=["GET"])
 def toggle_priority(run_id):
@@ -87,3 +88,4 @@ def toggle_priority(run_id):
     model.db.session.commit()
 
     return redirect(url_for("runs.runs_run", run_id=run_id))
+

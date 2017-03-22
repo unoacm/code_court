@@ -72,12 +72,12 @@ def contests_del(contest_id):
     """
     model = util.get_model()
 
-    contests = model.Contest.query.filter_by(id=contest_id).all()
-    if len(contests) == 0:
+    contest = model.Contest.query.filter_by(id=contest_id).scalar()
+    if contest is None:
         current_app.logger.info("Can't delete contest %s, doesn't exist", contest_id)
         abort(400)
 
-    model.db.session.delete(contests[0])
+    model.db.session.delete(contest)
     model.db.session.commit()
 
     return redirect(url_for("contests.contests_view"))
@@ -87,9 +87,9 @@ def users_from_emails(emails, model):
     users = []
 
     for email in emails:
-        db_users = model.User.query.filter_by(email=email).all()
-        if len(db_users) != 0:
-            users.append(db_users[0])
+        db_user = model.User.query.filter_by(email=email).scalar()
+        if db_user:
+            users.append(db_user)
     return users
 
 
@@ -98,9 +98,9 @@ def problems_from_slugs(problem_slugs, model):
 
     # Is this db querying problematic?
     for slug in problem_slugs:
-        db_problems = model.Problem.query.filter_by(slug=slug).all()
-        if len(db_problems) != 0:
-            problems.append(db_problems[0])
+        db_problem = model.Problem.query.filter_by(slug=slug).scalar()
+        if db_problem:
+            problems.append(db_problem)
     return problems
 
 
@@ -225,5 +225,9 @@ def is_dup_contest_name(name):
         bool: True if the name is a duplicate, False otherwise
     """
     model = util.get_model()
-    dup_contest = model.Contest.query.filter_by(name=name).all()
-    return len(dup_contest) > 0
+    dup_contest = model.Contest.query.filter_by(name=name).scalar()
+    if dup_contest:
+        return True
+    else:
+        return False
+
