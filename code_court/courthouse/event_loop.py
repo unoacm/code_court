@@ -1,6 +1,8 @@
 import datetime
 from time import sleep
 
+from flask import Flask
+
 import model
 from model import db
 
@@ -19,13 +21,21 @@ def reset_overdue_runs():
     model.db.session.commit()
 
 def event_loop():
-    try:
-        while True:
-            reset_overdue_runs()
-            sleep(30)
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['model'] = model
 
-    except KeyboardInterrupt:
-        print("Event loop shutting down")
+    db.init_app(app)
+
+    with app.app_context():
+        try:
+            while True:
+                reset_overdue_runs()
+                sleep(30)
+
+        except KeyboardInterrupt:
+            print("Event loop shutting down")
 
 if __name__ == "__main__":
     event_loop()
