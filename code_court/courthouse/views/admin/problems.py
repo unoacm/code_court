@@ -71,12 +71,12 @@ def problems_del(problem_id):
     """
     model = util.get_model()
 
-    problems = model.Problem.query.filter_by(id=problem_id).all()
-    if len(problems) == 0:
+    problem = model.Problem.query.filter_by(id=problem_id).scalar()
+    if problem is None:
         current_app.logger.info("Can't delete problem %s, doesn't exist", problem_id)
         abort(400)
 
-    model.db.session.delete(problems[0])
+    model.db.session.delete(problem)
     model.db.session.commit()
 
     return redirect(url_for("problems.problems_view"))
@@ -167,14 +167,14 @@ def display_problem_add_form(problem_id):
                                problem=None,
                                problemtypes=problemtypes)
     else: # edit
-        problems = model.Problem.query.filter_by(id=problem_id).all()
-        if len(problems) == 0:
+        problem = model.Problem.query.filter_by(id=problem_id).scalar()
+        if problem is None:
             # TODO: give better feedback for failure
             current_app.logger.info("Tried to edit non-existant problem, id:%s", problem_id)
             abort(400)
         return render_template("problems/add_edit.html",
                                action_label="Edit",
-                               problem=problems[0],
+                               problem=problem,
                                problemtypes=problemtypes)
 
 
@@ -190,5 +190,9 @@ def is_dup_problem_name(name):
         bool: True if the name is a duplicate, False otherwise
     """
     model = util.get_model()
-    dup_problem = model.Problem.query.filter_by(name=name).all()
-    return len(dup_problem) > 0
+    dup_problem = model.Problem.query.filter_by(name=name).scalar()
+    if dup_problem:
+        return True
+    else:
+        return False
+

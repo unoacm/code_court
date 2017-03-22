@@ -4,7 +4,7 @@ from base_test import BaseTest
 
 from web import model
 
-class LanguageTestCase(BaseTest):
+class LanguagesTestCase(BaseTest):
     """
     Contains tests for the languages blueprint
     """

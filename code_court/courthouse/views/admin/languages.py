@@ -178,5 +178,9 @@ def is_dup_lang_name(name):
         bool: True if the name is a duplicate, False otherwise
     """
     model = util.get_model()
-    dup_lang = model.Language.query.filter_by(name=name).all()
-    return len(dup_lang) > 0
+    dup_lang = model.Language.query.filter_by(name=name).scalar()
+    if dup_lang:
+        return True
+    else:
+        return False
+

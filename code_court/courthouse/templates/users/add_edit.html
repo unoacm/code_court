@@ -1,0 +1,48 @@
+{% extends "navbase.html" %}
+{% block content %}
+
+{% if action_label == "Add" %}
+    <h1>{{ action_label }}</h1>
+{% elif action_label == "Edit" %}
+    <h1>{{ action_label }} {{ user.id }}</h1>
+{% endif %}
+
+<form action="{{ url_for('users.users_add') }}" method="POST" class="form">
+    {% if user.id %}
+        <input type="hidden" name="user_id" value="{{ user.id }}">
+    {% endif %}
+
+    <div class="form-group">
+        <label for="name">Email*</label>
+        <input type="email" class="form-control" id="email" name="email"
+               placeholder="email@example.org" value="{{ user.email }}" required>
+    </div>
+    <div class="form-group">
+        <label for="name">Name*</label>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ user.name }}" required>
+    </div>
+    <div class="form-group">
+        {% if user.hashed_password %}
+        <label for="new_password">Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password"></input>
+        {% else %}
+        <label for="new_password">Password*</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required></input>
+        {% endif %}
+    </div>
+    <div class="form-group">
+        <label for="misc_data">Miscellaneous Data</label>
+        <textarea type="text" class="form-control" id="misc_data" name="misc_data" placeholder="Miscellaneous Data" rows="4">{% if user.misc_data %}{{ user.misc_data }}{% else %}{}{% endif %}</textarea>
+    </div>
+        <div class="form-group">
+        <label for="contest_ids">Contests</label>
+        <textarea type="text" class="form-control" id="contest_ids" name="contest_ids" placeholder="Contest IDs" rows="4">{% for contest in user.contests %}{{ contest.id }}&#10;{% endfor %}</textarea>
+    </div>
+    <div class="form-group">
+        <label for="user_role">User Roles</label>
+        <textarea type="text" class="form-control" id="user_role_ids" name="user_role_ids" placeholder="User Roles" rows="4">{% for user_role in user.user_roles %}{{ user_role.id }}&#10;{% endfor %}</textarea>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}
