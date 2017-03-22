@@ -1,49 +1,46 @@
 <template>
-  <transition name="fade">
-    <div :id="problem.slug" v-if="problem">
-      <h1 class="title is-1">{{ problem.name }}</h1>
-      <div v-html="convertToMarkdown(problem.problem_statement)"></div>
-      </br>
+  <div :id="problem.slug" v-if="problem">
+    <h1 class="title is-1">{{ problem.name }}</h1>
+    <div v-html="convertToMarkdown(problem.problem_statement)"></div>
+    </br>
 
-      <h3 class="subtitle is-3">Sample Input</h3>
-      <pre><code>{{ problem.sample_input }}</code></pre>
-      </br>
+    <h3 class="subtitle is-3">Sample Input</h3>
+    <pre><code>{{ problem.sample_input }}</code></pre>
+    </br>
 
-      <h3 class="subtitle is-3">Sample Output</h3>
-      <pre><code>{{ problem.sample_output }}</code></pre>
-      <br/>
+    <h3 class="subtitle is-3">Sample Output</h3>
+    <pre><code>{{ problem.sample_output }}</code></pre>
+    <br/>
 
-      <h3 class="subtitle is-3">Code</h3>
-      <label class="label" for="lang">Language:</label>
-      <p class="control">
-        <span class="select">
-          <select id="lang" v-model="lang">
-            <option v-for="lang in langs" :value="lang['name']">{{ lang['name'] }}</option>
-          </select>
-        </span>
-      </p>
-      <Editor v-model="sourceCode"
-              :id="'main-editor-' + problem.slug"
-              theme="solarized_light"
-              :lang="lang"
-              :height="500" />
-      <br/>
+    <h3 class="subtitle is-3">Code</h3>
+    <label class="label" for="lang">Language:</label>
+    <p class="control">
+      <span class="select">
+        <select id="lang" v-model="lang">
+          <option v-for="lang in langs" :value="lang['name']">{{ lang['name'] }}</option>
+        </select>
+      </span>
+    </p>
+    <Editor v-model="sourceCode"
+            :id="'main-editor-' + problem.slug"
+            theme="solarized_light"
+            :lang="lang" />
+    <br/>
 
-      <div>
-        <button v-on:click="submitCode(false)" class="button is-info">Test</button>
-        <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
-      </div>
-
-      <br/>
-
-      <h3 class="subtitle is-3">Runs</h3>
-      <RunCollapse v-for="(run, i) in problem.runs.slice().reverse()"
-                   :key="run.id"
-                   :run="run"
-                   :disable-toggle="i == 0 ? true : false"/>
-
+    <div>
+      <button v-on:click="submitCode(false)" class="button is-info">Test</button>
+      <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
     </div>
-  </transition>
+
+    <br/>
+
+    <h3 class="subtitle is-3">Runs</h3>
+    <RunCollapse v-for="(run, i) in problem.runs.slice().reverse()"
+                 :key="run.id"
+                 :run="run"
+                 :disable-toggle="i == 0 ? true : false"/>
+
+  </div>
 </template>
 
 <script>
@@ -100,7 +97,7 @@ export default {
         problemSlug: this.problem.slug,
         language: this.lang,
         source_code: this.sourceCode,
-        run_input: this.problem.sample_input,
+        run_input: isSubmission ? null : this.problem.sample_input,
         is_submission: isSubmission
       })
     }
@@ -113,10 +110,4 @@ export default {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
-}
 </style>

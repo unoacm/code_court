@@ -211,15 +211,14 @@ def submit_run():
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    max_runs = 5
-    time_limit = 1
+    MAX_RUNS = 5
+    TIME_LIMIT = 1
 
     run_count = model.Run.query.filter_by(user_id=user.id)\
-                                .filter(model.Run.submit_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=time_limit))\
+                                .filter(model.Run.submit_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))\
                                 .count()
 
-    if(run_count < max_runs):
-
+    if(run_count < MAX_RUNS):
         lang_name = request.json.get('lang', None)
         problem_slug = request.json.get('problem_slug', None)
         source_code = request.json.get('source_code', None)
@@ -246,6 +245,52 @@ def submit_run():
         return "good"
     else:
         return make_response(jsonify({'error': 'Submission rate limit exceeded'}), 400)
+@api.route("/scores", methods=["GET"])
+def get_scoreboard():
+    model = util.get_model()
+
+    contest = model.Contest.query.first() #TODO: replace with correct contest
+
+    defendants = model.User.query\
+                    .filter(model.User.user_roles.any(id="defendant"))\
+                    .filter(model.User.contests.any(id=contest.id))\
+                    .all()
+
+    problems = model.Problem.query\
+                .filter(model.Problem.contests.any(id=contest.id))\
+                .all()
+
+    user_points = []
+    for user in defendants:
+        problem_states = {}
+        penalty = 0
+        for problem in problems:
+            is_passed = 0 < len(model.Run.query.filter_by(is_submission=True,
+                                                    is_passed=True,
+                                                    user=user,
+                                                    contest=contest,
+                                                    problem=problem).all())
+            problem_states[problem.slug] = is_passed
+
+            failed_subs = model.Run.query.filter_by(is_submission=True,
+                                                    is_passed=False,
+                                                    user=user,
+                                                    contest=contest,
+                                                    problem=problem).all()
+
+            for sub in failed_subs:
+                penalty += 1 # TODO we may want to use the time submitted instead of 1
+                             #      to match ICPC scoring
+
+        user_points.append({"user": user.get_output_dict(),
+                            "num_solved": len([x for x in problem_states.values() if x]),
+                            "penalty": penalty,
+                            "problem_states": problem_states})
+
+    user_points.sort(key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
+
+    return make_response(jsonify(user_points))
+
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""

@@ -25,11 +25,13 @@ export default {
     if (this.$store.getters.isLoggedIn) {
       this.$store.dispatch('LOAD_PROBLEMS')
     }
+    this.$store.dispatch('LOAD_SCORES')
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
+      this.$store.dispatch('LOAD_SCORES')
     }.bind(this), 10000)
 
     this.$store.dispatch('LOAD_USER')

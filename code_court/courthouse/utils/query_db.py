@@ -4,6 +4,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+import datetime
+
 import IPython
 
 from flask import Flask
@@ -19,5 +21,27 @@ app.config['model'] = model
 
 db.init_app(app)
 
-with app.app_context():
-    IPython.embed()
+def _main():
+    with app.app_context():
+        IPython.embed()
+
+def submit_fake_run(email):
+    lang = model.Language.query.filter_by(name="python").scalar()
+    problem = model.Problem.query.first()
+    contest = model.Contest.query.first()
+    user = model.User.query.filter_by(email=email).scalar()
+
+    run_input = problem.secret_input
+    run_output = problem.secret_output
+    is_submission = True
+    source_code = 'print("Hello")'
+
+    run = model.Run(user, contest,
+                    lang, problem, datetime.datetime.utcnow(), source_code,
+                    run_input, run_output, is_submission)
+
+    model.db.session.add(run)
+    model.db.session.commit()
+
+if __name__ == '__main__':
+    _main()
