@@ -75,8 +75,8 @@ def setup_contest():
     roles = {x.id: x for x in model.UserRole.query.all()}
     test_contestant = model.User("testuser@xample.org", "Test User", "pass", user_roles=[roles['defendant']])
     test_executioner = model.User("testexec@example.org", "Test Executioner", "epass", user_roles=[roles['executioner']])
-    test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04"),
-                                 model.str_to_dt("2030-01-01T11:11"), True)
+    test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04Z"),
+                                 model.str_to_dt("2030-01-01T11:11Z"), True)
     io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
     test_problem = model.Problem(io_problem_type, "fizzbuzz", "FizzBuzz", "## FizzBuzz\nPerform fizzbuzz up to the given number",
                                  "3", "1\n2\nFizz",
@@ -85,7 +85,7 @@ def setup_contest():
     test_contest.users.append(test_contestant)
 
     python = model.Language.query.filter_by(name="python").one()
-    test_run = model.Run(test_contestant, test_contest, python, test_problem, model.str_to_dt("2017-02-05T23:00"),
+    test_run = model.Run(test_contestant, test_contest, python, test_problem, model.str_to_dt("2017-02-05T23:00Z"),
                          'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
                          test_problem.secret_input, test_problem.secret_output, True)
 

@@ -22,10 +22,14 @@ export default {
   created: function () {
   },
   mounted: function () {
+    this.$store.dispatch('LOAD_SCORES')
+    this.$store.dispatch('LOAD_USER')
+    this.$store.dispatch('LOAD_LANGS')
+
     if (this.$store.getters.isLoggedIn) {
       this.$store.dispatch('LOAD_PROBLEMS')
+      this.$store.dispatch('LOAD_CONTEST')
     }
-    this.$store.dispatch('LOAD_SCORES')
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
@@ -34,8 +38,11 @@ export default {
       this.$store.dispatch('LOAD_SCORES')
     }.bind(this), 10000)
 
-    this.$store.dispatch('LOAD_USER')
-    this.$store.dispatch('LOAD_LANGS')
+    setInterval(function () {
+      if (this.$store.getters.isLoggedIn) {
+        this.$store.dispatch('LOAD_CONTEST')
+      }
+    }.bind(this), 30000)
   },
   components: {
     'nav-disp': Nav

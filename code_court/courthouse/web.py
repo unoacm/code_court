@@ -206,12 +206,12 @@ def dev_init_db(app):
 
         # create test contest
         test_contest = model.Contest(name = "test_contest",
-                                     start_time = model.str_to_dt("2017-02-05T22:04"),
-                                     end_time = model.str_to_dt("2030-01-01T11:11"),
+                                     start_time = model.str_to_dt("2017-02-05T22:04Z"),
+                                     end_time = model.str_to_dt("2030-01-01T11:11Z"),
                                      is_public = True,
-                                     activate_time = model.str_to_dt("2018-02-05T22:04"),
-                                     freeze_time = model.str_to_dt("2019-02-05T22:04"),
-                                     deactivate_time = model.str_to_dt("2031-02-05T22:04"))
+                                     activate_time = model.str_to_dt("2018-02-05T22:04Z"),
+                                     freeze_time = model.str_to_dt("2019-02-05T22:04Z"),
+                                     deactivate_time = model.str_to_dt("2031-02-05T22:04Z"))
         test_contest.users += contestants
         model.db.session.add(test_contest)
 

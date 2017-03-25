@@ -32,7 +32,7 @@ class ModelsTestCase(BaseTest):
             "email": "testuser@example.org",
             "name": "Test A. B. User",
             "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-            "creation_time": model.str_to_dt("2017-01-01T12:12"),
+            "creation_time": model.str_to_dt("2017-01-01T12:12Z"),
             "misc_data": '{"teacher": "Cavanaugh"}',
         }
 
@@ -50,11 +50,11 @@ class ModelsTestCase(BaseTest):
         """test the contest table"""
         CONTEST_ARGS = {
             "name": "1620 bracket",
-            "activate_time": model.str_to_dt('2017-01-25T10:45'),
-            "start_time": model.str_to_dt('2017-01-25T11:00'),
-            "freeze_time": model.str_to_dt('2017-01-25T16:00'),
-            "end_time": model.str_to_dt('2017-01-25T16:45'),
-            "deactivate_time": model.str_to_dt('2017-01-26T10:45'),
+            "activate_time": model.str_to_dt('2017-01-25T10:45Z'),
+            "start_time": model.str_to_dt('2017-01-25T11:00Z'),
+            "freeze_time": model.str_to_dt('2017-01-25T16:00Z'),
+            "end_time": model.str_to_dt('2017-01-25T16:45Z'),
+            "deactivate_time": model.str_to_dt('2017-01-26T10:45Z'),
             "is_public": True,
         }
         user_args, user = get_user()
@@ -170,7 +170,7 @@ class ModelsTestCase(BaseTest):
             "user": user,
             "language": language,
             "source_code": "print('hello')",
-            "last_updated_time": model.str_to_dt('2017-01-26T10:45'),
+            "last_updated_time": model.str_to_dt('2017-01-26T10:45Z'),
         }
         saved_code = model.SavedCode(**SAVED_CODE_ARGS)
         model.db.session.add(saved_code)
@@ -188,7 +188,7 @@ class ModelsTestCase(BaseTest):
             "contest": contest,
             "language": language,
             "problem": problem,
-            "submit_time": model.str_to_dt('2017-01-26T10:45'),
+            "submit_time": model.str_to_dt('2017-01-26T10:45Z'),
             "source_code": "print('hello'*input())",
             "run_input": "5",
             "correct_output": "hellohellohellohellohello",
@@ -209,7 +209,7 @@ class ModelsTestCase(BaseTest):
             "problem": problem,
             "asker_user": user,
             "contents": "What is this thing?",
-            "creation_time": model.str_to_dt('2017-01-26T10:45'),
+            "creation_time": model.str_to_dt('2017-01-26T10:45Z'),
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)
@@ -278,7 +278,7 @@ def get_user():
         "email": "testuser@example.org",
         "name": "Test A. B. User",
         "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-        "creation_time": model.str_to_dt("2017-01-01T12:12"),
+        "creation_time": model.str_to_dt("2017-01-01T12:12Z"),
         "misc_data": '{"teacher": "Cavanaugh"}',
     }
 
@@ -293,11 +293,11 @@ def get_contest():
     """returns a test contest"""
     CONTEST_ARGS = {
         "name": "1620 bracket",
-        "activate_time": model.str_to_dt('2017-01-25T10:45'),
-        "start_time": model.str_to_dt('2017-01-25T11:00'),
-        "freeze_time": model.str_to_dt('2017-01-25T16:00'),
-        "end_time": model.str_to_dt('2017-01-25T16:45'),
-        "deactivate_time": model.str_to_dt('2017-01-26T10:45'),
+        "activate_time": model.str_to_dt('2017-01-25T10:45Z'),
+        "start_time": model.str_to_dt('2017-01-25T11:00Z'),
+        "freeze_time": model.str_to_dt('2017-01-25T16:00Z'),
+        "end_time": model.str_to_dt('2017-01-25T16:45Z'),
+        "deactivate_time": model.str_to_dt('2017-01-26T10:45Z'),
         "is_public": True,
     }
 

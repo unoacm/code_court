@@ -44,6 +44,10 @@ module.exports = {
         options: vueLoaderConfig
       },
       {
+        test: /\.json$/,
+        loader: 'json-loader',
+      },
+      {
         test: /\.js$/,
         loader: 'babel-loader',
         include: [resolve('src'), resolve('test')]
