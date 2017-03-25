@@ -7,7 +7,7 @@ import util
 
 from sqlalchemy import or_
 
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from flask import (
     abort,
@@ -107,6 +107,11 @@ def users_del(user_id):
     model = util.get_model()
 
     user = model.User.query.filter_by(id=user_id).scalar()
+
+    if current_user.id == user.id:
+        current_app.logger.info("Can't delete user %s, user cannot delete itself", user_id)
+        abort(400)
+
     if user is None:
         current_app.logger.info("Can't delete user %s, doesn't exist", user_id)
         abort(400)
