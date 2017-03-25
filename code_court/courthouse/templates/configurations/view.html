@@ -1,0 +1,30 @@
+{% extends "navbase.html" %}
+{% block content %}
+<h1>Users</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>key</th>
+            <th>val</th>
+            <th>valType</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for config in configs %}
+        <tr>
+            <td class="config_id">{{ config.id }}</td>
+            <td class="config_key">{{ config.key }}</td>
+            <td class="config_val">{{ config.val }}</td>
+            <td class="config_valType">{{ config.valType }}</td>
+            <td>
+                <a href="{{ url_for('configurations.configurations_add', config_id=config.id) }}" class="btn btn-info btn-xs">edit</a>
+                <a href="{{ url_for('configurations.configurations_del', config_id=config.id) }}" class="btn btn-danger btn-xs">del</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('configurations.configurations_add') }}" class="btn btn-primary">add</a>
+{% endblock %}

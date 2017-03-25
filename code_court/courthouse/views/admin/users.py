@@ -148,7 +148,6 @@ def add_user():
         current_app.logger.info("Failed to add new user (password mismatch): %s", email)
         abort(400)
 
-
     if user_id: # edit
         user = model.User.query.filter_by(id=user_id).one()
         user.email = email
