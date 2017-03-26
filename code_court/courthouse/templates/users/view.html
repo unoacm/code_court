@@ -32,8 +32,6 @@
             <th>user_role</th>
             <th>num_runs</th>
             <th>last_submit_time</th>
-            <th>creation_time</th>
-            <th>misc_data</th>
             <th></th>
         </tr>
     </thead>
@@ -45,9 +43,7 @@
             <td class="user_name">{{ user.name }}</td>
             <td class="user_name">{% for user_role in user.user_roles %}{{ user_role.id }} {% endfor %}</td>
             <td class="num_runs">{{ metrics[user.id]["num_runs"] }}</td>
-            <td class="last_run_time">{{ metrics[user.id]["last_submit_time"] }}</td>
-            <td class="user_creation_date">{{ user.creation_time }}</td>
-            <td class="user_misc_data">{{ user.misc_data }}</td>
+            <td class="last_run_time">{{ metrics[user.id]["last_run"].submit_time }}</td>
             <td>
                 <a href="{{ url_for('users.users_add', user_id=user.id) }}" class="btn btn-info btn-xs">edit</a>
                 <a href="{{ url_for('users.users_del', user_id=user.id) }}" class="btn btn-danger btn-xs">del</a>

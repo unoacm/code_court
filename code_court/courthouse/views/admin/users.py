@@ -7,7 +7,7 @@ import util
 
 from sqlalchemy import or_
 
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from flask import (
     abort,
@@ -59,7 +59,7 @@ def users_view():
         run_query = model.Run.query.filter_by(user_id=user.id)
         
         user_metrics["num_runs"] = run_query.count();
-        user_metrics["last_submit_time"] = run_query.order_by(model.Run.submit_time.desc()).limit(1).first()
+        user_metrics["last_run"] = run_query.order_by(model.Run.submit_time.desc()).limit(1).first()
 
         metrics[user.id] = user_metrics
 
@@ -107,6 +107,11 @@ def users_del(user_id):
     model = util.get_model()
 
     user = model.User.query.filter_by(id=user_id).scalar()
+
+    if current_user.id == user.id:
+        current_app.logger.info("Can't delete user %s, user cannot delete itself", user_id)
+        abort(400)
+
     if user is None:
         current_app.logger.info("Can't delete user %s, doesn't exist", user_id)
         abort(400)
@@ -133,9 +138,15 @@ def add_user():
     email = request.form.get("email")
     name = request.form.get("name")
     password = request.form.get("password")
+    confirm_password = request.form.get("confirm_password")
     misc_data = request.form.get("misc_data")
     contest_ids = request.form.get("contest_ids")
     user_role_ids = request.form.get("user_role_ids")
+
+    if password != confirm_password:
+        # TODO: give better feedback for failure
+        current_app.logger.info("Failed to add new user (password mismatch): %s", email)
+        abort(400)
 
     if user_id: # edit
         user = model.User.query.filter_by(id=user_id).one()

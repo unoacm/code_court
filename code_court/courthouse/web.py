@@ -27,6 +27,7 @@ from model import db
 from views.main import main
 from views.api import api
 from views.admin.admin import admin
+from views.admin.configurations import configurations
 from views.admin.languages import languages
 from views.admin.problems import problems
 from views.admin.users import users
@@ -88,6 +89,7 @@ def create_app():
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(admin, url_prefix='/admin')
+    app.register_blueprint(configurations, url_prefix='/admin/configurations')
     app.register_blueprint(languages, url_prefix='/admin/languages')
     app.register_blueprint(problems, url_prefix='/admin/problems')
     app.register_blueprint(users, url_prefix='/admin/users')
