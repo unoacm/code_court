@@ -150,7 +150,8 @@ def init_db(app):
         model.db.session.add_all([model.UserRole("defendant"),
                                   model.UserRole("operator"),
                                   model.UserRole("judge"),
-                                  model.UserRole("executioner")])
+                                  model.UserRole("executioner"),
+                                  model.UserRole("observer")])
 
         # TODO: extract these out into a folder
         model.db.session.add_all([
@@ -193,7 +194,8 @@ def dev_init_db(app):
         roles = {x.id: x for x in model.UserRole.query.all()}
 
         model.db.session.add_all([model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']]),
-                                  model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values()))])
+                                  model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values())),
+                                  model.User("observer@example.org", "ObserverUser", "pass", user_roles=[roles['observer']])])
 
         contestants = []
         names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
