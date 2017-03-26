@@ -6,6 +6,9 @@
           <h1 class="title">
             code_court
           </h1>
+          <div>
+            Ends <contest-countdown />
+          </div>
         </div>
       </div>
     </section>
@@ -16,6 +19,7 @@
 
 <script>
 import Nav from '@/components/Nav'
+import ContestCountdown from '@/components/ContestCountdown'
 
 export default {
   name: 'app',
@@ -45,7 +49,8 @@ export default {
     }.bind(this), 30000)
   },
   components: {
-    'nav-disp': Nav
+    'nav-disp': Nav,
+    ContestCountdown
   }
 }
 </script>

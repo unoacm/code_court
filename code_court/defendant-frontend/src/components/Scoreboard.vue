@@ -47,16 +47,14 @@ export default {
 
 .table-row-item {
   backface-visibility: hidden;
-}
-
-.table-row-item {
-  backface-visibility: hidden;
+  background-color: #fff;
 }
 
 .ul-table {
   width: 100%;
   display: table;
   border: 1px solid black;
+  background-color: #fff;
 }
 
 .ul-table li:first-child {

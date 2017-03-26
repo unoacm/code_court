@@ -1,9 +1,5 @@
 <template>
-  <div>
-    <h1 class="title is-1">Info</h1>
-    <h2 class="title is-2">Contest Info</h2>
-    <p>Contest ends in {{ contestEnd }}</p>
-  </div>
+  <span>{{ contestEnd }}</span>
 </template>
 
 <script>
