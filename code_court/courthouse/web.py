@@ -157,22 +157,25 @@ def init_db(app):
         model.db.session.add_all([
             model.Language("python",
                      True,
-                     textwrap.dedent('''#!/bin/bash
+                     textwrap.dedent('''
+                                        #!/bin/bash
                                         cat $1 | python3 $2
                                         exit $?'''
-            )),
+            ).strip()),
             model.Language("python2",
                      True,
-                     textwrap.dedent('''#!/bin/bash
+                     textwrap.dedent('''
+                                        #!/bin/bash
                                         cat $1 | python2 $2
                                         exit $?'''
-            )),
+            ).strip()),
             model.Language("ruby",
                            True,
-                           textwrap.dedent('''#!/bin/bash
-                                              cat $1 | ruby $2
-                                              exit $?'''
-            ))])
+                           textwrap.dedent('''
+                                            #!/bin/bash
+                                            cat $1 | ruby $2
+                                            exit $?'''
+            ).strip())])
         # model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python $2\nexit $?')])
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
@@ -207,13 +210,14 @@ def dev_init_db(app):
 
 
         # create test contest
+        now = datetime.datetime.utcnow()
         test_contest = model.Contest(name = "test_contest",
-                                     start_time = model.str_to_dt("2017-02-05T22:04Z"),
-                                     end_time = model.str_to_dt("2030-01-01T11:11Z"),
+                                     start_time = now,
+                                     end_time = now + datetime.timedelta(minutes=60),
                                      is_public = True,
-                                     activate_time = model.str_to_dt("2018-02-05T22:04Z"),
-                                     freeze_time = model.str_to_dt("2019-02-05T22:04Z"),
-                                     deactivate_time = model.str_to_dt("2031-02-05T22:04Z"))
+                                     activate_time = now,
+                                     freeze_time = None,
+                                     deactivate_time = None)
         test_contest.users += contestants
         model.db.session.add(test_contest)
 
