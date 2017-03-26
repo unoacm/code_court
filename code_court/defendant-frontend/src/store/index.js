@@ -10,6 +10,7 @@ const store = new Vuex.Store({
   plugins: [createPersistedState()],
   state: {
     problems: {},
+    contest: {},
     scores: [],
     user: null,
     langs: [],
@@ -30,6 +31,11 @@ const store = new Vuex.Store({
     LOAD_USER: function (context) {
       axios.get('http://localhost:9191/api/current-user').then((response) => {
         context.commit('SET_USER', { user: response.data })
+      })
+    },
+    LOAD_CONTEST: function (context) {
+      axios.get('http://localhost:9191/api/get-contest-info').then((response) => {
+        context.commit('SET_CONTEST', { contest: response.data })
       })
     },
     LOAD_LANGS: function (context) {
@@ -70,6 +76,9 @@ const store = new Vuex.Store({
     },
     SET_LANGS: (state, { langs }) => {
       state.langs = langs
+    },
+    SET_CONTEST: (state, { contest }) => {
+      state.contest = contest
     },
     ADD_FAKE_RUN: (state, run) => {
       state.problems[run.problemSlug].runs.push(run)

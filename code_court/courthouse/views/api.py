@@ -292,6 +292,28 @@ def get_scoreboard():
     return make_response(jsonify(user_points))
 
 
+@api.route("/get-contest-info")
+@jwt_required
+def get_contest_info():
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    contests = current_user.contests
+
+    if len(contests) > 1:
+        return make_response(jsonify({'error': 'User has multiple contests'}), 500)
+
+    if len(contests) < 1:
+        return make_response(jsonify({'error': 'User has no contests'}), 400)
+
+    contest = contests[0]
+
+    return make_response(jsonify(contest.get_output_dict()))
+
+
+
 def clean_output_string(s):
     """Cleans up an output string for comparison"""
     return s.replace("\r\n", "\n").strip()

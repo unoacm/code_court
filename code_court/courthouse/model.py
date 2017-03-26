@@ -273,7 +273,14 @@ class Contest(db.Model):
 
     def get_output_dict(self):
         return {
-            "id": self.id
+            "id": self.id,
+            "name": self.name,
+            "is_public": self.is_public,
+            "activate_time": dt_to_str(self.activate_time),
+            "start_time": dt_to_str(self.start_time),
+            "freeze_time": dt_to_str(self.freeze_time),
+            "end_time": dt_to_str(self.end_time),
+            "deactivate_time": dt_to_str(self.deactivate_time),
         }
 
     def __repr__(self):
@@ -281,7 +288,6 @@ class Contest(db.Model):
 
     def __str__(self):
         return self.__repr__()
-
 
 
 class Configuration(db.Model):
@@ -555,20 +561,20 @@ class UserRole(db.Model):
         return self.__repr__()
 
 def str_to_dt(s):
-    """Converts a string in format 2017-12-30T12:60 to datetime"""
-    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M')
+    """Converts a string in format 2017-12-30T12:60Z to datetime"""
+    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%MZ')
 
 def strs_to_dt(date_string, time_string):
     """Converts two strings in formats "2017-12-30" and "12:60" to datetime"""
-    return str_to_dt(date_string + "T" + time_string)
+    return str_to_dt(date_string + "T" + time_string + "Z")
 
 def time_str_to_dt(s):
     """Converts a string in format 12:59 to datetime"""
     return datetime.datetime.strptime(s, '%H:%M')
 
 def dt_to_str(dt):
-    """Converts a datetime to a string in format 2017-12-30T12:60"""
-    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M')
+    """Converts a datetime to a string in format 2017-12-30T12:60Z"""
+    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%MZ')
 
 def dt_to_date_str(dt):
     """Converts a datetime to a string in format 2017-12-30"""
