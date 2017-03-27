@@ -20,11 +20,9 @@
             <td class="config_valType">{{ config.valType }}</td>
             <td>
                 <a href="{{ url_for('configurations.configurations_add', config_id=config.id) }}" class="btn btn-info btn-xs">edit</a>
-                <a href="{{ url_for('configurations.configurations_del', config_id=config.id) }}" class="btn btn-danger btn-xs">del</a>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('configurations.configurations_add') }}" class="btn btn-primary">add</a>
 {% endblock %}

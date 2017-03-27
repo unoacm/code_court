@@ -170,5 +170,3 @@ def is_dup_config_key(key):
         return True
     else:
         return False
-
-
