@@ -69,6 +69,7 @@ def create_app():
     app.jinja_env.filters['dt_to_time_str'] = model.dt_to_time_str
 
     db.init_app(app)
+
     CORS(app)
 
     jwt = JWTManager(app)
@@ -124,6 +125,7 @@ def setup_database(app):
             db.create_all()
             db.session.commit()
             init_db(app)
+            app.config['MAX_CONTENT_LENGTH'] = util.get_configuration("max_output_length") * 1024 #kilobytes
             if not app.config['TESTING']:
                 dev_init_db(app)
 
@@ -181,7 +183,8 @@ def init_db(app):
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool"),
                                   model.Configuration("max_user_submissions", 5, "integer"),
-                                  model.Configuration("user_submission_time_limit", 1, "integer")])
+                                  model.Configuration("user_submission_time_limit", 1, "integer"),
+                                  model.Configuration("max_output_length", 10 * 1024, "integer")])
 
         model.db.session.add_all([model.ProblemType("input-output",
                                                     '#!/bin/bash\ntest "$1" = "$2"')])
