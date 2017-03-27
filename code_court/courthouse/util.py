@@ -105,3 +105,16 @@ def jwt_identity(payload):
     user_id = payload['identity']
 
     return model.User.query.filter_by(id=user_id).first()
+
+def get_configuration(key):
+    model = get_model()
+    config = model.Configuration.query.filter_by(key=key).scalar()
+    val_type = config.valType
+    if(val_type == "integer"):
+        return int(config.val)
+    elif (val_type == "bool"):
+        return bool(config.val)
+    elif (val_type == "string"):
+        return str(config.val)
+    else:
+        return None

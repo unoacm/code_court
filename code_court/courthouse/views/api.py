@@ -211,8 +211,8 @@ def submit_run():
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    MAX_RUNS = 5
-    TIME_LIMIT = 1
+    MAX_RUNS = util.get_configuration("max_user_submissions")
+    TIME_LIMIT = util.get_configuration("user_submission_time_limit")
 
     run_count = model.Run.query.filter_by(user_id=user.id)\
                                 .filter(model.Run.submit_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))\
@@ -245,6 +245,7 @@ def submit_run():
         return "good"
     else:
         return make_response(jsonify({'error': 'Submission rate limit exceeded'}), 400)
+
 @api.route("/scores", methods=["GET"])
 def get_scoreboard():
     model = util.get_model()
