@@ -66,12 +66,16 @@ export default {
     sourceCode: {
       get () {
         if (this.problem) {
-          return this.$store.getters.getSourceCode(this.problem.slug)
+          return this.$store.getters.getSourceCode(this.problem.slug, this.lang)
         }
       },
       set (value) {
         if (this.problem) {
-          this.$store.commit('UPDATE_SOURCE_CODE', {problemSlug: this.problem.slug, sourceCode: value})
+          this.$store.commit('UPDATE_SOURCE_CODE', {
+            problemSlug: this.problem.slug,
+            lang: this.lang,
+            sourceCode: value
+          })
         }
       }
     }

@@ -574,12 +574,18 @@ def time_str_to_dt(s):
 
 def dt_to_str(dt):
     """Converts a datetime to a string in format 2017-12-30T12:60Z"""
+    if dt is None:
+        return None
     return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%MZ')
 
 def dt_to_date_str(dt):
     """Converts a datetime to a string in format 2017-12-30"""
+    if dt is None:
+        return None
     return datetime.datetime.strftime(dt, '%Y-%m-%d')
 
 def dt_to_time_str(dt):
     """Converts a datetime to a string in format 12:59"""
+    if dt is None:
+        return None
     return datetime.datetime.strftime(dt, '%H:%M')

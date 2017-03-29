@@ -34,7 +34,7 @@ executioner_auth = HTTPBasicAuth()
 @executioner_auth.verify_password
 def verify_password(email, password):
     model = util.get_model()
-    user = model.User.query.filter_by(email=email).first()
+    user = model.User.query.filter_by(email=email).scalar()
     if not user or not user.verify_password(password):
         return False
     return True
@@ -88,7 +88,7 @@ def submit_writ(run_id):
     }
     """
     model = util.get_model()
-    run = model.Run.query.filter_by(id=run_id).first()
+    run = model.Run.query.filter_by(id=run_id).scalar()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s", run_id)
         abort(404)
@@ -203,6 +203,7 @@ def get_current_user():
 
     return make_response(jsonify(resp), 200)
 
+
 @api.route("/submit-run", methods=["POST"])
 @jwt_required
 def submit_run():
@@ -214,37 +215,39 @@ def submit_run():
     MAX_RUNS = util.get_configuration("max_user_submissions")
     TIME_LIMIT = util.get_configuration("user_submission_time_limit")
 
+    over_limit_runs_query= model.Run.submit_time >\
+                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))
     run_count = model.Run.query.filter_by(user_id=user.id)\
-                                .filter(model.Run.submit_time > datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))\
-                                .count()
+                    .filter(over_limit_runs_query)\
+                    .count()
 
-    if(run_count < MAX_RUNS):
-        lang_name = request.json.get('lang', None)
-        problem_slug = request.json.get('problem_slug', None)
-        source_code = request.json.get('source_code', None)
-        is_submission = request.json.get('is_submission', False)
-
-        lang = model.Language.query.filter_by(name=lang_name).one()
-        problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
-        contest = model.Contest.query.first()
-
-        if is_submission:
-            run_input = problem.secret_input
-            run_output = problem.secret_output
-        else:
-            run_input = problem.sample_input
-            run_output = problem.sample_output
-
-        run = model.Run(user, contest,
-                        lang, problem, datetime.datetime.utcnow(), source_code,
-                        run_input, run_output, is_submission)
-
-        model.db.session.add(run)
-        model.db.session.commit()
-
-        return "good"
-    else:
+    if(run_count > MAX_RUNS):
         return make_response(jsonify({'error': 'Submission rate limit exceeded'}), 400)
+
+    lang_name = request.json.get('lang', None)
+    problem_slug = request.json.get('problem_slug', None)
+    source_code = request.json.get('source_code', None)
+    is_submission = request.json.get('is_submission', False)
+
+    lang = model.Language.query.filter_by(name=lang_name).one()
+    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+    contest = user.contests[0]
+
+    if is_submission:
+        run_input = problem.secret_input
+        run_output = problem.secret_output
+    else:
+        run_input = problem.sample_input
+        run_output = problem.sample_output
+
+    run = model.Run(user, contest,
+                    lang, problem, datetime.datetime.utcnow(), source_code,
+                    run_input, run_output, is_submission)
+
+    model.db.session.add(run)
+    model.db.session.commit()
+
+    return "{}"
 
 @api.route("/scores", methods=["GET"])
 def get_scoreboard():
@@ -312,7 +315,6 @@ def get_contest_info():
     contest = contests[0]
 
     return make_response(jsonify(contest.get_output_dict()))
-
 
 
 def clean_output_string(s):

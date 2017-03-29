@@ -86,8 +86,11 @@ const store = new Vuex.Store({
     SET_LOGIN_TOKEN: (state, { token }) => {
       state.loginToken = token
     },
-    UPDATE_SOURCE_CODE: (state, { problemSlug, sourceCode }) => {
-      state.sourceCodes[problemSlug] = sourceCode
+    UPDATE_SOURCE_CODE: (state, { problemSlug, lang, sourceCode }) => {
+      if (!(problemSlug in state.sourceCodes)) {
+        state.sourceCodes[problemSlug] = {}
+      }
+      state.sourceCodes[problemSlug][lang] = sourceCode
     },
     LOGOUT: (state) => {
       state.loginToken = false
@@ -97,13 +100,11 @@ const store = new Vuex.Store({
   getters: {
     get_problem: (state, { slug }) => state.problems[slug],
     isLoggedIn: (state) => !!state.user,
-    getSourceCode: (state, getters) => (problemSlug) => {
-      var code = state.sourceCodes[problemSlug]
-      if (code) {
-        return code
-      } else {
+    getSourceCode: (state, getters) => (problemSlug, lang) => {
+      if (!(problemSlug in state.sourceCodes) || !(lang in state.sourceCodes[problemSlug])) {
         return ''
       }
+      return state.sourceCodes[problemSlug][lang]
     }
   }
 })
