@@ -285,7 +285,7 @@ def dev_init_db(app):
 
         for problem, user in problem_subs:
             src_code = solutions[problem.name]
-            is_submission = random.randint(1, 7) != 5
+            is_submission = random.randint(1, 7) == 5
 
             is_priority = random.randint(1, 9) == 7
             is_correct = random.randint(1, 3) == 3

@@ -15,7 +15,7 @@
           <span>{{ row.penalty }}</span>
           <span v-for="(state, prob) in row.problem_states" :class="{'correct': state}">
             <div v-if="prob" class="icon">
-              <i class="fa fa-check"></i>
+              <i v-if="state" class="fa fa-check"></i>
             </div>
           </span>
       </li>
