@@ -72,7 +72,7 @@ def main():
         shared_volumes = {
             container_shared_data_dir: {
                 "bind": "/share",
-                "mode": "rw"
+                "mode": "ro"
             }
         }
 
