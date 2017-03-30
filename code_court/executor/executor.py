@@ -2,20 +2,14 @@
 
 import logging
 import os
-import random
-import sched
-import shutil
 import stat
 import signal
-import string
 import sys
 import time
 import traceback
 import uuid
 
 from os import path
-from threading import Timer
-from multiprocessing import Pool, cpu_count
 
 from requests.auth import HTTPBasicAuth
 
@@ -30,7 +24,6 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
-IDEAL_NUM_EXECUTORS = cpu_count()*2
 
 writ_url = "http://localhost:9191/api/get-writ"
 RETURN_URL = "http://localhost:9191/api/return-without-run"
@@ -38,190 +31,111 @@ executioner_email = "exec@example.org"
 executioner_password = "epass"
 
 RUN_TIMEOUT = 5
-CPU_QUOTA = 50000 # 50% of a cpu
+CPU_PERIOD = 500000
 MEM_LIMIT = "128m"
-KERNEL_MEM = "50m"
-PID_LIMIT = 20
+PID_LIMIT = 50
 MEM_SWAPPINESS = 0 # disable container swapping
 CONTAINER_USER = "user"
+OUTPUT_LIMIT = 100000 # chars
 
-def event_loop():
-    # make sure that processes ignore SIGINT
-    original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-    pool = Pool(IDEAL_NUM_EXECUTORS)
-    signal.signal(signal.SIGINT, original_sigint_handler)
+client = docker.from_env()
 
-    if len(get_executor_containers()) > 0:
-        logging.info("Killing orphaned executors")
-        kill_all_executors()
+def main():
+    while True:
+        try:
+            writ = get_writ()
+        except InvalidWritException as e:
+            logging.exception("Exception while requesting writ")
+            continue
+        except CourtHouseConnectionError:
+            logging.error("Couldn't connect to courthouse")
+            time.sleep(5)
+            continue
+        except NoWritsAvailable:
+            continue
 
-    logging.info("Looking for writs")
-    try:
-        jobs = []
-        while True:
-            in_flight = sum(1 for x in jobs if x is not None and not x.ready())
+        logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
 
-            logging.debug("Jobs in flight: %s", in_flight)
-            if logging.getLogger().isEnabledFor(logging.DEBUG):
-                logging.debug("Executors running: %s", len(get_executor_containers()))
+        input_str = writ['input']
+        program_str = writ['source_code']
+        runner_str = writ['run_script']
+        runner_str = runner_str.replace("$1", "/share/input")
+        runner_str = runner_str.replace("$2", "/share/program")
 
-            if in_flight < IDEAL_NUM_EXECUTORS:
-                for _ in range(IDEAL_NUM_EXECUTORS - in_flight):
-                    jobs.append(get_and_dispatch_writ(pool))
-            time.sleep(1)
-    except KeyboardInterrupt:
-        logging.info("Exiting")
-        cleanup(pool)
-        sys.exit(0)
-    except Exception as e:
-        logging.exception("Uncaught exception, exiting")
-        cleanup(pool)
-        sys.exit(1)
+        container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
 
-def get_and_dispatch_writ(pool):
-    try:
-        writ = get_writ()
-    except InvalidWritException as e:
-        logging.exception("Exception while requesting writ")
-        return
-    except CourtHouseConnectionError:
-        logging.error("Couldn't connect to courthouse")
-        time.sleep(5)
-        return
-    except NoWritsAvailable:
-        return
+        container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
+        os.makedirs(container_shared_data_dir)
 
-    logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
-    return pool.apply_async(execute_writ, [writ])
+        create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
 
-def cleanup(pool):
-    logging.info("Waiting %s seconds for workers to finish", RUN_TIMEOUT+10)
-    time.sleep(RUN_TIMEOUT+10)
-
-    pool.terminate()
-    pool.join()
-
-    kill_all_executors()
-
-def execute_writ(writ):
-    client = docker.from_env()
-    runner_str = writ['run_script']
-    runner_str = runner_str.replace("$1", "/share/input")
-    runner_str = runner_str.replace("$2", "/share/program")
-
-    input_str = writ['input']
-    program_str = writ['source_code']
-
-    container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
-
-    container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
-    os.makedirs(container_shared_data_dir)
-
-    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
-
-    shared_volumes = {
-        container_shared_data_dir: {
-            "bind": "/share",
-            "mode": "ro"
+        shared_volumes = {
+            container_shared_data_dir: {
+                "bind": "/share",
+                "mode": "rw"
+            }
         }
-    }
 
-    container_name = "executor-{}".format(container_ident)
+        signal.signal(signal.SIGALRM, raise_timeout)
+        signal.alarm(RUN_TIMEOUT)
 
-
-    container = None
-    try:
-        container = client.containers.run(EXECUTOR_IMAGE_NAME,
-                                                 "tail -f /dev/null",
-                                                 detach=True,
-                                                 volumes=shared_volumes,
-                                                 name=container_name,
-                                                 user=CONTAINER_USER,
-                                                 network_disabled=True,
-                                                 read_only=True,
-                                                 mem_swappiness=MEM_SWAPPINESS,
-                                                 pids_limit=PID_LIMIT,
-                                                 mem_limit=MEM_LIMIT)
-        container.update(cpu_quota=CPU_QUOTA,
-                         kernel_memory=KERNEL_MEM)
-
-        # TODO: check what happens if tons of output is sent
-        stream = container.exec_run("/share/runner", stream=True, user=CONTAINER_USER)
-
-        timer = Timer(RUN_TIMEOUT, timeout_container, [container.id, writ['run_id']])
+        container = None
         try:
-            timer.start()
+            container = client.containers.run(EXECUTOR_IMAGE_NAME,
+                                                     "/share/runner",
+                                                     detach=True,
+                                                     working_dir="/share",
+                                                     volumes=shared_volumes,
+                                                     user=CONTAINER_USER,
+                                                     network_disabled=True,
+                                                     read_only=False,
+                                                     mem_swappiness=MEM_SWAPPINESS,
+                                                     pids_limit=PID_LIMIT,
+                                                     cpu_period=CPU_PERIOD,
+                                                     mem_limit=MEM_LIMIT)
+
             out = []
-            for line in stream:
-                out.append(line.decode("utf-8"))
+            rolling_size = 0
+            for line in container.logs(stream=True):
+                chunk = line.decode("utf-8")
+                rolling_size += len(chunk)
 
-            if is_container_running(container.id):
-                container.kill()
+                if rolling_size > OUTPUT_LIMIT:
+                    raise OutputLimitExceeded()
 
-
-            submit_writ(writ, "".join(out))
+                out.append(chunk)
+            signal.alarm(0)
+        except TimedOutException as e:
+            logging.info("Timed out writ %s", writ.get('run_id'))
+            submit_writ(writ, "Error: Timed out")
+            continue
+        except OutputLimitExceeded as e:
+            logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
+            submit_writ(writ, "Error: Output limit exceeded")
+            continue
         finally:
-            timer.cancel()
-    except:
-        logging.exception("Exception while executing writ")
-        raise
-    finally:
-        if container:
-            container.remove(force=True)
-            shutil.rmtree(container_shared_data_dir)
+            signal.alarm(0)
+            if container:
+                container.remove(force=True)
 
-def timeout_container(container_id, run_id):
-    client = docker.from_env()
+        submit_writ(writ, "".join(out))
 
-    if get_container_state(container_id)['Running']:
-        logging.info("Writ timed out, id: %s", run_id)
-        try:
-            client.containers.get(container_id).kill()
-        except docker.errors.APIError:
-            pass
-
-def is_container_running(container_id):
-    return get_container_state(container_id)['Running']
-
-def get_container_state(container_id):
-    client = docker.from_env()
-    return client.containers.get(container_id).attrs['State']
 
 def create_share_files(share_folder, runner_str, input_str, program_str):
-    runner_file = path.join(share_folder, "runner")
-    write_to_fname(runner_file, runner_str)
-    make_executable(runner_file)
+    files = {
+        "runner": runner_str,
+        "input": input_str,
+        "program": program_str
+    }
 
-    input_file = path.join(share_folder, "input")
-    write_to_fname(input_file, input_str)
-    make_executable(input_file)
+    for fname, contents in files.items():
+        loc = path.join(share_folder, fname)
+        with open(loc, "w+") as f:
+            f.write(contents.replace("\r\n", "\n"))
 
-    program_file = path.join(share_folder, "program")
-    write_to_fname(program_file, program_str)
-    make_executable(program_file)
+        st = os.stat(loc)
+        os.chmod(loc, st.st_mode | stat.S_IEXEC)
 
-def write_to_fname(fname, contents):
-    with open(fname, "w+") as f:
-        f.write(contents)
-
-def make_executable(fname):
-    st = os.stat(fname)
-    os.chmod(fname, st.st_mode | stat.S_IEXEC)
-
-def get_executor_containers():
-    client = docker.from_env()
-
-    # note: this is a direct api call, client.contatiners.list(all=True)
-    # can fail if a container is removed while it is running
-    running_containers = client.api.containers(all=True)
-    exec_containers = []
-    for c in running_containers:
-        try:
-            if c['Image'] == EXECUTOR_IMAGE_NAME:
-                exec_containers.append(client.containers.get(c['Id']))
-        except docker.errors.NotFound:
-            pass
-    return exec_containers
 
 def get_writ():
     try:
@@ -254,33 +168,19 @@ def get_writ():
 
     return writ
 
-def get_writ_id_from_container_name(name):
-    return name.split("-", 3)[1]
-
-def kill_all_executors():
-    client = docker.from_env()
-    for c in get_executor_containers():
-        logging.info("Killing %s", c.name)
-
-        try:
-            c.remove(force=True)
-        except (docker.errors.NotFound, docker.errors.APIError):
-            pass
-
-        return_writ_without_output(c.name)
-
-def return_writ_without_output(container_name):
-    run_id = get_writ_id_from_container_name(container_name)
-
-    logging.info("Returning writ without output: %s", run_id)
-
-    url = RETURN_URL + "/" + run_id
-    status = requests.post(url, auth=HTTPBasicAuth(executioner_email, executioner_password))
-
 def submit_writ(writ, out):
     logging.info("Submitting writ %s", writ['run_id'])
     status = requests.post(writ['return_url'],
                            json={"output": out}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+
+def raise_timeout(signum, frame):
+    raise TimedOutException()
+
+class OutputLimitExceeded(Exception):
+    pass
+
+class TimedOutException(Exception):
+    pass
 
 class InvalidWritException(Exception):
     pass
@@ -292,4 +192,11 @@ class NoWritsAvailable(Exception):
     pass
 
 if __name__ == '__main__':
-    event_loop()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.info("Exiting")
+        sys.exit(0)
+    except Exception as e:
+        logging.exception("Uncaught exception, exiting")
+        sys.exit(1)

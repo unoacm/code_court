@@ -169,6 +169,42 @@ def init_db(app):
                                         cat $1 | python2 $2
                                         exit $?'''
             ).strip()),
+            model.Language("fortran",
+                     True,
+                     textwrap.dedent('''
+                                    #!/bin/bash
+                                    cp /share/program /scratch/program.f
+
+                                    cd /scratch
+
+                                    gfortran -o program /scratch/program.f
+
+                                    if [[ $? != 0 ]]; then
+                                      exit $?
+                                    fi
+
+                                    cat $1 | ./program
+
+                                    exit $?'''
+            ).strip()),
+            model.Language("java",
+                     True,
+                     textwrap.dedent('''
+                                    #!/bin/bash
+                                    cp /share/program /scratch/Main.java
+
+                                    cd /scratch
+
+                                    /usr/lib/jvm/java-1.8-openjdk/bin/javac Main.java
+
+                                    if [[ $? != 0 ]]; then
+                                      exit $?
+                                    fi
+
+                                    cat $1 | /usr/lib/jvm/java-1.8-openjdk/bin/java Main
+
+                                    exit $?'''
+            ).strip()),
             model.Language("ruby",
                            True,
                            textwrap.dedent('''

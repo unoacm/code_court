@@ -7,8 +7,10 @@
 <script>
 import brace from 'brace'
 
+import 'brace/mode/fortran'
 import 'brace/mode/python'
 import 'brace/mode/ruby'
+import 'brace/mode/java'
 
 import 'brace/theme/chrome'
 import 'brace/theme/solarized_light'

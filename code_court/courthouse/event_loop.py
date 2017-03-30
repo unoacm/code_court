@@ -6,7 +6,7 @@ from flask import Flask
 import model
 from model import db
 
-EXECUTOR_TIMEOUT_MINS = 5
+EXECUTOR_TIMEOUT_MINS = 1
 
 def reset_overdue_runs():
     runs = model.Run.query.filter(model.Run.finished_execing_time == None)\
@@ -16,6 +16,7 @@ def reset_overdue_runs():
                         model.Run.started_execing_time).all()
 
     for run in runs:
+        print("Returning overdue run: ", run.id)
         run.started_execing_time = None
 
     model.db.session.commit()
