@@ -11,9 +11,28 @@ import 'brace/mode/fortran'
 import 'brace/mode/java'
 import 'brace/mode/python'
 import 'brace/mode/ruby'
+import 'brace/mode/perl'
+import 'brace/mode/lua'
+import 'brace/mode/javascript'
+import 'brace/mode/c_cpp'
+import 'brace/mode/lisp'
 
 import 'brace/theme/chrome'
 import 'brace/theme/solarized_light'
+
+var langToMode = {
+  'python': 'python',
+  'python2': 'python',
+  'perl': 'perl',
+  'lua': 'lua',
+  'nodejs': 'javascript',
+  'guile': 'lisp',
+  'fortran': 'fortran',
+  'c': 'c_cpp',
+  'c++': 'c_cpp',
+  'java': 'java',
+  'ruby': 'ruby'
+}
 
 export default {
   data () {
@@ -51,7 +70,7 @@ export default {
       var editor = brace.edit(this.id)
       editor.$blockScrolling = Infinity
 
-      editor.getSession().setMode('ace/mode/' + this.lang)
+      editor.getSession().setMode('ace/mode/' + langToMode[this.lang])
       editor.setTheme('ace/theme/' + this.theme)
 
       editor.getSession().setUseWorker(false)
@@ -90,7 +109,7 @@ export default {
   },
   watch: {
     lang: function () {
-      this.editor.getSession().setMode('ace/mode/' + this.lang)
+      this.editor.getSession().setMode('ace/mode/' + langToMode[this.lang])
     },
     value: function () {
       this.updateEditorContents()

@@ -171,6 +171,34 @@ def init_db(app):
                                         cat $1 | python2 $2
                                         exit $?'''
             ).strip()),
+            model.Language("perl",
+                     True,
+                     textwrap.dedent('''
+                                        #!/bin/bash
+                                        cat $1 | perl $2
+                                        exit $?'''
+            ).strip()),
+            model.Language("lua",
+                     True,
+                     textwrap.dedent('''
+                                        #!/bin/bash
+                                        cat $1 | lua $2
+                                        exit $?'''
+            ).strip()),
+            model.Language("nodejs",
+                     True,
+                     textwrap.dedent('''
+                                        #!/bin/bash
+                                        cat $1 | node $2
+                                        exit $?'''
+            ).strip()),
+            model.Language("guile",
+                     True,
+                     textwrap.dedent('''
+                                        #!/bin/bash
+                                        cat $1 | guile --no-auto-compile $2
+                                        exit $?'''
+            ).strip()),
             model.Language("fortran",
                      True,
                      textwrap.dedent('''
@@ -180,6 +208,42 @@ def init_db(app):
                                     cd /scratch
 
                                     gfortran -o program /scratch/program.f
+
+                                    if [[ $? != 0 ]]; then
+                                      exit $?
+                                    fi
+
+                                    cat $1 | ./program
+
+                                    exit $?'''
+            ).strip()),
+            model.Language("c",
+                     True,
+                     textwrap.dedent('''
+                                    #!/bin/bash
+                                    cp /share/program /scratch/program.c
+
+                                    cd /scratch
+
+                                    gcc -o program /scratch/program.c
+
+                                    if [[ $? != 0 ]]; then
+                                      exit $?
+                                    fi
+
+                                    cat $1 | ./program
+
+                                    exit $?'''
+            ).strip()),
+            model.Language("c++",
+                     True,
+                     textwrap.dedent('''
+                                    #!/bin/bash
+                                    cp /share/program /scratch/program.cpp
+
+                                    cd /scratch
+
+                                    g++ -o program /scratch/program.cpp
 
                                     if [[ $? != 0 ]]; then
                                       exit $?
