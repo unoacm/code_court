@@ -316,6 +316,38 @@ def get_contest_info():
 
     return make_response(jsonify(contest.get_output_dict()))
 
+@api.route("/make-defendant-user", methods=["POST"])
+@jwt_required
+def make_user():
+    """
+    To test manually:
+    - get auth token: curl -H "Content-Type: application/json" --data '{"email": "admin@example.org", "password": "pass"}' http://localhost:9191/api/login
+    - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "email": "ben@bendoan.me", "password": "pass"}' http://localhost:9191/api/make-defendant-user
+    """
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    if ("judge" not in current_user.user_roles and
+        "operator" not in current_user.user_roles):
+        return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+
+    email = request.json.get('email')
+    name = request.json.get('name')
+    password = request.json.get('password')
+
+    if not all([email, name, password]):
+        return make_response(jsonify({'error': 'Invalid request'}), 400)
+
+    defedant_role = model.UserRole.query.filter_by(id="defendant").scalar()
+
+    new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role])
+
+    model.db.session.add(new_user)
+    model.db.session.commit()
+
+    return make_response(jsonify({'status': 'Success'}), 400)
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""
