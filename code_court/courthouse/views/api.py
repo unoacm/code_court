@@ -228,16 +228,22 @@ def submit_run():
     problem_slug = request.json.get('problem_slug', None)
     source_code = request.json.get('source_code', None)
     is_submission = request.json.get('is_submission', False)
+    user_test_input = request.json.get('user_test_input', None)
 
     lang = model.Language.query.filter_by(name=lang_name).one()
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
     contest = user.contests[0]
 
+    run_input = None
+    run_output = None
     if is_submission:
         run_input = problem.secret_input
         run_output = problem.secret_output
     else:
-        run_input = problem.sample_input
+        if user_test_input:
+            run_input = user_test_input
+        else:
+            run_input = problem.sample_input
         run_output = problem.sample_output
 
     run = model.Run(user, contest,
