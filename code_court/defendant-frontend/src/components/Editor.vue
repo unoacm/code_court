@@ -110,8 +110,9 @@ export default {
   watch: {
     lang: function () {
       this.editor.getSession().setMode('ace/mode/' + langToMode[this.lang])
+      this.updateEditorContents()
     },
-    value: function () {
+    id: function () {
       this.updateEditorContents()
     }
   },
