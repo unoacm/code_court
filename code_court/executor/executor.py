@@ -104,21 +104,28 @@ def main():
                     raise OutputLimitExceeded()
 
                 out.append(chunk)
+
+            if rolling_size == 0:
+                raise NoOutputException()
+
             signal.alarm(0)
         except TimedOutException as e:
             logging.info("Timed out writ %s", writ.get('run_id'))
-            submit_writ(writ, "Error: Timed out")
+            submit_writ(writ, "Error: Timed out", "TimedOut")
             continue
         except OutputLimitExceeded as e:
             logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
-            submit_writ(writ, "Error: Output limit exceeded")
+            submit_writ(writ, "Error: Output limit exceeded", "OutputLimitExceeded")
             continue
+        except NoOutputException as e:
+            logging.info("No output given from writ %s", writ.get('run_id'))
+            submit_writ(write, "", "NoOutput")
         finally:
             signal.alarm(0)
             if container:
                 container.remove(force=True)
 
-        submit_writ(writ, "".join(out))
+        submit_writ(writ, "".join(out), "Successful")
 
 
 def create_share_files(share_folder, runner_str, input_str, program_str):
@@ -168,15 +175,18 @@ def get_writ():
 
     return writ
 
-def submit_writ(writ, out):
+def submit_writ(writ, out, state):
     logging.info("Submitting writ %s", writ['run_id'])
     status = requests.post(writ['return_url'],
-                           json={"output": out}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+                           json={"output": out, "state": state}, auth=HTTPBasicAuth(executioner_email, executioner_password))
 
 def raise_timeout(signum, frame):
     raise TimedOutException()
 
 class OutputLimitExceeded(Exception):
+    pass
+
+class NoOutputException(Exception):
     pass
 
 class TimedOutException(Exception):

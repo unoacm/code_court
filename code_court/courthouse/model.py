@@ -426,6 +426,9 @@ class Run(db.Model):
     is_priority = db.Column(db.Boolean, default=False)
     """bool: indicates whether or not a run has priority status, which expedites execution"""
 
+    state = db.Column(db.String)
+    """str: information about the execution of the program"""
+
     @property
     def is_judging(self):
         return (self.started_execing_time is not None and
@@ -457,6 +460,7 @@ class Run(db.Model):
             "is_submission": self.is_submission,
             "is_passed": self.is_passed,
             "is_priority": self.is_priority,
+            "state": self.state
         }
 
         if not self.is_submission:
