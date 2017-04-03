@@ -61,7 +61,9 @@ def get_writ():
     if chosen_run is None:
         return make_response(jsonify({'status': 'unavailable'}), 404)
 
+
     # TODO: use a better locking method to prevent dual execution
+    chosen_run.state = "Judging"
     chosen_run.started_execing_time = datetime.datetime.utcnow()
     model.db.session.commit()
 
