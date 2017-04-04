@@ -96,6 +96,7 @@ class ModelsTestCase(BaseTest):
             "key": "use_strict_comparison",
             "val": "True",
             "valType": "bool",
+            "category": "admin",
         }
 
         # create and add contest

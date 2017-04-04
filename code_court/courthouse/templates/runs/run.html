@@ -85,15 +85,13 @@
 </div>
 
 <script>
-    $(document).ready(function(){
-        var source = CodeMirror.fromTextArea(document.getElementById("source_code"),
+    var source = CodeMirror.fromTextArea(
+        document.getElementById("source_code"),
         {lineNumbers: true, readOnly: "nocursor"});
-    });
-
-    $(document).ready(function(){
-        var input = CodeMirror.fromTextArea(document.getElementById("run_input"),
+    
+    var input = CodeMirror.fromTextArea(
+        document.getElementById("run_input"),
         {lineNumbers: true, readOnly: "nocursor"});
-    });
 </script>
 
 <meta id="runs" data-output="{{run.run_output}}" data-expected="{{run.correct_output}}">

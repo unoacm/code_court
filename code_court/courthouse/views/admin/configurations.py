@@ -33,7 +33,9 @@ def configurations_view():
     """
     model = util.get_model()
 
-    configs = model.Configuration.query.all()
+    config_query = model.Configuration.query
+
+    configs = config_query.order_by(model.Configuration.category.asc()).all()
 
     return render_template("configurations/view.html", configs=configs)
 
@@ -103,12 +105,14 @@ def add_config():
     key = request.form.get("key")
     val = request.form.get("val")
     valType = request.form.get("valType")
+    category = request.form.get("category")
 
     if config_id: # edit
         config = model.Configuration.query.filter_by(id=config_id).one()
         config.key = key
         config.val = val
         config.valType = valType
+        config.category = category
     else: # add
         # check if is duplicate
         if is_dup_config_key(key):
@@ -118,7 +122,8 @@ def add_config():
 
         config = model.Configuration(key=key,
                                      val=val,
-                                     valType=valType)
+                                     valType=valType,
+                                     category=category)
         model.db.session.add(config)
 
     model.db.session.commit()
