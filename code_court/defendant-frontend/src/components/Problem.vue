@@ -28,8 +28,18 @@
     <br/>
 
     <div>
-      <button v-on:click="submitCode(false)" class="button is-info">Test</button>
       <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
+    </div>
+
+    <br/>
+
+    <h3 class="subtitle is-3">Test Input</h3>
+    <textarea class="textarea" v-model="testInput"></textarea>
+
+    <br/>
+
+    <div>
+      <button v-on:click="submitCode(false)" class="button is-info">Test</button>
     </div>
 
     <br/>
@@ -53,12 +63,17 @@ import RunCollapse from '@/components/RunCollapse'
 export default {
   data () {
     return {
-      lang: 'python'
+      lang: 'python',
+      testInputBySlug: {},
+      testInput: ''
     }
   },
   computed: {
     problem () {
       return this.$store.state.problems[this.$route.params.slug]
+    },
+    problems () {
+      return this.$store.state.problems
     },
     langs () {
       return this.$store.state.langs
@@ -80,6 +95,14 @@ export default {
       }
     }
   },
+  watch: {
+    testInput: function () {
+      this.testInputBySlug[this.problem.slug] = this.testInput
+    },
+    problem: function () {
+      this.testInput = this.testInputBySlug[this.problem.slug]
+    }
+  },
   methods: {
     convertToMarkdown: function (s) {
       return marked(s)
@@ -89,7 +112,8 @@ export default {
         lang: this.lang,
         problem_slug: this.problem.slug,
         source_code: this.sourceCode,
-        is_submission: isSubmission
+        is_submission: isSubmission,
+        user_test_input: isSubmission ? null : this.userTestInput
       }).then((response) => {
       }).catch(function (error) {
         console.log(error)
@@ -101,10 +125,16 @@ export default {
         problemSlug: this.problem.slug,
         language: this.lang,
         source_code: this.sourceCode,
-        run_input: isSubmission ? null : this.problem.sample_input,
+        run_input: isSubmission ? null : this.userTestInput,
         is_submission: isSubmission
       })
     }
+  },
+  mounted: function () {
+    for (var problemSlug in this.problems) {
+      this.testInputBySlug[problemSlug] = this.problems[problemSlug].sample_input
+    }
+    this.testInput = this.problem.sample_input
   },
   components: {
     Editor,
