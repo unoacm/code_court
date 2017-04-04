@@ -8,6 +8,7 @@
             <th>key</th>
             <th>val</th>
             <th>valType</th>
+            <th>category</th>
             <th></th>
         </tr>
     </thead>
@@ -18,6 +19,7 @@
             <td class="config_key">{{ config.key }}</td>
             <td class="config_val">{{ config.val }}</td>
             <td class="config_valType">{{ config.valType }}</td>
+            <td class="config_category">{{ config.category }}</td>
             <td>
                 <a href="{{ url_for('configurations.configurations_add', config_id=config.id) }}" class="btn btn-info btn-xs">edit</a>
             </td>

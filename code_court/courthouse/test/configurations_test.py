@@ -13,6 +13,7 @@ class ConfigurationsTestCase(BaseTest):
             "key": init_config_key,
             "val": "True",
             "valType": "bool",
+            "category": "admin",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to add configuration")
 
@@ -29,6 +30,7 @@ class ConfigurationsTestCase(BaseTest):
             "key": new_key,
             "val": "True",
             "valType": "bool",
+            "category": "admin",
         }, follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to edit configuration")
 

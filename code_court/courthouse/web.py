@@ -216,11 +216,11 @@ def init_db(app):
             ).strip())])
         # model.db.session.add_all([model.Language("python", True, '#!/bin/bash\ncat $1 | python $2\nexit $?')])
 
-        model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool"),
-                                  model.Configuration("contestants_see_sample_output", "True", "bool"),
-                                  model.Configuration("max_user_submissions", 5, "integer"),
-                                  model.Configuration("user_submission_time_limit", 1, "integer"),
-                                  model.Configuration("max_output_length", 10 * 1024, "integer")])
+        model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool", "admin"),
+                                  model.Configuration("contestants_see_sample_output", "True", "bool", "defendant"),
+                                  model.Configuration("max_user_submissions", 5, "integer", "defendant"),
+                                  model.Configuration("user_submission_time_limit", 1, "integer", "defendant"),
+                                  model.Configuration("max_output_length", 10 * 1024, "integer", "defendant")])
 
         model.db.session.add_all([model.ProblemType("input-output",
                                                     '#!/bin/bash\ntest "$1" = "$2"')])

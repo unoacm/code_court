@@ -305,10 +305,14 @@ class Configuration(db.Model):
     valType = db.Column(db.String, nullable=False)
     """str: the type of the config entry val"""
 
-    def __init__(self, key, val, valType):
+    category = db.Column(db.String, nullable=False)
+    """str: the config entry category """
+
+    def __init__(self, key, val, valType, category):
         self.key = key
         self.val = val
         self.valType = valType
+        self.category = category
 
     def get_output_dict(self):
         return {
