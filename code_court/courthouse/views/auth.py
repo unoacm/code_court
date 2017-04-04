@@ -49,7 +49,7 @@ def login_submit():
     if is_matching:
         flash("Login successful", "success")
         login_user(user)
-        return redirect("/")
+        return redirect("/admin")
     else:
         flash("Invalid username or password", "danger")
         abort(401)
@@ -62,4 +62,4 @@ def profile():
 def logout_submit():
     """processes logout requests"""
     logout_user()
-    return redirect("/")
+    return redirect("/admin")

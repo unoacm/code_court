@@ -5,7 +5,7 @@
         <div class="level-left">
           <span><router-link to="/" exact>Info</router-link></span>
           <span><router-link to="/scoreboard">Scoreboard</router-link></span>
-          <span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>
+          <!--<span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>-->
         </div>
 
         <div>

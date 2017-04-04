@@ -20,7 +20,7 @@ class BaseTest(unittest.TestCase):
 
     def login(self, email, password):
         with self.app:
-            rv = self.app.post('/login', data=dict(
+            rv = self.app.post('/admin/login', data=dict(
                 email=email,
                 password=password
             ), follow_redirects=True)
@@ -34,13 +34,16 @@ class BaseTest(unittest.TestCase):
 
     def logout(self):
         with self.app:
-            rv = self.app.get('/logout', follow_redirects=True)
-            self.assertEqual(rv.status_code, 200, "Failed to logout")
+            rv = self.app.get('/admin/logout', follow_redirects=True)
             self.assertNotEqual(current_user, None, "Failed to logout")
             self.assertTrue(current_user.is_anonymous, "Failed to logout")
 
             return rv
 
     def tearDown(self):
-        self.logout()
-        model.db.drop_all()
+        try:
+            self.logout()
+        except Exception:
+            self.fail("Failed to logout")
+        finally:
+            model.db.drop_all()

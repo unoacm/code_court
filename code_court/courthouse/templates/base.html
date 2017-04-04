@@ -6,21 +6,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="">
         <meta name="author" content="Ben Doan">
-        <link rel="icon" type="image/png" href="{{ url_for('main.send_static', path='img/cc.png') }}?1">
+        <link rel="icon" type="image/png" href="{{ url_for('main.send_flask_static', path='img/cc.png') }}?1">
 
         <title>code_court</title>
 
-        <script src="{{ url_for('main.send_static', path='js/jquery-2.2.4.min.js') }}"></script>
-        <script src="{{ url_for('main.send_static', path='js/bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('main.send_static', path='codemirror-5.23.0/codemirror.js') }}"></script>
-        <script src="{{ url_for('main.send_static', path='js-webshim/minified/polyfiller.js') }}"></script>
+        <script src="{{ url_for('main.send_flask_static', path='js/jquery-2.2.4.min.js') }}"></script>
+        <script src="{{ url_for('main.send_flask_static', path='js/bootstrap.min.js') }}"></script>
+        <script src="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/codemirror.js') }}"></script>
+        <script src="{{ url_for('main.send_flask_static', path='js-webshim/minified/polyfiller.js') }}"></script>
         <script>
             webshim.polyfill('forms-ext');
         </script>
 
-        <link href="{{ url_for('main.send_static', path='codemirror-5.23.0/codemirror.css') }}" rel="stylesheet">
-        <link href="{{ url_for('main.send_static', path='css/bootstrap.min.css') }}" rel="stylesheet">
-        <link href="{{ url_for('main.send_static', path='css/main.css') }}" rel="stylesheet">
+        <link href="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/codemirror.css') }}" rel="stylesheet">
+        <link href="{{ url_for('main.send_flask_static', path='css/bootstrap.min.css') }}" rel="stylesheet">
+        <link href="{{ url_for('main.send_flask_static', path='css/main.css') }}" rel="stylesheet">
     </head>
 
     <body>
