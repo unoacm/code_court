@@ -108,12 +108,19 @@ def add_lang():
     model = util.get_model()
 
     name = request.form.get("name")
+    syntax_mode = request.form.get("syntax_mode")
     is_enabled = request.form.get("is_enabled")
     run_script = request.form.get("run_script")
 
     if name is None:
         # TODO: give better feedback for failure
         current_app.logger.info("Undefined name when trying to add language")
+        abort(400)
+
+
+    if syntax_mode is None:
+        # TODO: give better feedback for failure
+        current_app.logger.info("Undefined syntax_mode when trying to add language")
         abort(400)
 
     # convert is_enabled to a bool
@@ -128,6 +135,7 @@ def add_lang():
     if lang_id: # edit
         lang = model.Language.query.filter_by(id=lang_id).one()
         lang.name = name
+        lang.syntax_mode = syntax_mode
         lang.is_enabled = is_enabled_bool
         lang.run_script = run_script
     else: # add
@@ -137,7 +145,7 @@ def add_lang():
             current_app.logger.info("Tried to add a duplicate language: %s", name)
             abort(400)
 
-        lang = model.Language(name, is_enabled_bool, run_script)
+        lang = model.Language(name, syntax_mode, is_enabled_bool, run_script)
         model.db.session.add(lang)
 
     model.db.session.commit()
@@ -170,6 +178,7 @@ def display_lang_add_form(lang_id):
                                action_label="Edit",
                                lang_id=lang_id,
                                name=lang[0].name,
+                               syntax_mode=lang[0].syntax_mode,
                                is_enabled=lang[0].is_enabled,
                                run_script=lang[0].run_script)
 
@@ -191,4 +200,3 @@ def is_dup_lang_name(name):
         return True
     else:
         return False
-

@@ -111,6 +111,7 @@ def get_language():
     """returns a test Language"""
     LANG_ARGS = {
         "name": "fakelang",
+        "syntax_mode": "clike",
         "is_enabled": True,
         "run_script": "#!/bin/bash\nfakelang $1",
     }
@@ -157,4 +158,3 @@ def get_contest():
     model.db.session.commit()
 
     return CONTEST_ARGS, contest
-

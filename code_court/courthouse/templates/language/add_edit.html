@@ -16,6 +16,10 @@
         <label for="name">Name</label>
         <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ name }}" required>
     </div>
+    <div class="form-group">
+        <label for="syntax_mode">syntax_mode</label>
+        <input type="text" class="form-control" id="syntax_mode" name="syntax_mode" placeholder="syntax_mode" value="{{ syntax_mode }}" required>
+    </div>
     <div class="checkbox">
         <label>
             <input type="checkbox" name="is_enabled" {% if is_enabled == True %}checked="checked"{% endif %}> is_enabled?
