@@ -3,6 +3,8 @@ import re
 
 import util
 
+from sqlalchemy.exc import IntegrityError
+
 from flask_login import login_required
 
 from flask import (
@@ -14,6 +16,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    flash,
 )
 
 languages = Blueprint('languages', __name__,
@@ -74,16 +77,21 @@ def languages_del(lang_id):
     """
     model = util.get_model()
 
-    langs = model.Language.query.filter_by(id=lang_id).all()
-    if len(langs) == 0:
-        current_app.logger.info("Can't delete lang %s, doesn't exist", lang_id)
-        abort(400)
+    lang = model.Language.query.filter_by(id=lang_id).scalar()
+    if lang is None:
+        current_app.logger.info("Can't delete lang \'%s\' as it doesn't exist", lang.name)
+        flash("Could not delete language \'{}\' as it does not exist.".format(lang.name), "danger")
+        return redirect(url_for("languages.languages_view"))
 
-    lang_name = langs[0].name
-    model.db.session.delete(langs[0])
-    model.db.session.commit()
+    try:
+        model.db.session.delete(lang)
+        model.db.session.commit()
+        flash("Deleted language \'{}\'".format(lang.name), "warning")
+    except IntegrityError:
+        model.db.session.rollback()
+        current_app.logger.info("IntegrityError: Could not delete language \'{}\'.".format(lang.name))
+        flash("IntegrityError: Could not delete language \'{}\' as it is referenced in another element in the database.".format(lang.name), "danger")
 
-    flash("Deleted language {}".format(lang_name), "warning")
     return redirect(url_for("languages.languages_view"))
 
 

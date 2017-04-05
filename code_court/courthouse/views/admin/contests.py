@@ -5,6 +5,8 @@ import sqlalchemy
 
 import util
 
+from sqlalchemy.exc import IntegrityError
+
 from flask_login import login_required
 
 from flask import (
@@ -15,6 +17,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    flash,
 )
 
 contests = Blueprint('contests', __name__,
@@ -74,11 +77,18 @@ def contests_del(contest_id):
 
     contest = model.Contest.query.filter_by(id=contest_id).scalar()
     if contest is None:
-        current_app.logger.info("Can't delete contest %s, doesn't exist", contest_id)
-        abort(400)
+        current_app.logger.info("Can't delete contest \'%s\' as it doesn't exist", contest.name)
+        flash("Could not delete contest \'{}\' as it does not exist.".format(contest.name), "danger")
+        return redirect(url_for("contests.contests_view"))
 
-    model.db.session.delete(contest)
-    model.db.session.commit()
+    try:
+        model.db.session.delete(contest)
+        model.db.session.commit()
+        flash("Deleted contest \'{}\'".format(contest.name), "warning")
+    except IntegrityError:
+        model.db.session.rollback()
+        current_app.logger.info("IntegrityError: Could not delete contest \'{}\'.".format(contest.name))
+        flash("IntegrityError: Could not delete contest \'{}\' as it is referenced in another element in the database.".format(contest.name), "danger")
 
     return redirect(url_for("contests.contests_view"))
 
