@@ -1,0 +1,40 @@
+{% extends "navbase.html" %}
+
+{% block content %}
+
+{% block view %}
+<p>view should be here</p>
+{% endblock %}
+
+<div class="modal fade" tabindex="-1" role="dialog" id="confirm">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Confirm Delete</h4>
+            <div>
+            <div class="modal-body">
+                This action cannot be undone.
+            </div
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-danger btn-sm" id="delete">Delete</button>
+                <button type="button" data-dismiss="modal" class="btn btn-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('button[id="del"]').on('click', function(e) {
+        var $form = $(this).closest('form');
+        e.preventDefault();
+        $('#confirm').modal({
+                backdrop: 'static',
+                keyboard: false
+            })
+        .on('click', '#delete', function(e) {
+            $form.trigger('submit');
+        });
+    });
+</script>
+
+{% endblock %}

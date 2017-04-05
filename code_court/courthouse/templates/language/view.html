@@ -1,5 +1,5 @@
-{% extends "navbase.html" %}
-{% block content %}
+{% extends "viewbase.html" %}
+{% block view %}
 <h1>Languages</h2>
 <table class="table">
     <thead>
@@ -21,7 +21,9 @@
             <td>...</td>
             <td>
                 <a href="{{ url_for('languages.languages_add', lang_id=language.id) }}" class="btn btn-info btn-xs">edit</a>
-                <a href="{{ url_for('languages.languages_del', lang_id=language.id) }}" class="btn btn-danger btn-xs">del</a>
+                <form action="{{ url_for('languages.languages_del', lang_id=language.id) }}" method="GET">
+                    <button type="submit" id="del" class="btn btn-danger btn-xs">del</button>
+                </form>
             </td>
         </tr>
         {% endfor %}

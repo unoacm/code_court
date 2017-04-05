@@ -1,5 +1,5 @@
-{% extends "navbase.html" %}
-{% block content %}
+{% extends "viewbase.html" %}
+{% block view %}
 <h1>Users</h1>
 <form action="{{ url_for('users.users_view') }}" method="POST">
     <div class="row">
@@ -47,11 +47,15 @@
             <td class="last_run_time">{{ metrics[user.id]["last_run"].submit_time }}</td>
             <td>
                 <a href="{{ url_for('users.users_add', user_id=user.id) }}" class="btn btn-info btn-xs">edit</a>
-                <a href="{{ url_for('users.users_del', user_id=user.id) }}" class="btn btn-danger btn-xs">del</a>
+                <form action="{{ url_for('users.users_del', user_id=user.id) }}" method="GET">
+                    <button type="submit" id="del" class="btn btn-danger btn-xs">del</button>
+                </form>
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 <a href="{{ url_for('users.users_add') }}" class="btn btn-primary">add</a>
+
 {% endblock %}
