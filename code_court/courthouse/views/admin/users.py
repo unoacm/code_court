@@ -6,6 +6,7 @@ import sqlalchemy
 import util
 
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from flask_login import login_required, current_user
 
@@ -17,6 +18,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    flash,
 )
 
 users = Blueprint('users', __name__,
@@ -109,17 +111,26 @@ def users_del(user_id):
     user = model.User.query.filter_by(id=user_id).scalar()
 
     if current_user.id == user.id:
-        current_app.logger.info("Can't delete user %s, user cannot delete itself", user_id)
-        abort(400)
+        current_app.logger.info("Can't delete user \'%s\' as a user cannot delete itself", user.email)
+        flash("Could not delete user \'{}\' because that's you.".format(user.email), "danger")
+        return redirect(url_for("users.users_view"))
 
     if user is None:
-        current_app.logger.info("Can't delete user %s, doesn't exist", user_id)
-        abort(400)
+        current_app.logger.info("Can't delete user \'%s\'' as it doesn't exist", user.email)
+        flash("Could not delete user \'{}\' as it does not exist.".format(user.email), "danger")
+        return redirect(url_for("users.users_view"))
 
-    model.db.session.delete(user)
-    model.db.session.commit()
-
+    try:
+        model.db.session.delete(user)
+        model.db.session.commit()
+        flash("Deleted user \'{}\'".format(user.email), "warning")
+    except IntegrityError:
+        model.db.session.rollback()
+        current_app.logger.info("IntegrityError: Could not delete user \'{}\'.".format(user.email))
+        flash("IntegrityError: Could not delete user \'{}\' as it is referenced in another element within the database.".format(user.email), "danger")
+        
     return redirect(url_for("users.users_view"))
+    
 
 
 def add_user():

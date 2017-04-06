@@ -4,6 +4,8 @@ import sqlalchemy
 
 import util
 
+from sqlalchemy.exc import IntegrityError
+
 from flask_login import login_required
 
 from flask import (
@@ -14,6 +16,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    flash,
 )
 
 problems = Blueprint('problems', __name__,
@@ -73,14 +76,20 @@ def problems_del(problem_id):
 
     problem = model.Problem.query.filter_by(id=problem_id).scalar()
     if problem is None:
-        current_app.logger.info("Can't delete problem %s, doesn't exist", problem_id)
+        current_app.logger.info("Can't delete problem \'%s\' as it doesn't exist", problem.slug)
+        flash("Could not delete problem \'{}\' as it does not exist.".format(problem.slug), "danger")
         abort(400)
 
-    model.db.session.delete(problem)
-    model.db.session.commit()
+    try:
+        model.db.session.delete(problem)
+        model.db.session.commit()
+        flash("Deleted problem \'{}\'".format(problem.slug), "warning")
+    except IntegrityError:
+        model.db.session.rollback()
+        current_app.logger.info("IntegrityError: Could not delete problem \'{}\'.".format(problem.slug))
+        flash("IntegrityError: Could not delete problem \'{}\' as it is referenced in another element in the database.".format(problem.slug), "danger")
 
     return redirect(url_for("problems.problems_view"))
-
 
 def add_problem():
     """
