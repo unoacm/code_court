@@ -158,6 +158,7 @@ def init_db(app):
         # TODO: extract these out into a folder
         model.db.session.add_all([
             model.Language("python",
+                     "python",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -165,6 +166,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("python2",
+                     "python",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -172,6 +174,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("perl",
+                     "perl",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -179,6 +182,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("lua",
+                     "lua",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -186,6 +190,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("nodejs",
+                     "javascript",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -193,6 +198,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("guile",
+                     "scheme",
                      True,
                      textwrap.dedent('''
                                         #!/bin/bash
@@ -200,6 +206,7 @@ def init_db(app):
                                         exit $?'''
             ).strip()),
             model.Language("fortran",
+                     "fortran",
                      True,
                      textwrap.dedent('''
                                     #!/bin/bash
@@ -218,6 +225,7 @@ def init_db(app):
                                     exit $?'''
             ).strip()),
             model.Language("c",
+                     "clike",
                      True,
                      textwrap.dedent('''
                                     #!/bin/bash
@@ -236,6 +244,7 @@ def init_db(app):
                                     exit $?'''
             ).strip()),
             model.Language("c++",
+                     "clike",
                      True,
                      textwrap.dedent('''
                                     #!/bin/bash
@@ -254,6 +263,7 @@ def init_db(app):
                                     exit $?'''
             ).strip()),
             model.Language("java",
+                     "clike",
                      True,
                      textwrap.dedent('''
                                     #!/bin/bash
@@ -272,6 +282,7 @@ def init_db(app):
                                     exit $?'''
             ).strip()),
             model.Language("ruby",
+                           "ruby",
                            True,
                            textwrap.dedent('''
                                             #!/bin/bash
