@@ -61,6 +61,7 @@ def get_writ():
     if chosen_run is None:
         return make_response(jsonify({'status': 'unavailable'}), 404)
 
+
     # TODO: use a better locking method to prevent dual execution
     chosen_run.started_execing_time = datetime.datetime.utcnow()
     model.db.session.commit()
@@ -249,6 +250,7 @@ def submit_run():
     run = model.Run(user, contest,
                     lang, problem, datetime.datetime.utcnow(), source_code,
                     run_input, run_output, is_submission)
+    run.state = "Judging"
 
     model.db.session.add(run)
     model.db.session.commit()

@@ -11,6 +11,7 @@ class LanguagesTestCase(BaseTest):
     def _lang_add(self, init_lang_name):
         rv = self.app.post('/admin/languages/add/', data={
             "name": init_lang_name,
+            "syntax_mode": "ruby",
             "is_enabled": "on",
             "run_script": "#!/bin/bash\nruby $1",
         }, follow_redirects=True)
@@ -27,6 +28,7 @@ class LanguagesTestCase(BaseTest):
         rv = self.app.post('/admin/languages/add/', data={
             "lang_id": lang_id,
             "name": new_name,
+            "syntax_mode": "ruby",
             "is_enabled": "on",
             "run_script": "#!/bin/bash\nruby $1",
         }, follow_redirects=True)

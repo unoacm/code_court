@@ -34,14 +34,18 @@ class Language(db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     """str: the language name"""
 
+    syntax_mode = db.Column(db.String, nullable=False)
+    """str: the syntax mode used by the code editor"""
+
     is_enabled = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the language is enabled"""
 
     run_script = db.Column(db.String, nullable=False)
     """str: script (with shebang) that compiles and runs scripts for this language"""
 
-    def __init__(self, name, is_enabled, run_script):
+    def __init__(self, name, syntax_mode, is_enabled, run_script):
         self.name = name
+        self.syntax_mode = syntax_mode
         self.is_enabled = is_enabled
         self.run_script = run_script
 
@@ -426,6 +430,9 @@ class Run(db.Model):
     is_priority = db.Column(db.Boolean, default=False)
     """bool: indicates whether or not a run has priority status, which expedites execution"""
 
+    state = db.Column(db.String)
+    """str: information about the execution of the program"""
+
     @property
     def is_judging(self):
         return (self.started_execing_time is not None and
@@ -457,6 +464,7 @@ class Run(db.Model):
             "is_submission": self.is_submission,
             "is_passed": self.is_passed,
             "is_priority": self.is_priority,
+            "state": self.state
         }
 
         if not self.is_submission:
