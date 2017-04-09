@@ -5,7 +5,7 @@
         <p>Run #{{ run.id }}</p>
         <a class="card-header-icon">
           <span class="tag">{{ run.language }}</span>
-          <span v-if="run.is_passed == null" class="tag is-info">
+          <span v-if="(run.is_submission && run.is_passed === null) || (!run.is_submission && run.run_output === null)" class="tag is-info">
             Judging <pulse-loader :loading="true" size="4px" color="#fff" />
           </span>
 

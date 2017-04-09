@@ -109,8 +109,9 @@ def submit_writ(run_id):
     run.run_output = request.json['output']
     run.finished_execing_time = datetime.datetime.utcnow()
 
-    is_correct = clean_output_string(run.run_output) == clean_output_string(run.correct_output)
-    run.is_passed = is_correct
+    if run.is_submission:
+        is_correct = clean_output_string(run.run_output) == clean_output_string(run.correct_output)
+        run.is_passed = is_correct
 
     model.db.session.commit()
     return "Good"

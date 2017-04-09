@@ -120,6 +120,9 @@ def main():
         except NoOutputException as e:
             logging.info("No output given from writ %s", writ.get('run_id'))
             submit_writ(write, "", "NoOutput")
+        except docker.errors.APIError:
+            return_writ_without_output(writ.get('run_id'))
+            traceback.print_exc()
         finally:
             signal.alarm(0)
             if container:
@@ -179,6 +182,13 @@ def submit_writ(writ, out, state):
     logging.info("Submitting writ %s", writ['run_id'])
     status = requests.post(writ['return_url'],
                            json={"output": out, "state": state}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+
+def return_writ_without_output(run_id):
+    logging.info("Returning writ without output: %s", run_id)
+
+    url = RETURN_URL + "/" + str(run_id)
+    status = requests.post(url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+
 
 def raise_timeout(signum, frame):
     raise TimedOutException()

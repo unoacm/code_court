@@ -12,12 +12,14 @@ from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 from os import path
 
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 from flask_cors import CORS
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager, current_user
+
+import werkzeug
 
 import model
 import util
@@ -60,7 +62,6 @@ def create_app():
     app.config['model'] = model
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
-    # app.debug = True
 
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
@@ -69,6 +70,11 @@ def create_app():
     app.jinja_env.filters['dt_to_time_str'] = model.dt_to_time_str
 
     db.init_app(app)
+    if not app.config['TESTING']:
+        setup_database(app)
+
+    with app.app_context():
+        app.config['MAX_CONTENT_LENGTH'] = util.get_configuration("max_output_length") * 1024 #kilobytes
 
     CORS(app)
 
@@ -97,12 +103,23 @@ def create_app():
     app.register_blueprint(runs, url_prefix='/admin/runs')
     app.register_blueprint(contests, url_prefix='/admin/contests')
     app.register_blueprint(defendant, url_prefix='/defendant')
-    app.register_blueprint(auth, url_prefix='')
+    app.register_blueprint(auth, url_prefix='/admin')
 
     @app.context_processor
     def inject_user():
         return {
         }
+
+    @app.route('/')
+    def defendant_index():
+        return send_from_directory('static/defendant-frontend', "index.html")
+
+    @app.route('/<path:path>')
+    def all(path):
+        try:
+            return send_from_directory('static/defendant-frontend', path)
+        except werkzeug.exceptions.NotFound as e:
+            return send_from_directory('static/defendant-frontend', "index.html")
 
     @app.errorhandler(404)
     def page_not_found(e):
@@ -125,7 +142,6 @@ def setup_database(app):
             db.create_all()
             db.session.commit()
             init_db(app)
-            app.config['MAX_CONTENT_LENGTH'] = util.get_configuration("max_output_length") * 1024 #kilobytes
             if not app.config['TESTING']:
                 dev_init_db(app)
 
@@ -329,7 +345,7 @@ def dev_init_db(app):
         now = datetime.datetime.utcnow()
         test_contest = model.Contest(name = "test_contest",
                                      start_time = now,
-                                     end_time = now + datetime.timedelta(minutes=60),
+                                     end_time = now + datetime.timedelta(minutes=30),
                                      is_public = True,
                                      activate_time = now,
                                      freeze_time = None,
@@ -350,7 +366,7 @@ def dev_init_db(app):
 
         hello_worlds = model.Problem(io_problem_type, "hello-worlds", "Hello, Worlds!",
                                           'Print the string "Hello, World!" n times',
-                                          "3", "Hello, World!\nHello, World!\nHello, World!",
+                                          "2", "Hello, World!\nHello, World!",
                                           "5", "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n")
         problems.append(hello_worlds)
         test_contest.problems.append(hello_worlds)
@@ -366,7 +382,7 @@ def dev_init_db(app):
 
         fibonacci = model.Problem(io_problem_type, "fibonoacci", "Fibonacci",
                                   "Give the nth number in the Fibonacci sequence",
-                                  "3", "2",
+                                  "4", "3",
                                   "5", "5")
         problems.append(fibonacci)
         test_contest.problems.append(fibonacci)
@@ -399,10 +415,10 @@ def dev_init_db(app):
 
         for problem, user in problem_subs:
             src_code = solutions[problem.name]
-            is_submission = random.randint(1, 7) == 5
+            is_submission = random.randint(1, 7) != 5
 
             is_priority = random.randint(1, 9) == 7
-            is_correct = random.randint(1, 3) == 3
+            is_correct = random.randint(1, 2) == 2
             if not is_correct:
                 src_code = src_code + "\nprint('Wait this isn\\'t correct')"
 
@@ -440,9 +456,7 @@ def setup_logging(app):
 
 app = create_app()
 
-# TODO: Moving setup functions here causes them to be executed repeatedly when nosetests is run
 setup_logging(app)
-setup_database(app)
 
 if __name__ == "__main__":
     PORT = 9191

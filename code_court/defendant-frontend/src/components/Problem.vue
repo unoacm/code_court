@@ -113,20 +113,28 @@ export default {
         problem_slug: this.problem.slug,
         source_code: this.sourceCode,
         is_submission: isSubmission,
-        user_test_input: isSubmission ? null : this.userTestInput
+        user_test_input: isSubmission ? null : this.testInput
       }).then((response) => {
       }).catch(function (error) {
         console.log(error)
       })
 
       // add a fake entry to runs
+      var runId = 0
+      if (this.problem.runs.length === 0) {
+        runId = 1
+      } else {
+        runId = this.problem.runs[this.problem.runs.length - 1].id + 1
+      }
       this.$store.commit('ADD_FAKE_RUN', {
-        id: this.problem.runs[this.problem.runs.length - 1].id + 1,
+        id: runId,
         problemSlug: this.problem.slug,
         language: this.lang,
         source_code: this.sourceCode,
-        run_input: isSubmission ? null : this.userTestInput,
-        is_submission: isSubmission
+        run_input: isSubmission ? null : this.testInput,
+        is_submission: isSubmission,
+        is_passed: null,
+        run_output: null
       })
     }
   },

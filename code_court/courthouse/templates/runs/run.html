@@ -42,11 +42,11 @@
     </tbody>
 </table>
 
-<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/mode/python/python.js') }}"></script>
-<script src="{{ url_for('main.send_static', path='js/diff_match_patch.js') }}"></script>
-<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.js') }}"></script>
+<script src="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/mode/python/python.js') }}"></script>
+<script src="{{ url_for('main.send_flask_static', path='js/diff_match_patch.js') }}"></script>
+<script src="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/addon/merge/merge.js') }}"></script>
 
-<link rel="stylesheet" href="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
+<link rel="stylesheet" href="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
 
 <a style="float: right;" href="{{ url_for('runs.toggle_priority', run_id=run.id) }}"
    {% if run.is_judged == False %}
@@ -88,7 +88,7 @@
     var source = CodeMirror.fromTextArea(
         document.getElementById("source_code"),
         {lineNumbers: true, readOnly: "nocursor"});
-    
+
     var input = CodeMirror.fromTextArea(
         document.getElementById("run_input"),
         {lineNumbers: true, readOnly: "nocursor"});

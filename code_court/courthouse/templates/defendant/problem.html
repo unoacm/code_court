@@ -11,8 +11,8 @@
 <pre>{{ problem.sample_output }}</pre>
 <br/>
 
-<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/mode/python/python.js') }}"></script>
-<script src="{{ url_for('main.send_static', path='codemirror-5.23.0/addon/display/placeholder.js') }}"></script>
+<script src="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/mode/python/python.js') }}"></script>
+<script src="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/addon/display/placeholder.js') }}"></script>
 
 <div class="panel panel-default">
     <form action="{{ url_for('defendant.problem', problem_id=problem.id) }}" method="POST" class="form">
