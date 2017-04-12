@@ -45,6 +45,11 @@ class APITestCase(BaseTest):
         self.assertIn('run_id', writ_data)
         self.assertEqual(writ_data['status'], 'found')
 
+        # verify the run has started but has not finished execing
+        run = model.Run.query.filter_by(id=writ_data['run_id']).one()
+        self.assertNotEqual(run.started_execing_time, None)
+        self.assertEqual(run.finished_execing_time, None)
+
         # verify no more writs
         rv = self.app.get('/api/get-writ', headers=auth_headers)
         self.assertEqual(rv.status_code, 404)
