@@ -139,10 +139,12 @@ export default {
     }
   },
   mounted: function () {
-    for (var problemSlug in this.problems) {
-      this.testInputBySlug[problemSlug] = this.problems[problemSlug].sample_input
+    if (this.problem) {
+      for (var problemSlug in this.problems) {
+        this.testInputBySlug[problemSlug] = this.problems[problemSlug].sample_input
+      }
+      this.testInput = this.problem.sample_input
     }
-    this.testInput = this.problem.sample_input
   },
   components: {
     Editor,

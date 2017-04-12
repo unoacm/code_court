@@ -203,6 +203,13 @@ class User(db.Model, UserMixin):
     def verify_password(self, plainext_password):
         return util.is_password_matching(plainext_password, self.hashed_password)
 
+    def merge_metadata(self, new_metadata_dict):
+        old_metadata_dict = json.loads(self.misc_data)
+
+        old_metadata_dict.update(new_metadata_dict)
+
+        self.misc_data = json.dumps(old_metadata_dict)
+
     @property
     def is_authenticated(self):
         return True

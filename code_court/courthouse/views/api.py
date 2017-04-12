@@ -259,10 +259,18 @@ def submit_run():
     return "{}"
 
 @api.route("/scores", methods=["GET"])
+@jwt_required
 def get_scoreboard():
     model = util.get_model()
 
-    contest = model.Contest.query.first() #TODO: replace with correct contest
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    if len(current_user.contests) == 0:
+        return make_response(jsonify({'error': 'User has no contests'}), 400)
+
+
+    contest = current_user.contests[0]
 
     defendants = model.User.query\
                     .filter(model.User.user_roles.any(id="defendant"))\
@@ -349,6 +357,10 @@ def make_user():
     if not all([email, name, password]):
         return make_response(jsonify({'error': 'Invalid request'}), 400)
 
+    existing_user = model.User.query.filter_by(email=email).scalar()
+    if existing_user:
+        return make_response(jsonify({'error': 'Invalid request, user already exists'}), 400)
+
     defedant_role = model.UserRole.query.filter_by(id="defendant").scalar()
 
     new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role])
@@ -356,7 +368,40 @@ def make_user():
     model.db.session.add(new_user)
     model.db.session.commit()
 
-    return make_response(jsonify({'status': 'Success'}), 400)
+    return make_response(jsonify({'status': 'Success'}), 200)
+
+
+@api.route("/update-user-metadata", methods=["POST"])
+@jwt_required
+def update_user_metadata():
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    if ("judge" not in current_user.user_roles and
+        "operator" not in current_user.user_roles):
+        return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+
+    user_email = request.json.get('user_email')
+    user_misc_metadata = request.json.get('misc_metadata')
+
+    if not all([user_email, user_misc_metadata]):
+        return make_response(jsonify({'error': 'Invalid request, missing field'}), 400)
+
+    if not isinstance(user_misc_metadata, dict):
+        return make_response(jsonify({'error': 'Invalid request, misc_metadata must be a dict'}), 400)
+
+    matching_user = model.User.query.filter_by(email=user_email).scalar()
+
+    if not matching_user:
+        return make_response(jsonify({'error': "Invalid request, Couldn't find user"}), 400)
+
+    matching_user.merge_metadata(user_misc_metadata)
+    model.db.session.commit()
+
+    return make_response(jsonify({'status': 'Success'}), 200)
+
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""

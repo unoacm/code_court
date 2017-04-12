@@ -19,11 +19,13 @@ auth = Blueprint('auth', __name__,
                 template_folder='templates')
 
 @auth.route("/login", methods=["GET"])
+@util.ssl_required
 def login_view():
     """general login page"""
     return render_template("auth/login.html")
 
 @auth.route("/login", methods=["POST"])
+@util.ssl_required
 def login_submit():
     """processes login requests"""
     model = util.get_model()
