@@ -63,6 +63,10 @@ def create_app():
     app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 
+    if app.config.get("SSL"):
+        app.config.update(dict(PREFERRED_URL_SCHEME = 'https'))
+
+
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
     app.jinja_env.filters['dt_to_str'] = model.dt_to_str

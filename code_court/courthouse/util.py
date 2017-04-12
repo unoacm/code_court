@@ -6,7 +6,7 @@ import bcrypt
 
 from flask_login import current_user
 
-from flask import current_app
+from flask import current_app, request
 
 class ModelMissingException(Exception):
     pass
@@ -118,3 +118,16 @@ def get_configuration(key):
         return str(config.val)
     else:
         return None
+
+def ssl_required(fn):
+    @wraps(fn)
+    def decorated_view(*args, **kwargs):
+        if current_app.config.get("SSL"):
+            if request.is_secure:
+                return fn(*args, **kwargs)
+            else:
+                return redirect(request.url.replace("http://", "https://"))
+
+        return fn(*args, **kwargs)
+
+    return decorated_view

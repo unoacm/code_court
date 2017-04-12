@@ -23,20 +23,26 @@ const store = new Vuex.Store({
         commit('SET_PROBLEMS', { problems: response.data })
       })
     },
-    LOAD_SCORES: function ({ commit }) {
-      axios.get('http://localhost:9191/api/scores').then((response) => {
-        commit('SET_SCORES', { scores: response.data })
-      })
+    LOAD_SCORES: function (context) {
+      if (context.state.loginToken) {
+        axios.get('http://localhost:9191/api/scores').then((response) => {
+          context.commit('SET_SCORES', { scores: response.data })
+        })
+      }
     },
     LOAD_USER: function (context) {
-      axios.get('http://localhost:9191/api/current-user').then((response) => {
-        context.commit('SET_USER', { user: response.data })
-      })
+      if (context.state.loginToken) {
+        axios.get('http://localhost:9191/api/current-user').then((response) => {
+          context.commit('SET_USER', { user: response.data })
+        })
+      }
     },
     LOAD_CONTEST: function (context) {
-      axios.get('http://localhost:9191/api/get-contest-info').then((response) => {
-        context.commit('SET_CONTEST', { contest: response.data })
-      })
+      if (context.state.loginToken) {
+        axios.get('http://localhost:9191/api/get-contest-info').then((response) => {
+          context.commit('SET_CONTEST', { contest: response.data })
+        })
+      }
     },
     LOAD_LANGS: function (context) {
       axios.get('http://localhost:9191/api/languages').then((response) => {
@@ -49,8 +55,10 @@ const store = new Vuex.Store({
         password: creds.password
       }).then((response) => {
         context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
-        context.dispatch('LOAD_USER')
-        context.dispatch('LOAD_PROBLEMS')
+        setTimeout(function () {
+          context.dispatch('LOAD_USER')
+          context.dispatch('LOAD_PROBLEMS')
+        }, 100)
       }).catch(function (error) {
         console.log(error)
       })
