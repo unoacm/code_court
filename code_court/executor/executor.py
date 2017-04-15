@@ -179,15 +179,24 @@ def get_writ():
     return writ
 
 def submit_writ(writ, out, state):
-    logging.info("Submitting writ %s", writ['run_id'])
-    status = requests.post(writ['return_url'],
-                           json={"output": out, "state": state}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    logging.info("Submitting writ %s, state: %s", writ['run_id'], state)
+    try:
+        status = requests.post(writ['return_url'],
+                               json={"output": out, "state": state}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    except requests.exceptions.ConnectionError:
+        try:
+            return_writ_without_output(writ['id'])
+        except:
+            pass
 
 def return_writ_without_output(run_id):
     logging.info("Returning writ without output: %s", run_id)
 
     url = RETURN_URL + "/" + str(run_id)
-    status = requests.post(url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    try:
+        status = requests.post(url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+    except requests.exceptions.ConnectionError:
+        logging.exception("Failed to return writ")
 
 
 def raise_timeout(signum, frame):
