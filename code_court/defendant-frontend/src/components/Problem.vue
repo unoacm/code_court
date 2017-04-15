@@ -100,7 +100,9 @@ export default {
       this.testInputBySlug[this.problem.slug] = this.testInput
     },
     problem: function () {
-      this.testInput = this.testInputBySlug[this.problem.slug]
+      if (this.problem) {
+        this.testInput = this.testInputBySlug[this.problem.slug]
+      }
     }
   },
   methods: {

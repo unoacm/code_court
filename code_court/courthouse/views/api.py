@@ -355,7 +355,7 @@ def make_user():
     password = request.json.get('password')
 
     if not all([email, name, password]):
-        return make_response(jsonify({'error': 'Invalid request'}), 400)
+        return make_response(jsonify({'error': 'Invalid request, missing fields'}), 400)
 
     existing_user = model.User.query.filter_by(email=email).scalar()
     if existing_user:
