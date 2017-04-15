@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import router from '../router'
 
 import createPersistedState from 'vuex-persistedstate'
 
@@ -12,37 +13,92 @@ const store = new Vuex.Store({
     problems: {},
     contest: {},
     scores: [],
-    user: null,
     langs: [],
+    alerts: [],
+    user: null,
     sourceCodes: {},
     loginToken: ''
   },
   actions: {
-    LOAD_PROBLEMS: function ({ commit }) {
-      axios.get('http://localhost:9191/api/problems').then((response) => {
-        commit('SET_PROBLEMS', { problems: response.data })
+    LOAD_PROBLEMS: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
+      }
+
+      axios.get(
+        'http://localhost:9191/api/problems',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },
-    LOAD_SCORES: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/scores').then((response) => {
-          context.commit('SET_SCORES', { scores: response.data })
-        })
+    LOAD_SCORES: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/scores',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_SCORES', { scores: response.data })
+      })
     },
-    LOAD_USER: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/current-user').then((response) => {
-          context.commit('SET_USER', { user: response.data })
-        })
+    LOAD_USER: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/current-user',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_USER', { user: response.data })
+      })
     },
-    LOAD_CONTEST: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/get-contest-info').then((response) => {
-          context.commit('SET_CONTEST', { contest: response.data })
-        })
+    LOAD_CONTEST: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/get-contest-info',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_CONTEST', { contest: response.data })
+      })
     },
     LOAD_LANGS: function (context) {
       axios.get('http://localhost:9191/api/languages').then((response) => {
@@ -55,12 +111,15 @@ const store = new Vuex.Store({
         password: creds.password
       }).then((response) => {
         context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
-        setTimeout(function () {
-          context.dispatch('LOAD_USER')
-          context.dispatch('LOAD_PROBLEMS')
-        }, 100)
+
+        context.dispatch('LOAD_USER')
+        context.dispatch('LOAD_PROBLEMS')
+
+        // clear old alerts here
+        router.push({ path: '/' })
       }).catch(function (error) {
         console.log(error)
+        context.commit('PUSH_ALERT', {text: 'Failed to login', severity: 'danger'})
       })
     },
     LOGOUT: function (context) {
@@ -70,6 +129,7 @@ const store = new Vuex.Store({
         context.commit('SET_USER', { user: null })
         context.commit('SET_PROBLEMS', { problems: {} })
       }, 200)
+      router.push({ path: '/' })
     }
   },
   mutations: {
@@ -87,6 +147,15 @@ const store = new Vuex.Store({
     },
     SET_CONTEST: (state, { contest }) => {
       state.contest = contest
+    },
+    PUSH_ALERT: (state, { text, severity }) => {
+      state.alerts.push({
+        text,
+        severity
+      })
+    },
+    DELETE_ALERTS: (state) => {
+      state.alerts = []
     },
     ADD_FAKE_RUN: (state, run) => {
       state.problems[run.problemSlug].runs.push(run)

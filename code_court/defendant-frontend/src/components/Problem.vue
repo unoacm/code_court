@@ -100,7 +100,9 @@ export default {
       this.testInputBySlug[this.problem.slug] = this.testInput
     },
     problem: function () {
-      this.testInput = this.testInputBySlug[this.problem.slug]
+      if (this.problem) {
+        this.testInput = this.testInputBySlug[this.problem.slug]
+      }
     }
   },
   methods: {
@@ -134,7 +136,8 @@ export default {
         run_input: isSubmission ? null : this.testInput,
         is_submission: isSubmission,
         is_passed: null,
-        run_output: null
+        run_output: null,
+        state: 'Judging'
       })
     }
   },

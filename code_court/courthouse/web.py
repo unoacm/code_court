@@ -431,6 +431,7 @@ def dev_init_db(app):
                                  src_code, problem.secret_input, problem.secret_output, is_submission)
             test_run.is_correct = is_correct
             test_run.is_priority = is_priority
+            test_run.state = "Judging"
 
             model.db.session.add(test_run)
         model.db.session.commit()

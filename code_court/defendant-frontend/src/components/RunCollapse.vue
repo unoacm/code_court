@@ -5,8 +5,8 @@
         <p>Run #{{ run.id }}</p>
         <a class="card-header-icon">
           <span class="tag">{{ run.language }}</span>
-          <span v-if="(run.is_submission && run.is_passed === null) || (!run.is_submission && run.run_output === null)" class="tag is-info">
-            Judging <pulse-loader :loading="true" size="4px" color="#fff" />
+          <span  class="tag is-info">
+            {{ run.state }} <pulse-loader v-if="run.state == 'Judging'" :loading="true" size="4px" color="#fff" />
           </span>
 
           <span v-if="run.is_submission" class="tag is-warning">Submission</span>
@@ -37,7 +37,6 @@
         </div>
       </div>
     </article>
-    <br/>
   </div>
 </template>
 
@@ -93,6 +92,14 @@ export default {
 .slide-fade-enter, .slide-fade-leave-to {
   transform: translateX(10px);
   opacity: 0;
+}
+
+.message {
+  margin-bottom: 15px;
+}
+
+.message-header {
+  padding: .1em .75em;
 }
 
 .message-header.hasToggle {
