@@ -20,31 +20,85 @@ const store = new Vuex.Store({
     loginToken: ''
   },
   actions: {
-    LOAD_PROBLEMS: function ({ commit }) {
-      axios.get('http://localhost:9191/api/problems').then((response) => {
-        commit('SET_PROBLEMS', { problems: response.data })
+    LOAD_PROBLEMS: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
+      }
+
+      axios.get(
+        'http://localhost:9191/api/problems',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },
-    LOAD_SCORES: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/scores').then((response) => {
-          context.commit('SET_SCORES', { scores: response.data })
-        })
+    LOAD_SCORES: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/scores',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_SCORES', { scores: response.data })
+      })
     },
-    LOAD_USER: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/current-user').then((response) => {
-          context.commit('SET_USER', { user: response.data })
-        })
+    LOAD_USER: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/current-user',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_USER', { user: response.data })
+      })
     },
-    LOAD_CONTEST: function (context) {
-      if (context.state.loginToken) {
-        axios.get('http://localhost:9191/api/get-contest-info').then((response) => {
-          context.commit('SET_CONTEST', { contest: response.data })
-        })
+    LOAD_CONTEST: function (context, loginToken = null) {
+      if (!loginToken) {
+        if (!context.state.loginToken) {
+          return
+        } else {
+          loginToken = context.state.loginToken
+        }
       }
+
+      axios.get(
+        'http://localhost:9191/api/get-contest-info',
+        {
+          headers: {
+            'Authorization': 'Bearer ' + loginToken
+          }
+        }
+      ).then((response) => {
+        context.commit('SET_CONTEST', { contest: response.data })
+      })
     },
     LOAD_LANGS: function (context) {
       axios.get('http://localhost:9191/api/languages').then((response) => {
@@ -57,11 +111,11 @@ const store = new Vuex.Store({
         password: creds.password
       }).then((response) => {
         context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
-        setTimeout(function () {
-          context.dispatch('LOAD_USER')
-          context.dispatch('LOAD_PROBLEMS')
-        }, 100)
-        context.commit('DELETE_ALERTS')
+
+        context.dispatch('LOAD_USER')
+        context.dispatch('LOAD_PROBLEMS')
+
+        // clear old alerts here
         router.push({ path: '/' })
       }).catch(function (error) {
         console.log(error)
