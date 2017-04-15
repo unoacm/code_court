@@ -37,7 +37,6 @@
         </div>
       </div>
     </article>
-    <br/>
   </div>
 </template>
 
@@ -93,6 +92,14 @@ export default {
 .slide-fade-enter, .slide-fade-leave-to {
   transform: translateX(10px);
   opacity: 0;
+}
+
+.message {
+  margin-bottom: 15px;
+}
+
+.message-header {
+  padding: .1em .75em;
 }
 
 .message-header.hasToggle {
