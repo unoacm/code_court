@@ -136,9 +136,9 @@ def add_problem():
         problem.secret_output = secret_output
     else: # add
         # check if is duplicate
-        if is_dup_problem_name(name):
+        if is_dup_problem_slug(slug):
             # TODO: give better feedback for failure
-            current_app.logger.info("Tried to add a duplicate problem: %s", name)
+            current_app.logger.info("Tried to add a duplicate problem: %s", slug)
             abort(400)
 
         problem = model.Problem(problem_type,
@@ -188,18 +188,18 @@ def display_problem_add_form(problem_id):
 
 
 ## Util functions
-def is_dup_problem_name(name):
+def is_dup_problem_slug(slug):
     """
-    Checks if a name is a duplicate of another problem
+    Checks if a slug is a duplicate of another problem
 
     Params:
-        name (str): the problem name to test
+        slug (str): the problem slug to test
 
     Returns:
-        bool: True if the name is a duplicate, False otherwise
+        bool: True if the slug is a duplicate, False otherwise
     """
     model = util.get_model()
-    dup_problem = model.Problem.query.filter_by(name=name).scalar()
+    dup_problem = model.Problem.query.filter_by(slug=slug).scalar()
     if dup_problem:
         return True
     else:
