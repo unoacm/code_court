@@ -32,7 +32,7 @@
         <label for="name">Slug*</label>
         <input type="text" class="form-control" id="slug" name="slug"
                placeholder="Slug" value="{{ problem.slug }}" maxlength="10"
-               pattern="[A-Za-z0-9_\-]" required>
+               pattern="[A-Za-z0-9_\-]*" required>
         <p class="form-text text-muted">
         Maximum of 10 characters, and must only contain the following characters, <code>A-Z, a-z, 0-9, -, _</code>
         </p>
