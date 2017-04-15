@@ -136,7 +136,8 @@ export default {
         run_input: isSubmission ? null : this.testInput,
         is_submission: isSubmission,
         is_passed: null,
-        run_output: null
+        run_output: null,
+        state: 'Judging'
       })
     }
   },

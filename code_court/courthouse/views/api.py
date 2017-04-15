@@ -106,12 +106,16 @@ def submit_writ(run_id):
         current_app.logger.debug("Received writ without the output field")
         abort(400)
 
-    run.run_output = request.json['output']
+    run.run_output = request.json.get('output')
+    run.state = request.json.get('state') or run.state
     run.finished_execing_time = datetime.datetime.utcnow()
 
     if run.is_submission:
         is_correct = clean_output_string(run.run_output) == clean_output_string(run.correct_output)
         run.is_passed = is_correct
+
+        if run.state == "Successful" and not is_correct:
+            run.state = "Failed"
 
     model.db.session.commit()
     return "Good"
