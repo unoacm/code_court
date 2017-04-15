@@ -19,8 +19,8 @@
     <div class="form-group">
         <label>Activate Date and Time</label>
         <div class="form-inline">
-            <input type="date" class="form-control" id="activate_date" name="activate_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.activate_time and contest.activate_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
-            <input type="time" class="form-control" id="activate_time" name="activate_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.activate_time and contest.activate_time|dt_to_time_str }}" pattern="\d{2}:\d{2}" required>
+            <input type="date" class="form-control" id="activate_date" name="activate_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.activate_time and contest.activate_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}">
+            <input type="time" class="form-control" id="activate_time" name="activate_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.activate_time and contest.activate_time|dt_to_time_str }}" pattern="\d{2}:\d{2}">
         </div>
     </div>
     <div class="form-group">
@@ -33,8 +33,8 @@
     <div class="form-group">
         <label>Freeze Date and Time</label>
         <div class="form-inline">
-            <input type="date" class="form-control" id="freeze_date" name="freeze_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.freeze_time and contest.freeze_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
-            <input type="time" class="form-control" id="freeze_time" name="freeze_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.freeze_time and contest.freeze_time|dt_to_time_str }}" pattern="\d{2}:\d{2}" required>
+            <input type="date" class="form-control" id="freeze_date" name="freeze_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.freeze_time and contest.freeze_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}">
+            <input type="time" class="form-control" id="freeze_time" name="freeze_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.freeze_time and contest.freeze_time|dt_to_time_str }}" pattern="\d{2}:\d{2}">
         </div>
     </div>
     <div class="form-group">
@@ -47,8 +47,8 @@
     <div class="form-group">
         <label>Deactivate Date and Time</label>
         <div class="form-inline">
-            <input type="date" class="form-control" id="deactivate_date" name="deactivate_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.deactivate_time and contest.deactivate_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
-            <input type="time" class="form-control" id="deactivate_time" name="deactivate_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.deactivate_time and contest.deactivate_time|dt_to_time_str }}" pattern="\d{2}:\d{2}" required>
+            <input type="date" class="form-control" id="deactivate_date" name="deactivate_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.deactivate_time and contest.deactivate_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}">
+            <input type="time" class="form-control" id="deactivate_time" name="deactivate_time" placeholder="HH:MM" title="A valid time format is of the form HH:MM" value="{{ contest.deactivate_time and contest.deactivate_time|dt_to_time_str }}" pattern="\d{2}:\d{2}">
         </div>
     </div>
     <div class="checkbox">
