@@ -129,6 +129,7 @@ const store = new Vuex.Store({
         context.commit('SET_USER', { user: null })
         context.commit('SET_PROBLEMS', { problems: {} })
       }, 200)
+      router.push({ path: '/' })
     }
   },
   mutations: {

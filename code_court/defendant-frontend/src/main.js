@@ -14,6 +14,14 @@ Vue.config.productionTip = false
 
 axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
 
+router.beforeEach((to, from, next) => {
+  if (to.name !== 'login' && !store.state.loginToken) {
+    next({name: 'login'})
+  } else {
+    next()
+  }
+})
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
