@@ -24,6 +24,10 @@
     </div>
     <hr>
 
+    <div class="container alert-container">
+      <notification v-for="alert in localAlerts" :key="alert.text" :message="alert.text" :severity="alert.severity"/>
+    </div>
+
     <div class="container">
       <router-view></router-view>
     </div>
@@ -31,8 +35,15 @@
 </template>
 
 <script>
+import Notification from '@/components/Notification'
+
 export default {
   name: 'app',
+  data () {
+    return {
+      localAlerts: []
+    }
+  },
   created: function () {
   },
   computed: {
@@ -41,6 +52,9 @@ export default {
     },
     user () {
       return this.$store.state.user
+    },
+    alerts () {
+      return this.$store.state.alerts
     }
   },
   methods: {
@@ -55,7 +69,16 @@ export default {
       }
       return false
     }
-  }
+  },
+  watch: {
+    alerts: function () {
+      if (this.alerts.length > 0) {
+        this.localAlerts = this.localAlerts.concat(this.alerts)
+        this.$store.commit('DELETE_ALERTS')
+      }
+    }
+  },
+  components: {Notification}
 }
 </script>
 
@@ -127,6 +150,10 @@ export default {
 
 .navigation div a.logout:hover {
   background-color: #872323;
+}
+
+.alert-container {
+  margin-bottom:20px;
 }
 
 </style>
