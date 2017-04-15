@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import router from '../router'
 
 import createPersistedState from 'vuex-persistedstate'
 
@@ -12,8 +13,9 @@ const store = new Vuex.Store({
     problems: {},
     contest: {},
     scores: [],
-    user: null,
     langs: [],
+    alerts: [],
+    user: null,
     sourceCodes: {},
     loginToken: ''
   },
@@ -59,8 +61,11 @@ const store = new Vuex.Store({
           context.dispatch('LOAD_USER')
           context.dispatch('LOAD_PROBLEMS')
         }, 100)
+        context.commit('DELETE_ALERTS')
+        router.push({ path: '/' })
       }).catch(function (error) {
         console.log(error)
+        context.commit('PUSH_ALERT', {text: 'Failed to login', severity: 'danger'})
       })
     },
     LOGOUT: function (context) {
@@ -87,6 +92,15 @@ const store = new Vuex.Store({
     },
     SET_CONTEST: (state, { contest }) => {
       state.contest = contest
+    },
+    PUSH_ALERT: (state, { text, severity }) => {
+      state.alerts.push({
+        text,
+        severity
+      })
+    },
+    DELETE_ALERTS: (state) => {
+      state.alerts = []
     },
     ADD_FAKE_RUN: (state, run) => {
       state.problems[run.problemSlug].runs.push(run)
