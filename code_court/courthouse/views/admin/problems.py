@@ -1,6 +1,7 @@
 import json
 import re
 import sqlalchemy
+import zipfile
 
 import util
 
@@ -36,6 +37,88 @@ def problems_view():
     problems = model.Problem.query.all()
 
     return render_template("problems/view.html", problems=problems)
+
+
+def ini_to_dict(raw_ini):
+    ini = {}
+    for line in raw_ini.split("\n"):
+        if line.strip() == "":
+            continue
+
+        keyval = re.match('\s*(\w+)\s*=\s*"(.*)"\s*', line)
+        if keyval == None:
+            keyval = re.match('\s*(\w+)\s*=\s*(.*)\s*', line)
+
+        key, val = keyval.groups()
+
+        ini[key] = val
+    return ini
+
+def extract_problem_data(problem_zip_file):
+    problem_zip_file = zipfile.ZipFile(problem_zip_file)
+    raw_ini = problem_zip_file.read("problem.ini").decode('utf-8')
+    ini = ini_to_dict(raw_ini)
+    data = {
+        "slug": ini['short_name'],
+        "name": ini['name'],
+        "problem_statement": problem_zip_file.read("problem.md").decode('utf-8'),
+        "sample_input": problem_zip_file.read("sample-input.txt").decode('utf-8'),
+        "sample_output": problem_zip_file.read("sample-output.txt").decode('utf-8'),
+        "secret_input": problem_zip_file.read("secret-input.txt").decode('utf-8'),
+        "secret_output": problem_zip_file.read("secret-output.txt").decode('utf-8'),
+    }
+    return data
+
+
+@problems.route("/batch_upload/", methods=["POST"])
+@util.login_required("operator")
+def problems_batch_upload():
+    """
+    Batch adds or updates problems from zip files.
+
+    Params:
+        None
+
+    Returns:
+        a redirect to the problem view page
+    """
+    model = util.get_model()
+    if request.method == "POST": # process added/edited problem
+        input_output = model.ProblemType.query.filter_by(name="input-output").one()
+
+        problem_zip_files = request.files.getlist("problems")
+
+        for problem_zip_file in problem_zip_files:
+            data = extract_problem_data(problem_zip_file)
+
+            problem_id = request.form.get('problem_id')
+            if is_dup_problem_slug(data['slug']): # update
+                problem = model.Problem.query.filter_by(slug=data['slug']).one()
+                problem.problem_type = input_output
+                problem.name = data['name']
+                problem.problem_statement = data['problem_statement']
+                problem.sample_input = data['sample_input']
+                problem.sample_output = data['sample_output']
+                problem.secret_input = data['secret_input']
+                problem.secret_output = data['secret_output']
+            else: # add
+                problem = model.Problem(problem_type=input_output,
+                                        slug=data['slug'],
+                                        name=data['name'],
+                                        problem_statement=data['problem_statement'],
+                                        sample_input=data['sample_input'],
+                                        sample_output=data['sample_output'],
+                                        secret_input=data['secret_input'],
+                                        secret_output=data['secret_output'])
+                model.db.session.add(problem)
+
+        model.db.session.commit()
+
+        return redirect(url_for("problems.problems_view"))
+    else:
+        current_app.logger.info("invalid problem batch upload request method: %s", request.method)
+        abort(400)
+
 
 @problems.route("/add/", methods=["GET", "POST"], defaults={'problem_id': None})
 @problems.route("/edit/<int:problem_id>/", methods=["GET"])
