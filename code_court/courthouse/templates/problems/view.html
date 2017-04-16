@@ -33,4 +33,13 @@
     </tbody>
 </table>
 <a href="{{ url_for('problems.problems_add') }}" class="btn btn-primary">add</a>
+<hr />
+
+<h2>Batch upload problem zip files</h2>
+
+<form action="{{ url_for('problems.problems_batch_upload') }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="problems" multiple>
+    <br />
+    <button type="submit" class="btn">upload</button>
+</form>
 {% endblock %}
