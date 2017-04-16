@@ -1,6 +1,10 @@
 {% extends "viewbase.html" %}
 {% block view %}
 <h1>Users</h1>
+
+{% import 'pagination.html' as pagination %}
+{{ pagination.render('configurations.configurations_view', configs) }}
+
 <table class="table">
     <thead>
         <tr>
@@ -13,7 +17,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for config in configs %}
+        {% for config in configs.items %}
         <tr>
             <td class="config_id">{{ config.id }}</td>
             <td class="config_key">{{ config.key }}</td>

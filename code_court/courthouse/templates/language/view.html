@@ -1,6 +1,10 @@
 {% extends "viewbase.html" %}
 {% block view %}
 <h1>Languages</h2>
+
+{% import 'pagination.html' as pagination %}
+{{ pagination.render('languages.languages_view', languages) }}
+
 <table class="table">
     <thead>
         <tr>
@@ -14,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for language in languages %}
+        {% for language in languages.items %}
         <tr>
             <td class="lang_id">{{ language.id }}</td>
             <td class="lang_name">{{ language.name }}</td>

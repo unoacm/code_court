@@ -1,7 +1,7 @@
 {% extends "viewbase.html" %}
 {% block view %}
 <h1>Users</h1>
-<form action="{{ url_for('users.users_view') }}" method="POST">
+<form action="{{ url_for('users.users_view') }}" method="GET">
     <div class="row">
         <div class="form-group col-xs-9 col-sm-10">
             <input type="text" class="form-control" id="search" name="search" 
@@ -23,6 +23,17 @@
         </select>
     </div>
 </form>
+
+{% import 'pagination.html' as pagination %}
+{% if search and user_role %}
+{{ pagination.render('users.users_view', users_pagination, '?search=' + search + '&user_role=' + user_role) }}
+{% elif search %}
+{{ pagination.render('users.users_view', users_pagination, '?search=' + search) }}
+{% elif user_role %}
+{{ pagination.render('users.users_view', users_pagination, '?user_role=' + user_role) }}
+{% else %}
+{{ pagination.render('users.users_view', users_pagination) }}
+{% endif %}
 
 <table class="table">
     <thead>

@@ -23,9 +23,10 @@ from flask import (
 contests = Blueprint('contests', __name__,
                   template_folder='templates/contests')
 
-@contests.route("/", methods=["GET"])
+@contests.route("/", methods=["GET"], defaults={'page': 1})
+@contests.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
-def contests_view():
+def contests_view(page):
     """
     The contest view page
 
@@ -34,7 +35,7 @@ def contests_view():
     """
     model = util.get_model()
 
-    contests = model.Contest.query.all()
+    contests = model.Contest.query.paginate(page, 30)
 
     return render_template("contests/view.html", contests=contests)
 
