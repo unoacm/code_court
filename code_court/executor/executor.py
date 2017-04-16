@@ -119,7 +119,7 @@ def main():
             continue
         except NoOutputException as e:
             logging.info("No output given from writ %s", writ.get('run_id'))
-            submit_writ(write, "", "NoOutput")
+            submit_writ(writ, "", "NoOutput")
         except docker.errors.APIError:
             return_writ_without_output(writ.get('run_id'))
             traceback.print_exc()
