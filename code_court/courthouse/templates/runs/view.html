@@ -1,10 +1,10 @@
-{% extends "navbase.html" %}
-{% block content %}
+{% extends "viewbase.html" %}
+{% block view %}
 <h1>Runs</h1>
 
 <p class="text-info">Total Runs Pending Execution: <b>{{ num_pending }}</b></p>
 
-<form action="{{ url_for('runs.runs_view') }}" method="POST" class="form">
+<form action="{{ url_for('runs.runs_view') }}" method="GET" class="form">
     <div class="row">
         <div class="form-group col-md-6">
             <select class="form-control" id="run_type" name="run_type" onchange="this.form.submit()">
@@ -23,6 +23,17 @@
     </div>
 </form>
 
+{% import 'pagination.html' as pagination %}
+{% if run_type and run_status %}
+{{ pagination.render('runs.runs_view', runs, '?run_type=' + run_type + '&run_status=' + run_status) }}
+{% elif run_type %}
+{{ pagination.render('runs.runs_view', runs, '?run_type=' + run_type) }}
+{% elif run_status %}
+{{ pagination.render('runs.runs_view', runs, '?run_status=' + run_status) }}
+{% else %}
+{{ pagination.render('runs.runs_view', runs) }}
+{% endif %}
+
 <table class="table">
     <thead>
         <tr>
@@ -39,7 +50,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for run in runs %}
+        {% for run in runs.items %}
 
         <tr>
             <td class="run_id">{{ run.id }}</td>

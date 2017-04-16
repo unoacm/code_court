@@ -22,9 +22,10 @@ from flask import (
 problems = Blueprint('problems', __name__,
                   template_folder='templates/problems')
 
-@problems.route("/", methods=["GET"])
+@problems.route("/", methods=["GET"], defaults={'page': 1})
+@problems.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
-def problems_view():
+def problems_view(page):
     """
     The problem view page
 
@@ -33,7 +34,7 @@ def problems_view():
     """
     model = util.get_model()
 
-    problems = model.Problem.query.all()
+    problems = model.Problem.query.paginate(page, 30)
 
     return render_template("problems/view.html", problems=problems)
 

@@ -1,6 +1,10 @@
 {% extends "viewbase.html" %}
 {% block view %}
 <h1>Contests</h2>
+
+{% import 'pagination.html' as pagination %}
+{{ pagination.render('contests.contests_view', contests) }}
+
 <table class="table">
     <thead>
         <tr>
@@ -17,7 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for contest in contests %}
+        {% for contest in contests.items %}
         <tr>
             <td class="contest_id">{{ contest.id }}</td>
             <td class="contest_name">{{ contest.name }}</td>

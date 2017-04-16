@@ -22,9 +22,10 @@ runs = Blueprint('runs', __name__,
 class ModelMissingException(Exception):
     pass
 
-@runs.route("/", methods=["GET", "POST"])
+@runs.route("/", methods=["GET"], defaults={'page': 1})
+@runs.route("/<int:page>/", methods=["GET"])
 @util.login_required("operator")
-def runs_view():
+def runs_view(page):
     """
     The runs view page
 
@@ -33,8 +34,8 @@ def runs_view():
     """
     model = util.get_model()
 
-    run_type = request.form.get("run_type")
-    run_status = request.form.get("run_status")
+    run_type = request.args.get("run_type")
+    run_status = request.args.get("run_status")
 
     num_pending = model.Run.query.filter_by(finished_execing_time=None).count()
 
@@ -50,7 +51,7 @@ def runs_view():
     elif run_status == "pending":
         run_query = run_query.filter_by(finished_execing_time=None)
 
-    runs = run_query.order_by(model.Run.submit_time.desc()).all()
+    runs = run_query.order_by(model.Run.submit_time.desc()).paginate(page, 30)
 
     return render_template("runs/view.html", runs=runs,
                                              run_type=run_type,

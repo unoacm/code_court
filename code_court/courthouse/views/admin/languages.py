@@ -25,9 +25,10 @@ languages = Blueprint('languages', __name__,
 class ModelMissingException(Exception):
     pass
 
-@languages.route("/", methods=["GET"])
+@languages.route("/", methods=["GET"], defaults={'page': 1})
+@languages.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
-def languages_view():
+def languages_view(page):
     """
     The language view page
 
@@ -36,7 +37,7 @@ def languages_view():
     """
     model = util.get_model()
 
-    languages = model.Language.query.all()
+    languages = model.Language.query.paginate(page, 30)
 
     return render_template("language/view.html", languages=languages)
 

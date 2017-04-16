@@ -24,9 +24,10 @@ from flask import (
 users = Blueprint('users', __name__,
                   template_folder='templates/users')
 
-@users.route("/", methods=["GET", "POST"])
+@users.route("/", methods=["GET"], defaults={'page': 1})
+@users.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
-def users_view():
+def users_view(page):
     """
     The user view page
 
@@ -35,24 +36,20 @@ def users_view():
     """
     model = util.get_model()
 
-    user_search = request.form.get("search")
-    user_role = request.form.get("user_role")
+    user_search = request.args.get("search")
+    user_role = request.args.get("user_role")
 
-    if user_search is not None:
+    users_query = model.User.query
+
+    if user_search:
         term = '%' + user_search + '%'
-        user_query = model.User.query.filter(or_(model.User.name.ilike(term), 
-                                                 model.User.email.ilike(term)))
-    else:
-        user_query = model.User.query.all()
-
-    if user_role is None or user_role == "all":
-        users = user_query
-    else:
-        users = []
-        for user in user_query:
-            for role in user.user_roles:
-                if role.id == user_role:
-                    users.append(user)
+        users_query = users_query.filter(or_(model.User.name.ilike(term), 
+                                             model.User.email.ilike(term)))
+    if user_role and user_role != "all":
+        users_query = users_query.join(model.User.user_roles).filter(model.UserRole.id==user_role)
+    
+    users_pagination = users_query.paginate(page, 3)
+    users = users_pagination.items
 
     metrics = {}
     for user in users:
@@ -65,7 +62,8 @@ def users_view():
 
         metrics[user.id] = user_metrics
 
-    return render_template("users/view.html", users=users,
+    return render_template("users/view.html", users_pagination=users_pagination,
+                                              users=users,
                                               metrics=metrics,
                                               user_role=user_role, 
                                               search=user_search)

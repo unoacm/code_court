@@ -22,9 +22,10 @@ from flask import (
 configurations = Blueprint('configurations', __name__,
                   template_folder='templates/configurations')
 
-@configurations.route("/", methods=["GET", "POST"])
+@configurations.route("/", methods=["GET", "POST"], defaults={'page': 1})
+@configurations.route("/<int:page>", methods=["GET", "POST"])
 @util.login_required("operator")
-def configurations_view():
+def configurations_view(page):
     """
     The config view page
 
@@ -35,7 +36,7 @@ def configurations_view():
 
     config_query = model.Configuration.query
 
-    configs = config_query.order_by(model.Configuration.category.asc()).all()
+    configs = config_query.order_by(model.Configuration.category.asc()).paginate(page, 30)
 
     return render_template("configurations/view.html", configs=configs)
 
