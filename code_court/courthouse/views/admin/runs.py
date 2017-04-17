@@ -59,7 +59,7 @@ def runs_view(page):
                                              num_pending=num_pending)
 
 
-@runs.route("/<int:run_id>/", methods=["GET"])
+@runs.route("/run/<int:run_id>/", methods=["GET"])
 @util.login_required("operator")
 def runs_run(run_id):
     """

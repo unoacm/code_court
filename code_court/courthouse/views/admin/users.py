@@ -48,7 +48,7 @@ def users_view(page):
     if user_role and user_role != "all":
         users_query = users_query.join(model.User.user_roles).filter(model.UserRole.id==user_role)
     
-    users_pagination = users_query.paginate(page, 3)
+    users_pagination = users_query.paginate(page, 30)
     users = users_pagination.items
 
     metrics = {}
