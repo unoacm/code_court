@@ -265,7 +265,7 @@ def submit_run():
         run.started_execing_time = datetime.datetime.utcnow()
         run.finished_execing_time = datetime.datetime.utcnow()
         resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
-    elif datetime.datetime.utcnow < contest.start_time:
+    elif datetime.datetime.utcnow() < contest.start_time:
         run.state = "ContestHasNotBegun"
         run.started_execing_time = datetime.datetime.utcnow()
         run.finished_execing_time = datetime.datetime.utcnow()
