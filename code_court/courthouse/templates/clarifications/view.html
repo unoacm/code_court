@@ -1,0 +1,35 @@
+{% extends "viewbase.html" %}
+{% block view %}
+<h1>Clarifications</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>subject</th>
+            <th>contents</th>
+            <th>initiating_user</th>
+            <th>is_public</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for clarification in clarifications %}
+        <tr>
+            <td class="clar_id">{{ clarification.id }}</td>
+            <td class="clar_subject">{{ clarification.subject }}</td>
+            <td class="clar_contents">{{ clarification.contents }}</td>
+            <td class="clar_initiating_user">{{ clarification.initiating_user }}</td>
+            <td class="clar_is_public">{{ clarification.is_public }}</td>
+            <td></td>
+            <td>
+                <form action="{{ url_for('clarifications.clarifications_del', clar_id=clarification.id) }}" method="GET">
+                    <button type="submit" id="del" class="btn btn-danger btn-xs">del</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('clarifications.clarifications_add') }}" class="btn btn-primary">add</a>
+{% endblock %}

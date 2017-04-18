@@ -186,6 +186,53 @@ def get_all_problems():
 
     return make_response(jsonify(resp), 200)
 
+@api.route("/clarifications", methods=["GET"])
+@jwt_required
+def get_clarifications():
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    clarifications = model.Clarification.query.filter(or_(is_public=True,
+        initiating_user=user)).all()
+
+    resp = [x.get_output_dict for x in clarifications]
+
+    return make_response(jsonify(resp), 200)
+
+@api.route("/submit_clarification", methods=["POST"])
+@jwt_required
+def submit_clarification():
+    model = util.get_model()
+
+    current_user_id = get_jwt_identity()
+    user = model.User.query.filter_by(id=current_user_id).scalar()
+
+    subject = request.json.get('subject', None)
+    contents = request.json.get('contents', None)
+    problem_slug = request.json.get('problem_slug', None)
+    parent_id = request.json.get('parent_id', None)
+
+    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+    #if problem == None:
+
+    thread = ""
+    if parent_id == None:
+        thread = str(uuid.uuid4())
+    else:
+        thread = model.Clarification.query.filter_by(id=parent_id).scalar().thread
+
+    is_public = False #user submitted clarifications are always false
+    clar = model.Clarification(current_user, subject, contents, thread, is_public)
+    clar.problem = problem
+
+    model.db.session.add(clar)
+    model.db.session.commit()
+
+    return "{}"
+
+
 @api.route("/languages", methods=["GET"])
 def get_languages():
     model = util.get_model()

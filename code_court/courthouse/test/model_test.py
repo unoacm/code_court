@@ -207,11 +207,10 @@ class ModelsTestCase(BaseTest):
         user_args, user = get_user()
 
         CLARIFICATION_ARGS = {
-            "contest": contest,
-            "problem": problem,
-            "asker_user": user,
+            "initiating_user": user,
+            "subject": "Test subject",
             "contents": "What is this thing?",
-            "creation_time": model.str_to_dt('2017-01-26T10:45Z'),
+            "thread": "",
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)
