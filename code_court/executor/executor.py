@@ -2,8 +2,9 @@
 
 import logging
 import os
-import stat
+import shutil
 import signal
+import stat
 import sys
 import time
 import traceback
@@ -136,6 +137,8 @@ def main():
                 container.remove(force=True)
 
         submit_writ(writ, "".join(out), "Successful")
+
+        shutil.rmtree(container_shared_data_dir)
 
 
 def create_share_files(share_folder, runner_str, input_str, program_str):
