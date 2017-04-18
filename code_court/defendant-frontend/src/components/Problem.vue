@@ -110,7 +110,7 @@ export default {
       return marked(s)
     },
     submitCode: function (isSubmission) {
-      axios.post('http://localhost:9191/api/submit-run', {
+      axios.post('/api/submit-run', {
         lang: this.lang,
         problem_slug: this.problem.slug,
         source_code: this.sourceCode,
