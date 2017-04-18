@@ -25,8 +25,9 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
 
-writ_url = "http://localhost:9191/api/get-writ"
-RETURN_URL = "http://localhost:9191/api/return-without-run"
+WRIT_URL = "http://localhost/api/get-writ"
+SUBMIT_URL = "http://localhost/api/submit-writ/{}"
+RETURN_URL = "http://localhost/api/return-without-run"
 executioner_email = "exec@example.org"
 executioner_password = "epass"
 
@@ -40,10 +41,15 @@ OUTPUT_LIMIT = 100000 # chars
 
 client = docker.from_env()
 
+current_writ = None
+
 def main():
     while True:
         try:
             writ = get_writ()
+
+            global current_writ
+            current_writ = writ.copy()
         except InvalidWritException as e:
             logging.exception("Exception while requesting writ")
             continue
@@ -52,6 +58,7 @@ def main():
             time.sleep(5)
             continue
         except NoWritsAvailable:
+            time.sleep(1)
             continue
 
         logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
@@ -149,7 +156,7 @@ def create_share_files(share_folder, runner_str, input_str, program_str):
 
 def get_writ():
     try:
-        r = requests.get(writ_url, auth=HTTPBasicAuth(executioner_email, executioner_password))
+        r = requests.get(WRIT_URL, auth=HTTPBasicAuth(executioner_email, executioner_password))
     except Exception as e:
         raise CourtHouseConnectionError("Couldn't fetch writ from courthouse: %s" % traceback.format_exc())
 
@@ -181,13 +188,20 @@ def get_writ():
 def submit_writ(writ, out, state):
     logging.info("Submitting writ %s, state: %s", writ['run_id'], state)
     try:
-        status = requests.post(writ['return_url'],
+        r = requests.post(SUBMIT_URL.format(writ['run_id']),
                                json={"output": out, "state": state}, auth=HTTPBasicAuth(executioner_email, executioner_password))
+
+        if r.status_code != 200:
+            logging.error("Failed to submit writ, code: %s, response: %s" % (r.status_code, r.text))
+
     except requests.exceptions.ConnectionError:
         try:
-            return_writ_without_output(writ['id'])
+            return_writ_without_output(writ['run_id'])
         except:
             pass
+
+    global current_writ
+    current_writ = None
 
 def return_writ_without_output(run_id):
     logging.info("Returning writ without output: %s", run_id)
@@ -225,6 +239,8 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         logging.info("Exiting")
+        if current_writ:
+            return_writ_without_output(current_writ.get('run_id'))
         sys.exit(0)
     except Exception as e:
         logging.exception("Uncaught exception, exiting")
