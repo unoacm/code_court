@@ -1,0 +1,23 @@
+{% extends "navbase.html" %}
+{% block content %}
+
+{% if action_label == "Add" %}
+    <h1>{{ action_label }}</h2>
+{% elif action_label == "Edit" %}
+    <h1>{{ action_label }} {{ lang_id }}</h2>
+{% endif %}
+
+<form action="{{ url_for('clarifications.clarifications_add') }}" method="POST" class="form">
+
+    <div class="form-group">
+        <label for="name">Subject</label>
+        <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" value="{{ subject }}" required>
+    </div>
+    <div class="form-group">
+        <label for="syntax_mode">Contents</label>
+        <input type="text" class="form-control" id="contents" name="contents" placeholder="Contents" value="{{ contents }}" required>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+{% endblock %}
