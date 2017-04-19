@@ -12,15 +12,17 @@ RUN apk add --no-cache python3-dev \
                         libxslt-dev \
                         gcc
 
-COPY courthouse /courthouse
-COPY defendant-frontend /defendant-frontend
 
+COPY courthouse/requirements.txt /tmp/courthouse_requirements.txt
 RUN virtualenv -p /usr/bin/python3 /env && \
         source /env/bin/activate && \
-        pip install -r /courthouse/requirements.txt
+        pip install -r /tmp/courthouse_requirements.txt
 
+COPY defendant-frontend /defendant-frontend
 RUN cd /defendant-frontend && \
         npm run build
+
+COPY courthouse /courthouse
 
 COPY docker_scripts /docker_scripts
 
