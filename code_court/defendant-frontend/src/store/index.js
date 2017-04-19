@@ -30,7 +30,7 @@ const store = new Vuex.Store({
       }
 
       axios.get(
-        'http://localhost:9191/api/problems',
+        '/api/problems',
         {
           headers: {
             'Authorization': 'Bearer ' + loginToken
@@ -50,7 +50,7 @@ const store = new Vuex.Store({
       }
 
       axios.get(
-        'http://localhost:9191/api/scores',
+        '/api/scores',
         {
           headers: {
             'Authorization': 'Bearer ' + loginToken
@@ -70,7 +70,7 @@ const store = new Vuex.Store({
       }
 
       axios.get(
-        'http://localhost:9191/api/current-user',
+        '/api/current-user',
         {
           headers: {
             'Authorization': 'Bearer ' + loginToken
@@ -90,7 +90,7 @@ const store = new Vuex.Store({
       }
 
       axios.get(
-        'http://localhost:9191/api/get-contest-info',
+        '/api/get-contest-info',
         {
           headers: {
             'Authorization': 'Bearer ' + loginToken
@@ -101,12 +101,12 @@ const store = new Vuex.Store({
       })
     },
     LOAD_LANGS: function (context) {
-      axios.get('http://localhost:9191/api/languages').then((response) => {
+      axios.get('/api/languages').then((response) => {
         context.commit('SET_LANGS', { langs: response.data })
       })
     },
     LOGIN: function (context, creds) {
-      axios.post('http://localhost:9191/api/login', {
+      axios.post('/api/login', {
         email: creds.email,
         password: creds.password
       }).then((response) => {

@@ -274,8 +274,11 @@ def submit_run():
                     .filter(over_limit_runs_query)\
                     .count()
 
-    if(run_count > MAX_RUNS):
+    if run_count > MAX_RUNS:
         return make_response(jsonify({'error': 'Submission rate limit exceeded'}), 400)
+
+    contest = user.contests[0]
+
 
     lang_name = request.json.get('lang', None)
     problem_slug = request.json.get('problem_slug', None)
@@ -285,7 +288,6 @@ def submit_run():
 
     lang = model.Language.query.filter_by(name=lang_name).one()
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
-    contest = user.contests[0]
 
     run_input = None
     run_output = None
@@ -304,10 +306,24 @@ def submit_run():
                     run_input, run_output, is_submission)
     run.state = "Judging"
 
+    resp = None
+    if datetime.datetime.utcnow() > contest.end_time:
+        run.state = "ContestEnded"
+        run.started_execing_time = datetime.datetime.utcnow()
+        run.finished_execing_time = datetime.datetime.utcnow()
+        resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
+    elif datetime.datetime.utcnow() < contest.start_time:
+        run.state = "ContestHasNotBegun"
+        run.started_execing_time = datetime.datetime.utcnow()
+        run.finished_execing_time = datetime.datetime.utcnow()
+        resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
+    else:
+        resp = make_response(jsonify({'status': 'good'}), 400)
+
     model.db.session.add(run)
     model.db.session.commit()
 
-    return "{}"
+    return resp
 
 @api.route("/scores", methods=["GET"])
 @jwt_required
