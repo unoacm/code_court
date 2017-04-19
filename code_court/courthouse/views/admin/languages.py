@@ -111,7 +111,7 @@ def add_lang():
     name = request.form.get("name")
     syntax_mode = request.form.get("syntax_mode")
     is_enabled = request.form.get("is_enabled")
-    run_script = request.form.get("run_script")
+    run_script = request.form.get("run_script").replace('\r\n', '\n')
 
     if name is None:
         # TODO: give better feedback for failure
