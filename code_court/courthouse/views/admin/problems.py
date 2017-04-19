@@ -160,9 +160,10 @@ def problems_del(problem_id):
 
     problem = model.Problem.query.filter_by(id=problem_id).scalar()
     if problem is None:
-        current_app.logger.info("Can't delete problem \'%s\' as it doesn't exist", problem.slug)
-        flash("Could not delete problem \'{}\' as it does not exist.".format(problem.slug), "danger")
-        abort(400)
+        error = "Failed to delete problem \'{}\' as it doesn't exist.".format(problem.slug)
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("problems.problems_view"))
 
     try:
         model.db.session.delete(problem)
@@ -170,10 +171,12 @@ def problems_del(problem_id):
         flash("Deleted problem \'{}\'".format(problem.slug), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        current_app.logger.info("IntegrityError: Could not delete problem \'{}\'.".format(problem.slug))
-        flash("IntegrityError: Could not delete problem \'{}\' as it is referenced in another element in the database.".format(problem.slug), "danger")
+        error = "Failed to delete problem \'{}\' as it's referenced in another DB element".format(problem.slug)
+        current_app.logger.info(error)
+        flash(error, "danger")
 
     return redirect(url_for("problems.problems_view"))
+
 
 def add_problem():
     """
@@ -198,14 +201,22 @@ def add_problem():
     secret_output = request.form.get("secret_output")
 
     if problem_type is None:
-        # TODO: give better feedback for failure
-        current_app.logger.info("Undefined problem_type when trying to add problem")
-        abort(400)
+        error = "Failed to add problem due to undefined problem_type."
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("problems.problems_view"))
 
     if name is None:
-        # TODO: give better feedback for failure
-        current_app.logger.info("Undefined name when trying to add problem")
-        abort(400)
+        error = "Failed to add problem due to undefined problem name."
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("problems.problems_view"))
+
+    if slug is None:
+        error = "Failed to add problem due to undefined problem slug."
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("problems.problems_view"))
 
     problem_id = request.form.get('problem_id')
     if problem_id: # edit
@@ -221,9 +232,10 @@ def add_problem():
     else: # add
         # check if is duplicate
         if is_dup_problem_slug(slug):
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to add a duplicate problem: %s", slug)
-            abort(400)
+            error = "Failed to add problem \'{}\' as problem already exists.".format(slug)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("problems.problems_view"))
 
         problem = model.Problem(problem_type,
                                 slug,
@@ -238,7 +250,6 @@ def add_problem():
     model.db.session.commit()
 
     return redirect(url_for("problems.problems_view"))
-
 
 
 def display_problem_add_form(problem_id):
@@ -262,9 +273,11 @@ def display_problem_add_form(problem_id):
     else: # edit
         problem = model.Problem.query.filter_by(id=problem_id).scalar()
         if problem is None:
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to edit non-existant problem, id:%s", problem_id)
-            abort(400)
+            error = "Failed to edit problem \'{}\' as problem doesn't exist.".format(problem_id)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("problems.problems_view"))
+
         return render_template("problems/add_edit.html",
                                action_label="Edit",
                                problem=problem,

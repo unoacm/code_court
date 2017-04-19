@@ -17,6 +17,7 @@ from flask import (
     redirect,
     request,
     url_for,
+    flash,
 )
 
 configurations = Blueprint('configurations', __name__,
@@ -81,8 +82,10 @@ def configurations_del(config_id):
     config = model.Configuration.query.filter_by(id=config_id).scalar()
 
     if config is None:
-        current_app.logger.info("Can't delete config %s, doesn't exist", config_id)
-        abort(400)
+        error = "Failed to delete config \'{}\' as config doesn't exist.".format(config_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("configurations.configurations_view"))
 
     model.db.session.delete(config)
     model.db.session.commit()
@@ -115,11 +118,11 @@ def add_config():
         config.valType = valType
         config.category = category
     else: # add
-        # check if is duplicate
         if is_dup_config_key(key):
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to add a duplicate config: %s", key)
-            abort(400)
+            error = "Failed to add config \'{}\' as config already exists.".format(key)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("configurations.configurations_view"))
 
         config = model.Configuration(key=key,
                                      val=val,
@@ -151,9 +154,11 @@ def display_config_add_form(config_id):
     else: # edit
         config = model.Configuration.query.filter_by(id=config_id).scalar()
         if config is None:
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to edit non-existant config, id:%s", config_id)
-            abort(400)
+            error = "Failed to edit config \'{}\' as config doesn't exist.".format(config_id)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("configurations.configurations_view"))
+
         return render_template("configurations/add_edit.html",
                                action_label="Edit",
                                config=config)

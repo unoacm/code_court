@@ -83,18 +83,20 @@ def clarifications_del(clar_id):
 
     clar = model.Clarification.query.filter_by(id=clar_id).scalar()
     if clar is None:
-        current_app.logger.info("Can't delete clarification \'%d\' as it doesn't exist", clar.id)
-        flash("Could not delete clarification \'{}\' as it does not exist.".format(clar.id), "danger")
+        error = "Failed to delete clarification \'{}\' as it doesn't exist.".format(clar_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
         return redirect(url_for("clarifications.clarifications_view"))
 
     try:
         model.db.session.delete(clar)
         model.db.session.commit()
-        flash("Deleted clarification \'{}\'".format(clar.id), "warning")
+        flash("Deleted clarification \'{}\'".format(clar_id), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        current_app.logger.info("IntegrityError: Could not delete clarification \'{}\'.".format(clar.id))
-        flash("IntegrityError: Could not delete clarification \'{}\' as it is referenced in another element in the database.".format(clar.id), "danger")
+        error = "Failed to delete clarification \'{}\' as it's referenced in another DB element".format(clar_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
 
     return redirect(url_for("clarifications.clarifications_view"))
 
@@ -115,15 +117,16 @@ def add_clar():
     contents = request.form.get("contents")
 
     if subject is None:
-        # TODO: give better feedback for failure
-        current_app.logger.info("Undefined subject when trying to add clarification")
-        abort(400)
-
+        error = "Failed to add clarification due to undefined subject."
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("clarifications.clarifications_view"))
 
     if contents is None:
-        # TODO: give better feedback for failure
-        current_app.logger.info("Undefined contents when trying to add clarification")
-        abort(400)
+        error = "Failed to add clarification due to undefined contents."
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("clarifications.clarifications_view"))
 
     thread = str(uuid.uuid4())
     is_public = True #This is a general clarification, which are always public
