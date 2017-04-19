@@ -108,14 +108,16 @@ def users_del(user_id):
 
     user = model.User.query.filter_by(id=user_id).scalar()
 
-    if current_user.id == user.id:
-        current_app.logger.info("Can't delete user \'%s\' as a user cannot delete itself", user.email)
-        flash("Could not delete user \'{}\' because that's you.".format(user.email), "danger")
+    if user is None:
+        error = "Failed to delete user \'{}\' as it does not exist.".format(user_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
-    if user is None:
-        current_app.logger.info("Can't delete user \'%s\'' as it doesn't exist", user.email)
-        flash("Could not delete user \'{}\' as it does not exist.".format(user.email), "danger")
+    if current_user.id == user.id:
+        error = "Failed to delete user \'{}\' because user cannot delete itself.".format(user_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
     try:
@@ -124,11 +126,11 @@ def users_del(user_id):
         flash("Deleted user \'{}\'".format(user.email), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        current_app.logger.info("IntegrityError: Could not delete user \'{}\'.".format(user.email))
-        flash("IntegrityError: Could not delete user \'{}\' as it is referenced in another element within the database.".format(user.email), "danger")
+        error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(user_id)
+        current_app.logger.info(error)
+        flash(error, "danger")
         
     return redirect(url_for("users.users_view"))
-    
 
 
 def add_user():
@@ -153,9 +155,10 @@ def add_user():
     user_role_ids = request.form.get("user_role_ids")
 
     if password != confirm_password:
-        # TODO: give better feedback for failure
-        current_app.logger.info("Failed to add new user (password mismatch): %s", email)
-        abort(400)
+        error = "Failed to add/edit \'{}\' due to password mismatch.".format(email)
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("users.users_view"))
 
     if user_id: # edit
         user = model.User.query.filter_by(id=user_id).one()
@@ -167,18 +170,18 @@ def add_user():
         user.contests = retrieve_by_ids(contest_ids.split(), model.Contest)
         user.user_roles = retrieve_by_ids(user_role_ids.split(), model.UserRole)
     else: # add
-        # check if is duplicate
         if is_dup_user_email(email):
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to add a duplicate user: %s", email)
-            abort(400)
+            error = "Failed to add user \'{}\' as user already exists.".format(email)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("users.users_view"))
 
         user = model.User(email=email,
-                            name=name,
-                            password=password,
-                            misc_data=misc_data,
-                            contests=retrieve_by_ids(contest_ids.split(), model.Contest),
-                            user_roles=retrieve_by_ids(user_role_ids.split(), model.UserRole))
+                          name=name,
+                          password=password,
+                          misc_data=misc_data,
+                          contests=retrieve_by_ids(contest_ids.split(), model.Contest),
+                          user_roles=retrieve_by_ids(user_role_ids.split(), model.UserRole))
         model.db.session.add(user)
 
     model.db.session.commit()
@@ -205,9 +208,10 @@ def display_user_add_form(user_id):
     else: # edit
         user = model.User.query.filter_by(id=user_id).scalar()
         if user is None:
-            # TODO: give better feedback for failure
-            current_app.logger.info("Tried to edit non-existant user, id:%s", user_id)
-            abort(400)
+            error = "Failed to edit user \'{}\' as user doesn't exist.".format(user_id)
+            current_app.logger.info(error)
+            flash(error, "danger")
+            return redirect(url_for("users.users_view"))
         return render_template("users/add_edit.html",
                                action_label="Edit",
                                user=user)
