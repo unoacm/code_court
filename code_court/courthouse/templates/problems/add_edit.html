@@ -41,6 +41,11 @@
         <label for="name">Name*</label>
         <input type="text" class="form-control" id="name" name="name" placeholder="Name" value="{{ problem.name }}" required>
     </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="is_enabled" {% if problem.is_enabled == True %}checked="checked"{% endif %}> is_enabled?
+        </label>
+    </div>
     <div class="form-group">
         <label for="problem_statement">Problem Statement</label>
         <textarea type="text" class="form-control" id="problem_statement" name="problem_statement" placeholder="Problem Statement" rows="10">{{ problem.problem_statement }}</textarea>

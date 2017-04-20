@@ -12,6 +12,7 @@
             <th>problem_type</th>
             <th>slug</th>
             <th>name</th>
+            <th>enabled</th>
             <th></th>
         </tr>
     </thead>
@@ -22,6 +23,7 @@
             <td class="problem_type">{{ problem.problem_type.name }}</td>
             <td class="problem_slug">{{ problem.slug }}</td>
             <td class="problem_name">{{ problem.name }}</td>
+            <td class="problem_hidden">{{ problem.is_enabled }}</td>
             <td>
                 <a href="{{ url_for('problems.problems_add', problem_id=problem.id) }}" class="btn btn-info btn-xs">edit</a>
                 <form action="{{ url_for('problems.problems_del', problem_id=problem.id) }}" method="GET">

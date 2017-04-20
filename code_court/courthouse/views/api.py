@@ -172,7 +172,7 @@ def get_all_problems():
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    problems = model.Problem.query.all()
+    problems = model.Problem.query.filter_by(is_enabled=True).all()
 
     resp = {}
     for problem in problems:
@@ -346,6 +346,7 @@ def get_scoreboard():
 
     problems = model.Problem.query\
                 .filter(model.Problem.contests.any(id=contest.id))\
+                .filter(model.Problem.is_enabled)\
                 .all()
 
     user_points = []
