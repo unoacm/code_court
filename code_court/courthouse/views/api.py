@@ -479,6 +479,20 @@ def update_user_metadata():
 
     return make_response(jsonify({'status': 'Success'}), 200)
 
+@api.route("/signout/<email>", methods=["GET"])
+@util.login_required("operator")
+def signout_user(email):
+    model = util.get_model()
+
+    matching_user = model.User.query.filter_by(email=email).scalar()
+
+    if not matching_user:
+        return make_response(jsonify({'error': "Invalid request, couldn't find user"}), 400)
+
+    matching_user.merge_metadata({"signed_out": True})
+    model.db.session.commit()
+
+    return make_response(jsonify({'status': 'Success'}), 200)
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""
