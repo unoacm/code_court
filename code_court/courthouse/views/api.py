@@ -318,7 +318,7 @@ def submit_run():
         run.finished_execing_time = datetime.datetime.utcnow()
         resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
     else:
-        resp = make_response(jsonify({'status': 'good'}), 400)
+        resp = make_response(jsonify({'status': 'good'}), 200)
 
     model.db.session.add(run)
     model.db.session.commit()
@@ -420,8 +420,9 @@ def make_user():
     email = request.json.get('email')
     name = request.json.get('name')
     password = request.json.get('password')
+    contest_name = request.json.get('contest_name')
 
-    if not all([email, name, password]):
+    if not all([email, name, password, contest_name]):
         return make_response(jsonify({'error': 'Invalid request, missing fields'}), 400)
 
     existing_user = model.User.query.filter_by(email=email).scalar()
@@ -433,6 +434,15 @@ def make_user():
     new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role])
 
     model.db.session.add(new_user)
+    model.db.session.commit()
+
+    contest = model.Contest.query.filter_by(name=contest_name).scalar()
+
+    if not contest:
+        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+
+    new_user.contests.append(contest)
+
     model.db.session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
