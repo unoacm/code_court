@@ -148,7 +148,7 @@ def setup_database(app):
             db.create_all()
             db.session.commit()
             init_db(app)
-            if not app.config['TESTING']:
+            if not app.config['TESTING'] and not os.getenv("CODE_COURT_PRODUCTION"):
                 dev_init_db(app)
 
 def is_db_inited(app):
