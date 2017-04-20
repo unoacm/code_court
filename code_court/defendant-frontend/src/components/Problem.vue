@@ -110,16 +110,18 @@ export default {
       return marked(s)
     },
     submitCode: function (isSubmission) {
-      axios.post('/api/submit-run', {
-        lang: this.lang,
-        problem_slug: this.problem.slug,
-        source_code: this.sourceCode,
-        is_submission: isSubmission,
-        user_test_input: isSubmission ? null : this.testInput
-      }).then((response) => {
-      }).catch(function (error) {
-        console.log(error)
-      })
+      setTimeout(function () {
+        axios.post('/api/submit-run', {
+          lang: this.lang,
+          problem_slug: this.problem.slug,
+          source_code: this.sourceCode,
+          is_submission: isSubmission,
+          user_test_input: isSubmission ? null : this.testInput
+        }).then((response) => {
+        }).catch(function (error) {
+          console.log(error)
+        })
+      }, 5000)
 
       // add a fake entry to runs
       var runId = 0
