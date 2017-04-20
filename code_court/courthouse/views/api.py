@@ -5,6 +5,7 @@ and external services
 import datetime
 import json
 import re
+import time
 
 import six
 
@@ -490,7 +491,7 @@ def signout_user(email):
     if not matching_user:
         return make_response(jsonify({'error': "Invalid request, couldn't find user"}), 400)
 
-    matching_user.merge_metadata({"signed_out": True})
+    matching_user.merge_metadata({"signout": int(time.time())})
     model.db.session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
