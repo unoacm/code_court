@@ -3,6 +3,8 @@ services:
     courthouse:
         image: code-court
         restart: unless-stopped
+        volumes:
+            - ./courthouse_data:/tmp
         expose:
             - 9191
 
