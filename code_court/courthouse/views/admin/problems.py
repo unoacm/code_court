@@ -194,6 +194,7 @@ def add_problem():
     problem_type = model.ProblemType.query.filter_by(id=problem_type_id).one()
     slug = request.form.get("slug")
     name = request.form.get("name")
+    is_enabled = request.form.get("is_enabled")
     problem_statement = request.form.get("problem_statement")
     sample_input = request.form.get("sample_input")
     sample_output = request.form.get("sample_output")
@@ -212,6 +213,13 @@ def add_problem():
         flash(error, "danger")
         return redirect(url_for("problems.problems_view"))
 
+    is_enabled_bool = util.checkbox_result_to_bool(is_enabled)
+    if is_enabled_bool is None:
+        error = "Failed to add problem \'{}\' due to invalid is_enabled check.".format(name)
+        current_app.logger.info(error)
+        flash(error, "danger")
+        return redirect(url_for("problems.problems_view"))
+
     if slug is None:
         error = "Failed to add problem due to undefined problem slug."
         current_app.logger.info(error)
@@ -224,6 +232,7 @@ def add_problem():
         problem.problem_type = problem_type
         problem.slug = slug
         problem.name = name
+        problem.is_enabled = is_enabled_bool
         problem.problem_statement = problem_statement
         problem.sample_input = sample_input
         problem.sample_output = sample_output
@@ -245,6 +254,7 @@ def add_problem():
                                 sample_output,
                                 secret_input,
                                 secret_output)
+        problem.is_enabled = is_enabled_bool
         model.db.session.add(problem)
 
     model.db.session.commit()

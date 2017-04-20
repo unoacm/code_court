@@ -172,7 +172,7 @@ def get_all_problems():
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(id=current_user_id).scalar()
 
-    problems = model.Problem.query.all()
+    problems = model.Problem.query.filter_by(is_enabled=True).all()
 
     resp = {}
     for problem in problems:
@@ -318,7 +318,7 @@ def submit_run():
         run.finished_execing_time = datetime.datetime.utcnow()
         resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
     else:
-        resp = make_response(jsonify({'status': 'good'}), 400)
+        resp = make_response(jsonify({'status': 'good'}), 200)
 
     model.db.session.add(run)
     model.db.session.commit()
@@ -346,6 +346,7 @@ def get_scoreboard():
 
     problems = model.Problem.query\
                 .filter(model.Problem.contests.any(id=contest.id))\
+                .filter(model.Problem.is_enabled)\
                 .all()
 
     user_points = []
@@ -420,8 +421,9 @@ def make_user():
     email = request.json.get('email')
     name = request.json.get('name')
     password = request.json.get('password')
+    contest_name = request.json.get('contest_name')
 
-    if not all([email, name, password]):
+    if not all([email, name, password, contest_name]):
         return make_response(jsonify({'error': 'Invalid request, missing fields'}), 400)
 
     existing_user = model.User.query.filter_by(email=email).scalar()
@@ -433,6 +435,15 @@ def make_user():
     new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role])
 
     model.db.session.add(new_user)
+    model.db.session.commit()
+
+    contest = model.Contest.query.filter_by(name=contest_name).scalar()
+
+    if not contest:
+        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+
+    new_user.contests.append(contest)
+
     model.db.session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
@@ -469,6 +480,20 @@ def update_user_metadata():
 
     return make_response(jsonify({'status': 'Success'}), 200)
 
+@api.route("/signout/<email>", methods=["GET"])
+@util.login_required("operator")
+def signout_user(email):
+    model = util.get_model()
+
+    matching_user = model.User.query.filter_by(email=email).scalar()
+
+    if not matching_user:
+        return make_response(jsonify({'error': "Invalid request, couldn't find user"}), 400)
+
+    matching_user.merge_metadata({"signed_out": True})
+    model.db.session.commit()
+
+    return make_response(jsonify({'status': 'Success'}), 200)
 
 def clean_output_string(s):
     """Cleans up an output string for comparison"""

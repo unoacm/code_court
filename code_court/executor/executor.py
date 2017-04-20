@@ -26,9 +26,14 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
 
-WRIT_URL = "http://localhost/api/get-writ"
-SUBMIT_URL = "http://localhost/api/submit-writ/{}"
-RETURN_URL = "http://localhost/api/return-without-run"
+COURTHOUSE_URL = "http://localhost"
+if 'COURTHOUSE_URL' in os.environ:
+    COURTHOUSE_URL = os.getenv('COURTHOUSE_URL')
+
+WRIT_URL = "{}/api/get-writ".format(COURTHOUSE_URL)
+SUBMIT_URL = "{}/api/submit-writ/{{}}".format(COURTHOUSE_URL)
+RETURN_URL = "{}/api/return-without-run".format(COURTHOUSE_URL)
+
 executioner_email = "exec@example.org"
 executioner_password = "epass"
 
@@ -167,6 +172,7 @@ def get_writ():
         raise NoWritsAvailable()
 
     if r.status_code != 200:
+        print(r.text)
         raise InvalidWritException("Received non-200 status code: %s" % r.status_code)
 
     writ = r.json()

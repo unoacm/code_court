@@ -26,6 +26,8 @@ COPY courthouse /courthouse
 
 COPY docker_scripts /docker_scripts
 
+ENV CODE_COURT_PRODUCTION true
+
 EXPOSE 9191
 
 CMD ["/docker_scripts/courthouse_start.sh"]
