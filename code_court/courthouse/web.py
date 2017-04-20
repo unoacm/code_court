@@ -323,7 +323,9 @@ def init_db(app):
                                                     '#!/bin/bash\ntest "$1" = "$2"')])
 
         roles = {x.id: x for x in model.UserRole.query.all()}
-        model.db.session.add(model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]))
+        model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
+                                  model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']])])
+
 
         model.db.session.commit()
 
@@ -334,8 +336,7 @@ def dev_init_db(app):
         app.logger.info("Initializing tables with dev data")
         roles = {x.id: x for x in model.UserRole.query.all()}
 
-        model.db.session.add_all([model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']]),
-                                  model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values())),
+        model.db.session.add_all([model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values())),
                                   model.User("observer@example.org", "ObserverUser", "pass", user_roles=[roles['observer']])])
 
         contestants = []
