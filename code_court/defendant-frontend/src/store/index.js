@@ -86,7 +86,11 @@ const store = new Vuex.Store({
       state.scores = scores
     },
     SET_LANGS: (state, { langs }) => {
-      state.langs = langs
+      var langObj = {}
+      for (var lang of langs) {
+        langObj[lang.name] = lang
+      }
+      state.langs = langObj
     },
     SET_CONTEST: (state, { contest }) => {
       state.contest = contest
@@ -121,10 +125,14 @@ const store = new Vuex.Store({
     get_problem: (state, { slug }) => state.problems[slug],
     isLoggedIn: (state) => !!state.user,
     getSourceCode: (state, getters) => (problemSlug, lang) => {
-      if (!(problemSlug in state.sourceCodes) || !(lang in state.sourceCodes[problemSlug])) {
-        return ''
+      if (!(problemSlug in state.sourceCodes) || !(lang.name in state.sourceCodes[problemSlug])) {
+        if (lang.default_template) {
+          return lang.default_template
+        } else {
+          return ''
+        }
       }
-      return state.sourceCodes[problemSlug][lang]
+      return state.sourceCodes[problemSlug][lang.name]
     }
   }
 })

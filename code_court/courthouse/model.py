@@ -133,7 +133,7 @@ class Problem(db.Model):
     secret_output = db.Column(db.String, nullable=False)
     """str: the problem's secret output, this may be shown to the user """
 
-    is_enabled = db.Column(db.Boolean, nullable=False, default=False)
+    is_enabled = db.Column(db.Boolean, nullable=False, default=True)
     """bool: whether or not the problem is enabled"""
 
     contests = db.relationship("Contest", secondary=contest_problem, back_populates="problems")
