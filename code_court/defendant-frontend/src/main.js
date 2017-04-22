@@ -12,7 +12,9 @@ sync(store, router)
 
 Vue.config.productionTip = false
 
-axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
+if (store.state.loginToken) {
+  axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
+}
 
 router.beforeEach((to, from, next) => {
   if (to.name !== 'login' && !store.state.loginToken) {
