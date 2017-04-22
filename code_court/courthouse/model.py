@@ -173,6 +173,9 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String, nullable=False)
     """str: the user's full name, no specific format is assumed"""
 
+    username = db.Column(db.String, nullable=False)
+    """str: the username, for display"""
+
     hashed_password = db.Column(db.String, nullable=False)
     """str: a bcrypt hash of the user's password"""
 
@@ -185,7 +188,7 @@ class User(db.Model, UserMixin):
     contests = db.relationship("Contest", secondary=contest_user, back_populates="users")
     user_roles = db.relationship("UserRole", secondary=user_user_role, back_populates="users")
 
-    def __init__(self, email, name, password, creation_time=None, misc_data=None, contests=None, user_roles=None):
+    def __init__(self, email, name, password, creation_time=None, misc_data=None, contests=None, user_roles=None, username=None):
         if misc_data is None:
             misc_data = json.dumps({})
 
@@ -202,6 +205,10 @@ class User(db.Model, UserMixin):
         self.name = name
         self.hashed_password = util.hash_password(password)
         self.misc_data = misc_data
+        if username:
+            self.username = username
+        else:
+            self.username = email.split("@")[0]
 
     def verify_password(self, plainext_password):
         return util.is_password_matching(plainext_password, self.hashed_password)
@@ -233,6 +240,7 @@ class User(db.Model, UserMixin):
             "id": self.id,
             "email": self.email,
             "name": self.name,
+            "username": self.username,
         }
 
     def __repr__(self):

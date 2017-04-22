@@ -422,9 +422,10 @@ def make_user():
     email = request.json.get('email')
     name = request.json.get('name')
     password = request.json.get('password')
+    username = request.json.get('username')
     contest_name = request.json.get('contest_name')
 
-    if not all([email, name, password, contest_name]):
+    if not all([email, name, password, username, contest_name]):
         return make_response(jsonify({'error': 'Invalid request, missing fields'}), 400)
 
     existing_user = model.User.query.filter_by(email=email).scalar()
@@ -433,7 +434,7 @@ def make_user():
 
     defedant_role = model.UserRole.query.filter_by(id="defendant").scalar()
 
-    new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role])
+    new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role], username=username)
 
     model.db.session.add(new_user)
     model.db.session.commit()
