@@ -114,6 +114,7 @@ def add_lang():
     syntax_mode = request.form.get("syntax_mode")
     is_enabled = request.form.get("is_enabled")
     run_script = request.form.get("run_script").replace('\r\n', '\n')
+    default_template = request.form.get("default_template").replace('\r\n', '\n')
 
     if name is None:
         error = "Failed to add language due to undefined language name."
@@ -142,6 +143,7 @@ def add_lang():
         lang.syntax_mode = syntax_mode
         lang.is_enabled = is_enabled_bool
         lang.run_script = run_script
+        lang.default_template = default_template
     else: # add
         if is_dup_lang_name(name):
             error = "Failed to add language \'{}\' as language already exists.".format(name)
@@ -149,7 +151,7 @@ def add_lang():
             flash(error, "danger")
             return redirect(url_for("languages.languages_view"))
 
-        lang = model.Language(name, syntax_mode, is_enabled_bool, run_script)
+        lang = model.Language(name, syntax_mode, is_enabled_bool, run_script, default_template)
         model.db.session.add(lang)
 
     model.db.session.commit()
@@ -185,7 +187,8 @@ def display_lang_add_form(lang_id):
                                name=lang.name,
                                syntax_mode=lang.syntax_mode,
                                is_enabled=lang.is_enabled,
-                               run_script=lang.run_script)
+                               run_script=lang.run_script,
+                               default_template=lang.default_template)
 
 
 ## Util functions

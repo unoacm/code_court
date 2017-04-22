@@ -34,6 +34,9 @@ class Language(db.Model):
     name = db.Column(db.String, unique=True, nullable=False)
     """str: the language name"""
 
+    default_template = db.Column(db.String)
+    """str: the languages default template"""
+
     syntax_mode = db.Column(db.String, nullable=False)
     """str: the syntax mode used by the code editor"""
 
@@ -43,18 +46,20 @@ class Language(db.Model):
     run_script = db.Column(db.String, nullable=False)
     """str: script (with shebang) that compiles and runs scripts for this language"""
 
-    def __init__(self, name, syntax_mode, is_enabled, run_script):
+    def __init__(self, name, syntax_mode, is_enabled, run_script, default_template=None):
         self.name = name
         self.syntax_mode = syntax_mode
         self.is_enabled = is_enabled
         self.run_script = run_script
+        self.default_template = default_template
 
     def get_output_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "is_enabled": self.is_enabled,
-            "run_script": self.run_script
+            "run_script": self.run_script,
+            "default_template": self.default_template
         }
 
     def __str__(self):

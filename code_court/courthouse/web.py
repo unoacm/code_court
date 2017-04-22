@@ -263,8 +263,12 @@ def init_db(app):
 
                                     cat $1 | ./program
 
-                                    exit $?'''
-            ).strip()),
+                                    exit $?''').strip(),
+                     textwrap.dedent('''
+                                    #include <stdio.h>
+
+                                    int main(int argc, const char* argv[]) {
+                                    }''')),
             model.Language("c++",
                      "clike",
                      True,
@@ -282,8 +286,13 @@ def init_db(app):
 
                                     cat $1 | ./program
 
-                                    exit $?'''
-            ).strip()),
+                                    exit $?''').strip(),
+                     textwrap.dedent('''
+                                    #include <iostream>
+
+                                    int main() {
+                                      std::cout << "Hello World!";
+                                    }''')),
             model.Language("java",
                      "clike",
                      True,
@@ -302,7 +311,14 @@ def init_db(app):
                                     cat $1 | /usr/lib/jvm/java-1.8-openjdk/bin/java Main
 
                                     exit $?'''
-            ).strip()),
+            ).strip(),
+                     textwrap.dedent('''
+                                    public class Main {
+                                        public static void main(String[] args) {
+
+                                        }
+                                    }'''
+            )),
             model.Language("ruby",
                            "ruby",
                            True,
