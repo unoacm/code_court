@@ -41,6 +41,7 @@
             <th>id</th>
             <th>email</th>
             <th>name</th>
+            <th>username</th>
             <th>user_role</th>
             <th>num_runs</th>
             <th>last_submit_time</th>
@@ -52,7 +53,7 @@
         <tr>
             <td class="user_id">{{ user.id }}</td>
             <td class="user_email">{{ user.email }}</td>
-            <td class="user_name">{{ user.email.split("@")[0] }}</td>
+            <td class="user_username">{{ user.username }}</td>
             <td class="user_name">{% for user_role in user.user_roles %}{{ user_role.id }} {% endfor %}</td>
             <td class="num_runs">{{ metrics[user.id]["num_runs"] }}</td>
             <td class="last_run_time">{{ metrics[user.id]["last_run"].submit_time }}</td>

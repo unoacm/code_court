@@ -32,6 +32,7 @@ class UsersTestCase(BaseTest):
             "user_id": user_id,
             "name": "Johnny Test",
             "email": new_email,
+            "username": "",
             "password": "",
             "confirm_password": "",
             "misc_data": "{}",

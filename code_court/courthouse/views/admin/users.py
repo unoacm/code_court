@@ -148,6 +148,7 @@ def add_user():
     user_id = request.form.get("user_id")
     email = request.form.get("email")
     name = request.form.get("name")
+    username = request.form.get("username")
     password = request.form.get("password")
     confirm_password = request.form.get("confirm_password")
     misc_data = request.form.get("misc_data")
@@ -164,6 +165,7 @@ def add_user():
         user = model.User.query.filter_by(id=user_id).one()
         user.email = email
         user.name = name
+        user.username = username
         if password != "":
             user.hashed_password = util.hash_password(password)
         user.misc_data = misc_data
@@ -181,7 +183,8 @@ def add_user():
                           password=password,
                           misc_data=misc_data,
                           contests=retrieve_by_ids(contest_ids.split(), model.Contest),
-                          user_roles=retrieve_by_ids(user_role_ids.split(), model.UserRole))
+                          user_roles=retrieve_by_ids(user_role_ids.split(), model.UserRole),
+                          username=username)
         model.db.session.add(user)
 
     model.db.session.commit()
