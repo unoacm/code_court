@@ -40,7 +40,7 @@ export default {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
       this.$store.dispatch('LOAD_SCORES')
-    }.bind(this), 5000)
+    }.bind(this), 15000)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
