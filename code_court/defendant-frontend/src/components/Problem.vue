@@ -1,7 +1,7 @@
 <template>
   <div :id="problem.slug" v-if="problem">
     <h1 class="title is-1">{{ problem.name }}</h1>
-    <div v-html="convertToMarkdown(problem.problem_statement)"></div>
+    <div v-html="convertToMarkdown(problem.problem_statement)" class="content"></div>
     </br>
 
     <h3 class="subtitle is-3">Sample Input</h3>
