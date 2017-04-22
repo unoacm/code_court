@@ -17,7 +17,7 @@
     <p class="control">
       <span class="select">
         <select id="lang" v-model="lang">
-          <option v-for="lang in langs" :value="lang['name']">{{ lang['name'] }}</option>
+          <option v-for="(lang, name) in langs" :value="lang['name']">{{ lang['name'] }}</option>
         </select>
       </span>
     </p>
@@ -82,7 +82,7 @@ export default {
     sourceCode: {
       get () {
         if (this.problem) {
-          return this.$store.getters.getSourceCode(this.problem.slug, this.lang)
+          return this.$store.getters.getSourceCode(this.problem.slug, this.langs[this.lang])
         }
       },
       set (value) {
