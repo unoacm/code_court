@@ -20,83 +20,23 @@ const store = new Vuex.Store({
     loginToken: ''
   },
   actions: {
-    LOAD_PROBLEMS: function (context, loginToken = null) {
-      if (!loginToken) {
-        if (!context.state.loginToken) {
-          return
-        } else {
-          loginToken = context.state.loginToken
-        }
-      }
-
-      axios.get(
-        '/api/problems',
-        {
-          headers: {
-            'Authorization': 'Bearer ' + loginToken
-          }
-        }
-      ).then((response) => {
+    LOAD_PROBLEMS: function (context) {
+      axios.get('/api/problems').then((response) => {
         context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },
-    LOAD_SCORES: function (context, loginToken = null) {
-      if (!loginToken) {
-        if (!context.state.loginToken) {
-          return
-        } else {
-          loginToken = context.state.loginToken
-        }
-      }
-
-      axios.get(
-        '/api/scores',
-        {
-          headers: {
-            'Authorization': 'Bearer ' + loginToken
-          }
-        }
-      ).then((response) => {
+    LOAD_SCORES: function (context) {
+      axios.get('/api/scores').then((response) => {
         context.commit('SET_SCORES', { scores: response.data })
       })
     },
-    LOAD_USER: function (context, loginToken = null) {
-      if (!loginToken) {
-        if (!context.state.loginToken) {
-          return
-        } else {
-          loginToken = context.state.loginToken
-        }
-      }
-
-      axios.get(
-        '/api/current-user',
-        {
-          headers: {
-            'Authorization': 'Bearer ' + loginToken
-          }
-        }
-      ).then((response) => {
+    LOAD_USER: function (context) {
+      axios.get('/api/current-user').then((response) => {
         context.commit('SET_USER', { user: response.data })
       })
     },
-    LOAD_CONTEST: function (context, loginToken = null) {
-      if (!loginToken) {
-        if (!context.state.loginToken) {
-          return
-        } else {
-          loginToken = context.state.loginToken
-        }
-      }
-
-      axios.get(
-        '/api/get-contest-info',
-        {
-          headers: {
-            'Authorization': 'Bearer ' + loginToken
-          }
-        }
-      ).then((response) => {
+    LOAD_CONTEST: function (context) {
+      axios.get('/api/get-contest-info').then((response) => {
         context.commit('SET_CONTEST', { contest: response.data })
       })
     },
@@ -112,8 +52,11 @@ const store = new Vuex.Store({
       }).then((response) => {
         context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
 
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
+
         context.dispatch('LOAD_USER')
         context.dispatch('LOAD_PROBLEMS')
+        context.dispatch('LOAD_CONTEST')
 
         // clear old alerts here
         router.push({ path: '/' })

@@ -3,6 +3,44 @@
   <head>
     <meta charset="utf-8">
     <title>defendant-frontend</title>
+    <style>
+@-webkit-keyframes v-pulseStretchDelay
+{
+    0%,
+    80%
+    {
+        -webkit-transform: scale(1);
+                transform: scale(1);
+        -webkit-opacity: 1;
+                opacity: 1;
+    }
+    45%
+    {
+        -webkit-transform: scale(0.1);
+                transform: scale(0.1);
+        -webkit-opacity: 0.7;
+                opacity: 0.7;
+    }
+}
+@keyframes v-pulseStretchDelay
+{
+    0%,
+    80%
+    {
+        -webkit-transform: scale(1);
+                transform: scale(1);
+        -webkit-opacity: 1;
+                opacity: 1;
+    }
+    45%
+    {
+        -webkit-transform: scale(0.1);
+                transform: scale(0.1);
+        -webkit-opacity: 0.7;
+                opacity: 0.7;
+    }
+
+    </style>
   </head>
   <body>
     <div id="app"></div>
