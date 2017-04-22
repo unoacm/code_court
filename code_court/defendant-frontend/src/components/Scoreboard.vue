@@ -10,7 +10,7 @@
       </li>
       <li v-for="(row, i) in scores" :key="row.user.email" class="table-row-item" >
           <span>{{ i+1 }}</span>
-          <span :title="row.user.email">{{ getUsername(row.user.email) }}</span>
+          <span :title="row.user.email">{{ row.user.username }}</span>
           <span>{{ row.num_solved }}</span>
           <span>{{ row.penalty }}</span>
           <span v-for="(state, prob) in row.problem_states" :class="{'correct': state}">
