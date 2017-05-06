@@ -9,6 +9,7 @@ from model import db
 EXECUTOR_TIMEOUT_MINS = 1
 
 def reset_overdue_runs():
+    """give overdue runs another chance"""
     runs = model.Run.query.filter(model.Run.finished_execing_time == None)\
                .filter(model.Run.started_execing_time != None)\
                .filter((datetime.datetime.utcnow() -
@@ -22,6 +23,7 @@ def reset_overdue_runs():
     model.db.session.commit()
 
 def event_loop():
+    """loop to reset overdue runs"""
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

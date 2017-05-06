@@ -96,17 +96,20 @@ def checkbox_result_to_bool(res):
     return None
 
 def jwt_authenticate(email, password):
+    """authenticate the user"""
     user = model.User.query.filter_by(email=email).first()
     if user and user.verify_password(password):
         return user
 
 def jwt_identity(payload):
+    """get user identity"""
     model = get_model()
     user_id = payload['identity']
 
     return model.User.query.filter_by(id=user_id).first()
 
 def get_configuration(key):
+    """get specified config"""
     model = get_model()
     config = model.Configuration.query.filter_by(key=key).scalar()
     val_type = config.valType

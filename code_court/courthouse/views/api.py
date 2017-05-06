@@ -34,6 +34,7 @@ executioner_auth = HTTPBasicAuth()
 # api auth
 @executioner_auth.verify_password
 def verify_password(email, password):
+    """verifies a user's password"""
     model = util.get_model()
     user = model.User.query.filter_by(email=email).scalar()
     if not user or not user.verify_password(password):
@@ -42,6 +43,7 @@ def verify_password(email, password):
 
 @executioner_auth.error_handler
 def unauthorized():
+    """make an unathorized access message"""
     return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
 # api routes
@@ -144,6 +146,7 @@ def return_without_run(run_id):
 
 @api.route('/login', methods=['POST'])
 def login():
+    """log in a user"""
     model = util.get_model()
 
     email = request.json.get('email', None)
@@ -159,6 +162,7 @@ def login():
 
 @api.route("/problem/<slug>", methods=["GET"])
 def get_problem(slug):
+    """get a specified problem"""
     model = util.get_model()
 
     problem = model.Problem.query.filter_by(slug=slug).scalar()
@@ -168,6 +172,7 @@ def get_problem(slug):
 @api.route("/problems", methods=["GET"])
 @jwt_required
 def get_all_problems():
+    """get all problems"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -190,6 +195,7 @@ def get_all_problems():
 @api.route("/clarifications", methods=["GET"])
 @jwt_required
 def get_clarifications():
+    """get all clarifications"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -205,6 +211,7 @@ def get_clarifications():
 @api.route("/submit_clarification", methods=["POST"])
 @jwt_required
 def submit_clarification():
+    """submit a clarification"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -236,6 +243,7 @@ def submit_clarification():
 
 @api.route("/languages", methods=["GET"])
 def get_languages():
+    """get all languages"""
     model = util.get_model()
 
     langs = model.Language.query.all()
@@ -246,6 +254,7 @@ def get_languages():
 @api.route("/current-user", methods=["GET"])
 @jwt_required
 def get_current_user():
+    """get the currently authenticated user"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -261,6 +270,7 @@ def get_current_user():
 @api.route("/submit-run", methods=["POST"])
 @jwt_required
 def submit_run():
+    """submit a run to be executed"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -329,6 +339,7 @@ def submit_run():
 @api.route("/scores", methods=["GET"])
 @jwt_required
 def get_scoreboard():
+    """get the scoreboard"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -385,6 +396,7 @@ def get_scoreboard():
 @api.route("/get-contest-info")
 @jwt_required
 def get_contest_info():
+    """get contest info on current user"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -454,6 +466,7 @@ def make_user():
 @api.route("/update-user-metadata", methods=["POST"])
 @jwt_required
 def update_user_metadata():
+    """update user metadata"""
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
@@ -485,6 +498,7 @@ def update_user_metadata():
 @api.route("/signout/<email>", methods=["GET"])
 @util.login_required("operator")
 def signout_user(email):
+    """signout a specified user"""
     model = util.get_model()
 
     matching_user = model.User.query.filter_by(email=email).scalar()

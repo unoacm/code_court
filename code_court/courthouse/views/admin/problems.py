@@ -56,6 +56,7 @@ def ini_to_dict(raw_ini):
     return ini
 
 def extract_problem_data(problem_zip_file):
+    """extract problems from problems in zip file"""
     problem_zip_file = zipfile.ZipFile(problem_zip_file)
     raw_ini = problem_zip_file.read("problem.ini").decode('utf-8')
     ini = ini_to_dict(raw_ini)
