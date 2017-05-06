@@ -97,6 +97,7 @@ def contests_del(contest_id):
 
 
 def users_from_emails(emails, model):
+    """returns list of users from email keys"""
     users = []
 
     for email in emails:
@@ -107,6 +108,7 @@ def users_from_emails(emails, model):
 
 
 def problems_from_slugs(problem_slugs, model):
+    """returns list of problems from problem_slugs"""
     problems = []
 
     for slug in problem_slugs:

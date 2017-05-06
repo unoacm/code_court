@@ -147,6 +147,15 @@ def main():
 
 
 def create_share_files(share_folder, runner_str, input_str, program_str):
+    """
+    Create the share files.
+
+    Params:
+        share_folder: The path to the share folder.
+        runner_str: The runner string.
+        input_str: The input string.
+        program_str: The program string.
+    """
     files = {
         "runner": runner_str,
         "input": input_str,
@@ -163,6 +172,9 @@ def create_share_files(share_folder, runner_str, input_str, program_str):
 
 
 def get_writ():
+    """
+    Gets a writ to be executed by an executor.
+    """
     try:
         r = requests.get(WRIT_URL, auth=HTTPBasicAuth(executioner_email, executioner_password))
     except Exception as e:
@@ -195,6 +207,14 @@ def get_writ():
     return writ
 
 def submit_writ(writ, out, state):
+    """
+    Submits a writ to await execution by an executor.
+
+    Params:
+        writ: The submission to be executed.
+        out: The output of submitting the writ.
+        state: The state after submitting the writ.
+    """
     logging.info("Submitting writ %s, state: %s", writ['run_id'], state)
     try:
         r = requests.post(SUBMIT_URL.format(writ['run_id']),
@@ -213,6 +233,12 @@ def submit_writ(writ, out, state):
     current_writ = None
 
 def return_writ_without_output(run_id):
+    """
+    Returns a writ without any output.
+
+    Params:
+        run_id: The id of the writ that is to be returned.
+    """
     logging.info("Returning writ without output: %s", run_id)
 
     url = RETURN_URL + "/" + str(run_id)
@@ -223,6 +249,9 @@ def return_writ_without_output(run_id):
 
 
 def raise_timeout(signum, frame):
+    """
+    Raises a timeout exception.
+    """
     raise TimedOutException()
 
 class OutputLimitExceeded(Exception):

@@ -80,6 +80,7 @@ def runs_run(run_id):
 
 @runs.route("/<int:run_id>/priority", methods=["GET"])
 def toggle_priority(run_id):
+    """toggle priority on specified run"""
     model = util.get_model()
 
     run = model.Run.query.filter_by(id=run_id).one()

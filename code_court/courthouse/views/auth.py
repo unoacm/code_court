@@ -58,6 +58,7 @@ def login_submit():
 
 @auth.route("/profile", methods=["GET"])
 def profile():
+    """returns profile page"""
     return render_template("auth/profile.html")
 
 @auth.route("/logout", methods=["GET"])
