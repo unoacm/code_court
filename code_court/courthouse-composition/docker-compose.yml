@@ -3,6 +3,8 @@ services:
     courthouse:
         image: code-court
         restart: unless-stopped
+        environment:
+            - CODE_COURT_DB_URI=postgresql+pypostgresql://codecourt:benpass@postgres/codecourt
         volumes:
             - ./courthouse_data:/tmp
         expose:
@@ -16,4 +18,13 @@ services:
             - /etc/letsencrypt:/etc/letsencrypt
         ports:
             - 80:80
-            - 443:443
+
+    postgres:
+        image: postgres
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=codecourt
+            - POSTGRES_PASSWORD=benpass
+            - POSTGRES_DB=codecourt
+        volumes:
+            - ./postgres:/var/lib/postgresql/data

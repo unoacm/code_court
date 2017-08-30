@@ -46,7 +46,7 @@ def hash_password(plaintext_password):
         num_rounds = 10
 
     hashed_password = bcrypt.hashpw(plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))
-    return hashed_password
+    return hashed_password.decode("UTF-8")
 
 def is_password_matching(plaintext_password, hashed_password):
     """
@@ -59,10 +59,7 @@ def is_password_matching(plaintext_password, hashed_password):
     Returns:
         bool: whether or not the passwords match
     """
-    try:
-        return bcrypt.hashpw(str(plaintext_password), str(hashed_password)) == hashed_password
-    except:
-        return bcrypt.hashpw(plaintext_password.encode(), hashed_password) == hashed_password
+    return bcrypt.hashpw(plaintext_password.encode(), hashed_password.encode()).decode("UTF-8") == hashed_password
 
 def login_required(role="ANY"):
     def wrapper(fn):
@@ -71,7 +68,7 @@ def login_required(role="ANY"):
             if not current_user.is_authenticated:
               return current_app.login_manager.unauthorized()
 
-            role_ids = [x.id for x in current_user.user_roles]
+            role_ids = [x.name for x in current_user.user_roles]
             if ((role not in role_ids) and (role != "ANY")):
                 return current_app.login_manager.unauthorized()
 
@@ -131,3 +128,9 @@ def ssl_required(fn):
         return fn(*args, **kwargs)
 
     return decorated_view
+
+def i(num):
+    try:
+        return int(num)
+    except:
+        return None

@@ -92,7 +92,6 @@ def problems_batch_upload():
         for problem_zip_file in problem_zip_files:
             data = extract_problem_data(problem_zip_file)
 
-            problem_id = request.form.get('problem_id')
             if is_dup_problem_slug(data['slug']): # update
                 problem = model.Problem.query.filter_by(slug=data['slug']).one()
                 problem.problem_type = input_output
@@ -158,7 +157,7 @@ def problems_del(problem_id):
     """
     model = util.get_model()
 
-    problem = model.Problem.query.filter_by(id=problem_id).scalar()
+    problem = model.Problem.query.filter_by(id=int(problem_id)).scalar()
     if problem is None:
         error = "Failed to delete problem \'{}\' as it doesn't exist.".format(problem.slug)
         current_app.logger.info(error)
@@ -191,7 +190,7 @@ def add_problem():
     model = util.get_model()
 
     problem_type_id = request.form.get("problem_type_id")
-    problem_type = model.ProblemType.query.filter_by(id=problem_type_id).one()
+    problem_type = model.ProblemType.query.filter_by(id=int(problem_type_id)).one()
     slug = request.form.get("slug")
     name = request.form.get("name")
     is_enabled = request.form.get("is_enabled")
@@ -228,7 +227,7 @@ def add_problem():
 
     problem_id = request.form.get('problem_id')
     if problem_id: # edit
-        problem = model.Problem.query.filter_by(id=problem_id).one()
+        problem = model.Problem.query.filter_by(id=int(problem_id)).one()
         problem.problem_type = problem_type
         problem.slug = slug
         problem.name = name
@@ -281,7 +280,7 @@ def display_problem_add_form(problem_id):
                                problem=None,
                                problemtypes=problemtypes)
     else: # edit
-        problem = model.Problem.query.filter_by(id=problem_id).scalar()
+        problem = model.Problem.query.filter_by(id=int(problem_id)).scalar()
         if problem is None:
             error = "Failed to edit problem \'{}\' as problem doesn't exist.".format(problem_id)
             current_app.logger.info(error)

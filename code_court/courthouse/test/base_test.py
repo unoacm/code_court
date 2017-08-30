@@ -1,4 +1,5 @@
 import logging
+import os
 import unittest
 
 from flask_login import current_user
@@ -11,11 +12,19 @@ class BaseTest(unittest.TestCase):
     """
     def setUp(self):
         logging.disable(logging.CRITICAL)
-        app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
+
         app.config['TESTING'] = True
         app.app_context().push()
         self.app = app.test_client()
+
+        logging.info("Droping database for test")
+            # commit needs to be run before drop_all for
+            # postgres, or it will silently fail
+        model.db.session.commit()
+        model.db.drop_all()
+        model.db.session.commit()
         with app.app_context():
+            logging.info("Setting up database")
             setup_database(app)
 
     def login(self, email, password):
@@ -46,4 +55,8 @@ class BaseTest(unittest.TestCase):
         except Exception:
             self.fail("Failed to logout")
         finally:
+            # commit needs to be run before drop_all for
+            # postgres, or it will silently fail
+            model.db.session.commit()
             model.db.drop_all()
+            model.db.session.commit()

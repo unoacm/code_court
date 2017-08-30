@@ -78,7 +78,7 @@ def languages_del(lang_id):
     """
     model = util.get_model()
 
-    lang = model.Language.query.filter_by(id=lang_id).scalar()
+    lang = model.Language.query.filter_by(id=util.i(lang_id)).scalar()
     if lang is None:
         error = "Failed to delete language \'{}\' as it does not exist.".format(lang_id)
         current_app.logger.info(error)
@@ -136,7 +136,7 @@ def add_lang():
         flash(error, "danger")
         return redirect(url_for("languages.languages_view"))
 
-    lang_id = request.form.get('lang_id')
+    lang_id = util.i(request.form.get('lang_id'))
     if lang_id: # edit
         lang = model.Language.query.filter_by(id=lang_id).one()
         lang.name = name

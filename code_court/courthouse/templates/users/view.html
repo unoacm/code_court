@@ -4,8 +4,8 @@
 <form action="{{ url_for('users.users_view') }}" method="GET">
     <div class="row">
         <div class="form-group col-xs-9 col-sm-10">
-            <input type="text" class="form-control" id="search" name="search" 
-                placeholder="Search term partial matches with user name or email" 
+            <input type="text" class="form-control" id="search" name="search"
+                placeholder="Search term partial matches with user name or email"
                 {% if search %} value="{{ search }}" {% endif %}>
         </div>
         <div class="form-group col-xs-3 col-sm-2">
@@ -53,8 +53,9 @@
         <tr>
             <td class="user_id">{{ user.id }}</td>
             <td class="user_email">{{ user.email }}</td>
+            <td class="user_name">{{ user.name }}</td>
             <td class="user_username">{{ user.username }}</td>
-            <td class="user_name">{% for user_role in user.user_roles %}{{ user_role.id }} {% endfor %}</td>
+            <td class="user_role">{% for user_role in user.user_roles %}{{ user_role.name }} {% endfor %}</td>
             <td class="num_runs">{{ metrics[user.id]["num_runs"] }}</td>
             <td class="last_run_time">{{ metrics[user.id]["last_run"].submit_time }}</td>
             <td>

@@ -79,7 +79,7 @@ def configurations_del(config_id):
     """
     model = util.get_model()
 
-    config = model.Configuration.query.filter_by(id=config_id).scalar()
+    config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
 
     if config is None:
         error = "Failed to delete config \'{}\' as config doesn't exist.".format(config_id)
@@ -112,7 +112,7 @@ def add_config():
     category = request.form.get("category")
 
     if config_id: # edit
-        config = model.Configuration.query.filter_by(id=config_id).one()
+        config = model.Configuration.query.filter_by(id=int(config_id)).one()
         config.key = key
         config.val = val
         config.valType = valType
@@ -152,7 +152,7 @@ def display_config_add_form(config_id):
                                action_label="Add",
                                config=None)
     else: # edit
-        config = model.Configuration.query.filter_by(id=config_id).scalar()
+        config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
         if config is None:
             error = "Failed to edit config \'{}\' as config doesn't exist.".format(config_id)
             current_app.logger.info(error)

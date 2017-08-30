@@ -26,7 +26,7 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
 
-COURTHOUSE_URL = "http://localhost"
+COURTHOUSE_URL = "http://localhost:9191"
 if 'COURTHOUSE_URL' in os.environ:
     COURTHOUSE_URL = os.getenv('COURTHOUSE_URL')
 

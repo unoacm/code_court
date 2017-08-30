@@ -76,7 +76,7 @@ def contests_del(contest_id):
     """
     model = util.get_model()
 
-    contest = model.Contest.query.filter_by(id=contest_id).scalar()
+    contest = model.Contest.query.filter_by(id=int(contest_id)).scalar()
     if contest is None:
         error = "Failed to delete contest \'{}\' as it doesn't exist.".format(contest.name)
         current_app.logger.info(error)
@@ -172,9 +172,9 @@ def add_contest():
         flash(error, "danger")
         return redirect(url_for("contests.contests_view"))
 
-    contest_id = request.form.get('contest_id')
+    contest_id = util.i(request.form.get('contest_id'))
     if contest_id: # edit
-        contest = model.Contest.query.filter_by(id=contest_id).one()
+        contest = model.Contest.query.filter_by(id=int(contest_id)).one()
         contest.name = name
         contest.is_public = is_public_bool
 
@@ -227,7 +227,7 @@ def display_contest_add_form(contest_id):
                                user_emails=[user.email for user in model.User.query.all()],
                                problem_slugs=[a.slug for a in model.Problem.query.all()])
     else: # edit
-        contest = model.Contest.query.filter_by(id=contest_id).scalar()
+        contest = model.Contest.query.filter_by(id=util.i(contest_id)).scalar()
         if contest is None:
             error = "Failed to edit contest \'{}\' as contest doesn't exist.".format(contest_id)
             current_app.logger.info(error)
