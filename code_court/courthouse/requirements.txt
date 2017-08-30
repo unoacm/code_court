@@ -46,3 +46,5 @@ traitlets==4.3.1
 wcwidth==0.1.7
 Werkzeug==0.11.15
 WTForms==2.1
+py-postgresql
+lxml
