@@ -12,17 +12,17 @@ from flask import (
     redirect,
     render_template,
     request,
-    flash,
-)
+    flash, )
 
-auth = Blueprint('auth', __name__,
-                template_folder='templates')
+auth = Blueprint('auth', __name__, template_folder='templates')
+
 
 @auth.route("/login", methods=["GET"])
 @util.ssl_required
 def login_view():
     """general login page"""
     return render_template("auth/login.html")
+
 
 @auth.route("/login", methods=["POST"])
 @util.ssl_required
@@ -56,12 +56,15 @@ def login_submit():
         flash("Invalid username or password", "danger")
         abort(401)
 
+
 @auth.route("/profile", methods=["GET"])
 def profile():
     return render_template("auth/profile.html")
+
 
 @auth.route("/logout", methods=["GET"])
 def logout_submit():
     """processes logout requests"""
     logout_user()
     return redirect("/admin")
+

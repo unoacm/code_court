@@ -5,24 +5,26 @@ import util
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import UniqueConstraint
 
 db = SQLAlchemy()
 
 contest_problem = db.Table('contest_problem', db.Model.metadata,
-    db.Column('contest_id', db.Integer, db.ForeignKey('contest.id')),
-    db.Column('problem_id', db.Integer, db.ForeignKey('problem.id'))
-)
+                           db.Column('contest_id', db.Integer,
+                                     db.ForeignKey('contest.id')),
+                           db.Column('problem_id', db.Integer,
+                                     db.ForeignKey('problem.id')))
 
 contest_user = db.Table('contest_user', db.Model.metadata,
-    db.Column('contest_id', db.Integer, db.ForeignKey('contest.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
-)
+                        db.Column('contest_id', db.Integer,
+                                  db.ForeignKey('contest.id')),
+                        db.Column('user_id', db.Integer,
+                                  db.ForeignKey('user.id')))
 
 user_user_role = db.Table('user_user_role', db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('user_role_id', db.Integer, db.ForeignKey('user_role.id'))
-)
+                          db.Column('user_id', db.Integer,
+                                    db.ForeignKey('user.id')),
+                          db.Column('user_role_id', db.Integer,
+                                    db.ForeignKey('user_role.id')))
 
 
 class Language(db.Model):
@@ -46,7 +48,12 @@ class Language(db.Model):
     run_script = db.Column(db.String, nullable=False)
     """str: script (with shebang) that compiles and runs scripts for this language"""
 
-    def __init__(self, name, syntax_mode, is_enabled, run_script, default_template=None):
+    def __init__(self,
+                 name,
+                 syntax_mode,
+                 is_enabled,
+                 run_script,
+                 default_template=None):
         self.name = name
         self.syntax_mode = syntax_mode
         self.is_enabled = is_enabled
@@ -67,9 +74,6 @@ class Language(db.Model):
 
     def __repr__(self):
         return "Language({})".format(self.name)
-
-    def __str__(self):
-        return self.__repr__()
 
 
 class ProblemType(db.Model):
@@ -107,8 +111,10 @@ class Problem(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    problem_type = db.relationship('ProblemType', backref=db.backref('Problem', lazy='dynamic'))
-    problem_type_id = db.Column(db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
+    problem_type = db.relationship(
+        'ProblemType', backref=db.backref('Problem', lazy='dynamic'))
+    problem_type_id = db.Column(
+        db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
     slug = db.Column(db.String(20), unique=True, nullable=False)
@@ -136,10 +142,11 @@ class Problem(db.Model):
     is_enabled = db.Column(db.Boolean, nullable=False, default=True)
     """bool: whether or not the problem is enabled"""
 
-    contests = db.relationship("Contest", secondary=contest_problem, back_populates="problems")
+    contests = db.relationship(
+        "Contest", secondary=contest_problem, back_populates="problems")
 
-    def __init__(self, problem_type, slug, name, problem_statement, sample_input,
-                 sample_output, secret_input, secret_output):
+    def __init__(self, problem_type, slug, name, problem_statement,
+                 sample_input, sample_output, secret_input, secret_output):
         self.problem_type = problem_type
         self.slug = slug
         self.name = name
@@ -166,6 +173,7 @@ class Problem(db.Model):
     def __str__(self):
         return self.__repr__()
 
+
 class User(db.Model, UserMixin):
     """Stores information about a user"""
     __tablename__ = 'user'
@@ -184,16 +192,27 @@ class User(db.Model, UserMixin):
     hashed_password = db.Column(db.String, nullable=False)
     """str: a bcrypt hash of the user's password"""
 
-    creation_time = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow())
+    creation_time = db.Column(
+        db.DateTime, nullable=False, default=datetime.datetime.utcnow())
     """str: the creation time of the user"""
 
     misc_data = db.Column(db.String, nullable=False)
     """str: misc data about a user, stored as a json object"""
 
-    contests = db.relationship("Contest", secondary=contest_user, back_populates="users")
-    user_roles = db.relationship("UserRole", secondary=user_user_role, back_populates="users")
+    contests = db.relationship(
+        "Contest", secondary=contest_user, back_populates="users")
+    user_roles = db.relationship(
+        "UserRole", secondary=user_user_role, back_populates="users")
 
-    def __init__(self, email, name, password, creation_time=None, misc_data=None, contests=None, user_roles=None, username=None):
+    def __init__(self,
+                 email,
+                 name,
+                 password,
+                 creation_time=None,
+                 misc_data=None,
+                 contests=None,
+                 user_roles=None,
+                 username=None):
         if misc_data is None:
             misc_data = json.dumps({})
 
@@ -216,7 +235,8 @@ class User(db.Model, UserMixin):
             self.username = email.split("@")[0]
 
     def verify_password(self, plainext_password):
-        return util.is_password_matching(plainext_password, self.hashed_password)
+        return util.is_password_matching(plainext_password,
+                                         self.hashed_password)
 
     def merge_metadata(self, new_metadata_dict):
         old_metadata_dict = json.loads(self.misc_data)
@@ -284,10 +304,21 @@ class Contest(db.Model):
     """bool: whether or not the contest can be joined/viewed by anyone"""
 
     # users = db.relationship("ContestUser", back_populates="contest")
-    users = db.relationship("User", secondary=contest_user, back_populates="contests")
-    problems = db.relationship("Problem", secondary=contest_problem, back_populates="contests")
+    users = db.relationship(
+        "User", secondary=contest_user, back_populates="contests")
+    problems = db.relationship(
+        "Problem", secondary=contest_problem, back_populates="contests")
 
-    def __init__(self, name, start_time, end_time, is_public, activate_time=None, freeze_time=None, deactivate_time=None, users=None, problems=None):
+    def __init__(self,
+                 name,
+                 start_time,
+                 end_time,
+                 is_public,
+                 activate_time=None,
+                 freeze_time=None,
+                 deactivate_time=None,
+                 users=None,
+                 problems=None):
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
@@ -342,9 +373,7 @@ class Configuration(db.Model):
         self.category = category
 
     def get_output_dict(self):
-        return {
-            "id": self.id
-        }
+        return {"id": self.id}
 
     def __repr__(self):
         return "Configuration({}={})".format(self.key, self.val)
@@ -359,20 +388,27 @@ class SavedCode(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    contest = db.relationship('Contest', backref=db.backref('SavedCode', lazy='dynamic'))
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    contest = db.relationship(
+        'Contest', backref=db.backref('SavedCode', lazy='dynamic'))
+    contest_id = db.Column(
+        db.Integer, db.ForeignKey('contest.id'), nullable=False)
     """int: a foreignkey to the saved_code's contest"""
 
-    problem = db.relationship('Problem', backref=db.backref('SavedCode', lazy='dynamic'))
-    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    problem = db.relationship(
+        'Problem', backref=db.backref('SavedCode', lazy='dynamic'))
+    problem_id = db.Column(
+        db.Integer, db.ForeignKey('problem.id'), nullable=False)
     """int: a foreignkey to the saved_code's problem"""
 
-    user = db.relationship('User', backref=db.backref('SavedCode', lazy='dynamic'))
+    user = db.relationship(
+        'User', backref=db.backref('SavedCode', lazy='dynamic'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the saved_code's user"""
 
-    language = db.relationship('Language', backref=db.backref('SavedCode', lazy='dynamic'))
-    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    language = db.relationship(
+        'Language', backref=db.backref('SavedCode', lazy='dynamic'))
+    language_id = db.Column(
+        db.Integer, db.ForeignKey('language.id'), nullable=False)
     """int: a foreignkey to the saved_code's language"""
 
     source_code = db.Column(db.String, unique=True, nullable=False)
@@ -381,7 +417,8 @@ class SavedCode(db.Model):
     last_updated_time = db.Column(db.DateTime)
     """DateTime: the time the code was last updated at"""
 
-    def __init__(self, contest, problem, user, language, source_code, last_updated_time):
+    def __init__(self, contest, problem, user, language, source_code,
+                 last_updated_time):
         self.contest = contest
         self.problem = problem
         self.user = user
@@ -390,9 +427,7 @@ class SavedCode(db.Model):
         self.last_updated_time = last_updated_time
 
     def get_output_dict(self):
-        return {
-            "id": self.id
-        }
+        return {"id": self.id}
 
     def __repr__(self):
         return "SavedCode(id={})".format(self.id)
@@ -411,16 +446,22 @@ class Run(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the run's user"""
 
-    contest = db.relationship('Contest', backref=db.backref('Run', lazy='dynamic'))
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    contest = db.relationship(
+        'Contest', backref=db.backref('Run', lazy='dynamic'))
+    contest_id = db.Column(
+        db.Integer, db.ForeignKey('contest.id'), nullable=False)
     """int: a foreignkey to the run's contest"""
 
-    language = db.relationship('Language', backref=db.backref('Run', lazy='dynamic'))
-    language_id = db.Column(db.Integer, db.ForeignKey('language.id'), nullable=False)
+    language = db.relationship(
+        'Language', backref=db.backref('Run', lazy='dynamic'))
+    language_id = db.Column(
+        db.Integer, db.ForeignKey('language.id'), nullable=False)
     """int: a foreignkey to the run's language"""
 
-    problem = db.relationship('Problem', backref=db.backref('Run', lazy='dynamic'))
-    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    problem = db.relationship(
+        'Problem', backref=db.backref('Run', lazy='dynamic'))
+    problem_id = db.Column(
+        db.Integer, db.ForeignKey('problem.id'), nullable=False)
     """int: a foreignkey to the run's problem"""
 
     source_code = db.Column(db.String, nullable=False)
@@ -458,20 +499,21 @@ class Run(db.Model):
 
     @property
     def is_judging(self):
-        return (self.started_execing_time is not None and
-                self.finished_execing_time is None)
+        return (self.started_execing_time is not None
+                and self.finished_execing_time is None)
 
     @property
     def is_judged(self):
         return self.finished_execing_time is not None
 
-    def __init__(self, user, contest, language, problem, submit_time, source_code, run_input, correct_output, is_submission):
+    def __init__(self, user, contest, language, problem, submit_time,
+                 source_code, run_input, correct_output, is_submission):
         self.user = user
         self.contest = contest
         self.language = language
         self.problem = problem
         self.submit_time = submit_time
-        self.source_code =  source_code
+        self.source_code = source_code
         self.run_input = run_input
         self.correct_output = correct_output
         self.is_submission = is_submission
@@ -505,12 +547,12 @@ class Run(db.Model):
 
     @staticmethod
     def get_judging_runs():
-        return Run.query.filter(Run.started_execing_time != None).\
-                         filter(Run.finished_execing_time == None).all()
+        return Run.query.filter(Run.started_execing_time is not None).\
+                         filter(Run.finished_execing_time is None).all()
 
     @staticmethod
     def get_unjudged_runs():
-        return Run.query.filter(Run.finished_execing_time == None).all()
+        return Run.query.filter(Run.finished_execing_time is None).all()
 
 
 class Clarification(db.Model):
@@ -519,21 +561,22 @@ class Clarification(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    #contest = db.relationship('Contest', backref=db.backref('Clarification', lazy='dynamic'))
-    #contest_id = db.Column(db.Integer, db.ForeignKey('contest.id'), nullable=False)
-    #"""int: a foreignkey to the clarification's contest"""
-
-    problem = db.relationship('Problem', backref=db.backref('Clarification', lazy='dynamic'))
-    problem_id = db.Column(db.Integer, db.ForeignKey('problem.id'), nullable=True)
+    problem = db.relationship(
+        'Problem', backref=db.backref('Clarification', lazy='dynamic'))
+    problem_id = db.Column(
+        db.Integer, db.ForeignKey('problem.id'), nullable=True)
     """int: a foreignkey to the clarification's problem, if it is null, the
         the clarification is general"""
 
-    initiating_user = db.relationship('User', backref=db.backref('Clarification', lazy='dynamic'))
-    initiating_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    initiating_user = db.relationship(
+        'User', backref=db.backref('Clarification', lazy='dynamic'))
+    initiating_user_id = db.Column(
+        db.Integer, db.ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the user that initiated the clarification"""
 
     parent = db.relationship("Clarification", remote_side=[id])
-    parent_id = db.Column(db.Integer, db.ForeignKey('clarification.id'), nullable=True)
+    parent_id = db.Column(
+        db.Integer, db.ForeignKey('clarification.id'), nullable=True)
     """int: a foreignkey to the a parent clarification"""
 
     thread = db.Column(db.String, nullable=False)
@@ -545,12 +588,12 @@ class Clarification(db.Model):
     contents = db.Column(db.String, nullable=False)
     """str: the contents of the clarification"""
 
-    creation_time = db.Column(db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    creation_time = db.Column(
+        db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
     """DateTime: the time the clarification was created at"""
 
     is_public = db.Column(db.Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
-
 
     def __init__(self, initiating_user, subject, contents, thread, is_public):
         self.initiating_user = initiating_user
@@ -583,15 +626,14 @@ class UserRole(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
 
-    users = db.relationship("User", secondary=user_user_role, back_populates="user_roles")
+    users = db.relationship(
+        "User", secondary=user_user_role, back_populates="user_roles")
 
     def __init__(self, name):
         self.name = name
 
     def get_output_dict(self):
-        return {
-            "name": self.name
-        }
+        return {"name": self.name}
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
@@ -615,17 +657,21 @@ class UserRole(db.Model):
     def __str__(self):
         return self.__repr__()
 
+
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60Z to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%MZ')
+
 
 def strs_to_dt(date_string, time_string):
     """Converts two strings in formats "2017-12-30" and "12:60" to datetime"""
     return str_to_dt(date_string + "T" + time_string + "Z")
 
+
 def time_str_to_dt(s):
     """Converts a string in format 12:59 to datetime"""
     return datetime.datetime.strptime(s, '%H:%M')
+
 
 def dt_to_str(dt):
     """Converts a datetime to a string in format 2017-12-30T12:60Z"""
@@ -633,14 +679,17 @@ def dt_to_str(dt):
         return None
     return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%MZ')
 
+
 def dt_to_date_str(dt):
     """Converts a datetime to a string in format 2017-12-30"""
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%Y-%m-%d')
 
+
 def dt_to_time_str(dt):
     """Converts a datetime to a string in format 12:59"""
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%H:%M')
+

@@ -1,15 +1,15 @@
-import sys
-
 from functools import wraps
 
 import bcrypt
 
 from flask_login import current_user
 
-from flask import current_app, request
+from flask import current_app, request, redirect
+
 
 class ModelMissingException(Exception):
     pass
+
 
 def get_model():
     """
@@ -29,6 +29,7 @@ def get_model():
         raise ModelMissingException()
     return model
 
+
 def hash_password(plaintext_password):
     """
     Hashes a password with bcrypt
@@ -45,8 +46,10 @@ def hash_password(plaintext_password):
     else:
         num_rounds = 10
 
-    hashed_password = bcrypt.hashpw(plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))
+    hashed_password = bcrypt.hashpw(
+        plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))
     return hashed_password.decode("UTF-8")
+
 
 def is_password_matching(plaintext_password, hashed_password):
     """
@@ -59,22 +62,28 @@ def is_password_matching(plaintext_password, hashed_password):
     Returns:
         bool: whether or not the passwords match
     """
-    return bcrypt.hashpw(plaintext_password.encode(), hashed_password.encode()).decode("UTF-8") == hashed_password
+    return bcrypt.hashpw(
+        plaintext_password.encode(),
+        hashed_password.encode()).decode("UTF-8") == hashed_password
+
 
 def login_required(role="ANY"):
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
-              return current_app.login_manager.unauthorized()
+                return current_app.login_manager.unauthorized()
 
             role_ids = [x.name for x in current_user.user_roles]
             if ((role not in role_ids) and (role != "ANY")):
                 return current_app.login_manager.unauthorized()
 
             return fn(*args, **kwargs)
+
         return decorated_view
+
     return wrapper
+
 
 def checkbox_result_to_bool(res):
     """
@@ -92,10 +101,6 @@ def checkbox_result_to_bool(res):
         return False
     return None
 
-def jwt_authenticate(email, password):
-    user = model.User.query.filter_by(email=email).first()
-    if user and user.verify_password(password):
-        return user
 
 def jwt_identity(payload):
     model = get_model()
@@ -103,11 +108,12 @@ def jwt_identity(payload):
 
     return model.User.query.filter_by(id=user_id).first()
 
+
 def get_configuration(key):
     model = get_model()
     config = model.Configuration.query.filter_by(key=key).scalar()
     val_type = config.valType
-    if(val_type == "integer"):
+    if (val_type == "integer"):
         return int(config.val)
     elif (val_type == "bool"):
         return bool(config.val)
@@ -115,6 +121,7 @@ def get_configuration(key):
         return str(config.val)
     else:
         return None
+
 
 def ssl_required(fn):
     @wraps(fn)
@@ -129,8 +136,10 @@ def ssl_required(fn):
 
     return decorated_view
 
+
 def i(num):
     try:
         return int(num)
-    except:
+    except Exception:
         return None
+

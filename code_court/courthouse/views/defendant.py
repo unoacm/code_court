@@ -1,6 +1,4 @@
 import collections
-import json
-import re
 
 from markdown import markdown
 from enum import Enum
@@ -10,19 +8,11 @@ import util
 import datetime
 
 from flask_login import current_user
-from flask import (
-    abort,
-    Blueprint,
-    current_app,
-    render_template,
-    redirect,
-    request,
-    url_for,
-    Markup
-)
+from flask import (abort, Blueprint, current_app, render_template,
+                   request, Markup)
 
-defendant = Blueprint('defendant', __name__,
-                  template_folder='templates')
+defendant = Blueprint('defendant', __name__, template_folder='templates')
+
 
 @defendant.route("/", methods=["GET"])
 def index():
@@ -38,22 +28,29 @@ def index():
 
     return render_template("defendant/index.html", problems=problems)
 
+
 RunState = Enum("RunState", "judging passed failed")
+
 
 @defendant.route("/scoreboard", methods=["GET"])
 def scoreboard():
     model = util.get_model()
 
-    defendants = model.User.query.filter(model.User.user_roles.any(id="defendant")).all()
+    defendants = model.User.query.filter(
+        model.User.user_roles.any(id="defendant")).all()
     problems = model.Problem.query.all()
-    contest = model.Contest.query.first() #TODO: replace with correct contest
+    contest = model.Contest.query.first()  # TODO: replace with correct contest
 
     # compute scoreboard
     scores = collections.OrderedDict()
     for user in defendants:
         user_scores = collections.OrderedDict()
         for problem in problems:
-            runs = model.Run.query.filter_by(is_submission=True, user=user, contest=contest, problem=problem).all()
+            runs = model.Run.query.filter_by(
+                is_submission=True,
+                user=user,
+                contest=contest,
+                problem=problem).all()
 
             grid = []
             for run in runs:
@@ -68,7 +65,13 @@ def scoreboard():
             user_scores[problem.id] = grid
         scores[user.id] = user_scores
 
-    return render_template("defendant/scoreboard.html", users=defendants, problems=problems, scores=scores, RunState=RunState)
+    return render_template(
+        "defendant/scoreboard.html",
+        users=defendants,
+        problems=problems,
+        scores=scores,
+        RunState=RunState)
+
 
 @defendant.route("/problem/<problem_id>/", methods=["GET"])
 @defendant.route("/problem/<problem_id>/", methods=["POST"])
@@ -88,10 +91,11 @@ def problem(problem_id):
     if request.method == "POST":
         source_code = submit_code(problem)
 
-    return render_template("defendant/problem.html",
-                            problem=problem,
-                            markdown_statement=markdown_statement,
-                            source_code=source_code)
+    return render_template(
+        "defendant/problem.html",
+        problem=problem,
+        markdown_statement=markdown_statement,
+        source_code=source_code)
 
 
 @defendant.route("/submissions", methods=["GET"])
@@ -103,7 +107,9 @@ def submissions():
                                  .order_by(model.Run.submit_time.desc())\
                                  .all()
 
-    return render_template("defendant/submissions.html", submissions=submissions)
+    return render_template(
+        "defendant/submissions.html", submissions=submissions)
+
 
 def submit_code(problem):
     """
@@ -134,11 +140,12 @@ def submit_code(problem):
     button_action = request.form.get("action")
     is_submission = button_action == "submit" and not button_action == "run"
 
-    run = model.Run(test_user, test_contest,
-                    python, problem, current_time, source_code,
-                    problem.secret_input, problem.secret_output, is_submission)
+    run = model.Run(test_user, test_contest, python, problem, current_time,
+                    source_code, problem.secret_input, problem.secret_output,
+                    is_submission)
 
     model.db.session.add(run)
     model.db.session.commit()
 
     return source_code
+

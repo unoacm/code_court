@@ -1,13 +1,6 @@
-import datetime
-import json
-import re
-import sqlalchemy
-
 import util
 
 from sqlalchemy.exc import IntegrityError
-
-from flask_login import login_required
 
 from flask import (
     abort,
@@ -17,11 +10,11 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash,
-)
+    flash, )
 
-contests = Blueprint('contests', __name__,
-                  template_folder='templates/contests')
+contests = Blueprint(
+    'contests', __name__, template_folder='templates/contests')
+
 
 @contests.route("/", methods=["GET"], defaults={'page': 1})
 @contests.route("/<int:page>", methods=["GET"])
@@ -39,7 +32,9 @@ def contests_view(page):
 
     return render_template("contests/view.html", contests=contests)
 
-@contests.route("/add/", methods=["GET", "POST"], defaults={'contest_id': None})
+
+@contests.route(
+    "/add/", methods=["GET", "POST"], defaults={'contest_id': None})
 @contests.route("/edit/<int:contest_id>/", methods=["GET"])
 @util.login_required("operator")
 def contests_add(contest_id):
@@ -52,13 +47,13 @@ def contests_add(contest_id):
     Returns:
         a rendered add/edit template or a redirect to the contest view page
     """
-    model = util.get_model()
-    if request.method == "GET": # display add form
+    if request.method == "GET":  # display add form
         return display_contest_add_form(contest_id)
-    elif request.method == "POST": # process added/edited contest
+    elif request.method == "POST":  # process added/edited contest
         return add_contest()
     else:
-        current_app.logger.info("invalid contest add request method: %s", request.method)
+        current_app.logger.info("invalid contest add request method: %s",
+                                request.method)
         abort(400)
 
 
@@ -78,7 +73,8 @@ def contests_del(contest_id):
 
     contest = model.Contest.query.filter_by(id=int(contest_id)).scalar()
     if contest is None:
-        error = "Failed to delete contest \'{}\' as it doesn't exist.".format(contest.name)
+        error = "Failed to delete contest \'{}\' as it doesn't exist.".format(
+            contest.name)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("contests.contests_view"))
@@ -89,7 +85,8 @@ def contests_del(contest_id):
         flash("Deleted contest \'{}\'".format(contest.name), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        error = "Failed to delete contest \'{}\' as it's referenced in another DB element".format(contest.name)
+        error = "Failed to delete contest \'{}\' as it's referenced in another DB element".format(
+            contest.name)
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -154,7 +151,8 @@ def add_contest():
         freeze_date_time = None
 
     if deactivate_date is not "" and deactivate_time is not "":
-        deactivate_date_time = model.strs_to_dt(deactivate_date, deactivate_time)
+        deactivate_date_time = model.strs_to_dt(deactivate_date,
+                                                deactivate_time)
     else:
         deactivate_date_time = None
 
@@ -167,13 +165,14 @@ def add_contest():
     # convert is_public to a bool
     is_public_bool = util.checkbox_result_to_bool(is_public)
     if is_public_bool is None:
-        error = "Failed to add contest \'{}\' due to invalid is_public check.".format(name)
+        error = "Failed to add contest \'{}\' due to invalid is_public check.".format(
+            name)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("contests.contests_view"))
 
     contest_id = util.i(request.form.get('contest_id'))
-    if contest_id: # edit
+    if contest_id:  # edit
         contest = model.Contest.query.filter_by(id=int(contest_id)).one()
         contest.name = name
         contest.is_public = is_public_bool
@@ -186,28 +185,29 @@ def add_contest():
 
         contest.users = users_from_emails(user_emails.split(), model)
         contest.problems = problems_from_slugs(problem_slugs.split(), model)
-    else: # add
+    else:  # add
         if is_dup_contest_name(name):
-            error = "Failed to add contest \'{}\' as contest already exists.".format(name)
+            error = "Failed to add contest \'{}\' as contest already exists.".format(
+                name)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("contests.contests_view"))
 
-        contest = model.Contest(name=name,
-                                is_public=is_public_bool,
-                                activate_time = activate_date_time,
-                                start_time = model.strs_to_dt(start_date, start_time),
-                                freeze_time = freeze_date_time,
-                                end_time = model.strs_to_dt(end_date, end_time),
-                                deactivate_time = deactivate_date_time,
-                                users = users_from_emails(user_emails.split(), model),
-                                problems = problems_from_slugs(problem_slugs.split(), model))
+        contest = model.Contest(
+            name=name,
+            is_public=is_public_bool,
+            activate_time=activate_date_time,
+            start_time=model.strs_to_dt(start_date, start_time),
+            freeze_time=freeze_date_time,
+            end_time=model.strs_to_dt(end_date, end_time),
+            deactivate_time=deactivate_date_time,
+            users=users_from_emails(user_emails.split(), model),
+            problems=problems_from_slugs(problem_slugs.split(), model))
         model.db.session.add(contest)
 
     model.db.session.commit()
 
     return redirect(url_for("contests.contests_view"))
-
 
 
 def display_contest_add_form(contest_id):
@@ -222,27 +222,31 @@ def display_contest_add_form(contest_id):
     """
     model = util.get_model()
 
-    if contest_id is None: # add
-        return render_template("contests/add_edit.html", action_label="Add", contest=None,
-                               user_emails=[user.email for user in model.User.query.all()],
-                               problem_slugs=[a.slug for a in model.Problem.query.all()])
-    else: # edit
+    if contest_id is None:  # add
+        return render_template(
+            "contests/add_edit.html",
+            action_label="Add",
+            contest=None,
+            user_emails=[user.email for user in model.User.query.all()],
+            problem_slugs=[a.slug for a in model.Problem.query.all()])
+    else:  # edit
         contest = model.Contest.query.filter_by(id=util.i(contest_id)).scalar()
         if contest is None:
-            error = "Failed to edit contest \'{}\' as contest doesn't exist.".format(contest_id)
+            error = "Failed to edit contest \'{}\' as contest doesn't exist.".format(
+                contest_id)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("contests.contests_view"))
 
-        return render_template("contests/add_edit.html",
-                               action_label="Edit",
-                               contest=contest,
-                               user_emails=[user.email for user in model.User.query.all()],
-                               problem_slugs=[a.slug for a in model.Problem.query.all()])
+        return render_template(
+            "contests/add_edit.html",
+            action_label="Edit",
+            contest=contest,
+            user_emails=[user.email for user in model.User.query.all()],
+            problem_slugs=[a.slug for a in model.Problem.query.all()])
 
 
-
-## Util functions
+# Util functions
 def is_dup_contest_name(name):
     """
     Checks if a name is a duplicate of another contest

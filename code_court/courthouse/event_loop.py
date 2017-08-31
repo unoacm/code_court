@@ -10,6 +10,7 @@ from model import db
 
 EXECUTOR_TIMEOUT_MINS = 1
 
+
 def reset_overdue_runs():
     runs = model.Run.query.filter(model.Run.finished_execing_time == None)\
                .filter(model.Run.started_execing_time != None)\
@@ -23,9 +24,11 @@ def reset_overdue_runs():
 
     model.db.session.commit()
 
+
 def event_loop():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+        "CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['model'] = model
 
@@ -39,6 +42,7 @@ def event_loop():
 
         except KeyboardInterrupt:
             print("Event loop shutting down")
+
 
 if __name__ == "__main__":
     event_loop()
