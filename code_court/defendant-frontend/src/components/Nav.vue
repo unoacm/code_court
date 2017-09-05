@@ -3,13 +3,13 @@
     <div class="container">
       <div class="navigation level">
         <div class="level-left">
-          <span v-if="user"><router-link to="/" exact>Info</router-link></span>
-          <span v-if="user"><router-link to="/scoreboard">Scoreboard</router-link></span>
+          <span v-if="is_active"><router-link to="/" exact>Info</router-link></span>
+          <span v-if="is_active"><router-link to="/scoreboard">Scoreboard</router-link></span>
           <!--<span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>-->
         </div>
 
         <div>
-          <span v-if="user" v-for="(problem, slug) in problems">
+          <span v-if="is_active" v-for="(problem, slug) in problems">
             <router-link :to="{ name: 'problem', params: { slug: slug }}" class="problem-link">
               {{ slug }}
             </router-link>
@@ -36,6 +36,7 @@
 
 <script>
 import Notification from '@/components/Notification'
+import isContestOver from '@/util'
 
 export default {
   name: 'app',
@@ -53,8 +54,14 @@ export default {
     user () {
       return this.$store.state.user
     },
+    contest () {
+      return this.$store.state.contest
+    },
     alerts () {
       return this.$store.state.alerts
+    },
+    is_active () {
+      return this.$store.state.user != null && isContestOver(this.contest)
     }
   },
   methods: {

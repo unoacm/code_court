@@ -111,7 +111,7 @@ class Problem(db.Model):
     problem_type_id = db.Column(db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
-    slug = db.Column(db.String(10), unique=True, nullable=False)
+    slug = db.Column(db.String(20), unique=True, nullable=False)
     """str: the problem's slug, this is a short (<11 chars) string that is used to identify
             a problem. It can only contain the following characters: a-z, A-Z, 0-1, -, _"""
 
@@ -208,7 +208,7 @@ class User(db.Model, UserMixin):
 
         self.email = email
         self.name = name
-        self.hashed_password = util.hash_password(password)
+        self.hashed_password = str(util.hash_password(password))
         self.misc_data = misc_data
         if username:
             self.username = username
@@ -580,24 +580,25 @@ class UserRole(db.Model):
     """Stores system user roles"""
     __tablename__ = 'user_role'
 
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
 
     users = db.relationship("User", secondary=user_user_role, back_populates="user_roles")
 
     def __init__(self, name):
-        self.id = name
+        self.name = name
 
     def get_output_dict(self):
         return {
-            "id": self.id
+            "name": self.name
         }
 
     def __eq__(self, other):
         """Override the default Equals behavior"""
         if isinstance(other, self.__class__):
-            return self.id == other.id
+            return self.name == other.name
         elif isinstance(other, str):
-            return self.id == other
+            return self.name == other
         return NotImplemented
 
     def __ne__(self, other):
@@ -606,10 +607,10 @@ class UserRole(db.Model):
         return NotImplemented
 
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.name)
 
     def __repr__(self):
-        return "UserRole(id={})".format(self.id)
+        return "UserRole(name={})".format(self.name)
 
     def __str__(self):
         return self.__repr__()

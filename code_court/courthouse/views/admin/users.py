@@ -43,20 +43,20 @@ def users_view(page):
 
     if user_search:
         term = '%' + user_search + '%'
-        users_query = users_query.filter(or_(model.User.name.ilike(term), 
+        users_query = users_query.filter(or_(model.User.name.ilike(term),
                                              model.User.email.ilike(term)))
     if user_role and user_role != "all":
-        users_query = users_query.join(model.User.user_roles).filter(model.UserRole.id==user_role)
-    
+        users_query = users_query.join(model.User.user_roles).filter(model.UserRole.name==user_role)
+
     users_pagination = users_query.paginate(page, 30)
     users = users_pagination.items
 
     metrics = {}
     for user in users:
         user_metrics = {}
-         
+
         run_query = model.Run.query.filter_by(user_id=user.id)
-        
+
         user_metrics["num_runs"] = run_query.count();
         user_metrics["last_run"] = run_query.order_by(model.Run.submit_time.desc()).limit(1).first()
 
@@ -65,7 +65,7 @@ def users_view(page):
     return render_template("users/view.html", users_pagination=users_pagination,
                                               users=users,
                                               metrics=metrics,
-                                              user_role=user_role, 
+                                              user_role=user_role,
                                               search=user_search)
 
 
@@ -106,7 +106,7 @@ def users_del(user_id):
     """
     model = util.get_model()
 
-    user = model.User.query.filter_by(id=user_id).scalar()
+    user = model.User.query.filter_by(id=util.i(user_id)).scalar()
 
     if user is None:
         error = "Failed to delete user \'{}\' as it does not exist.".format(user_id)
@@ -129,7 +129,7 @@ def users_del(user_id):
         error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(user_id)
         current_app.logger.info(error)
         flash(error, "danger")
-        
+
     return redirect(url_for("users.users_view"))
 
 
@@ -162,7 +162,7 @@ def add_user():
         return redirect(url_for("users.users_view"))
 
     if user_id: # edit
-        user = model.User.query.filter_by(id=user_id).one()
+        user = model.User.query.filter_by(id=util.i(user_id)).one()
         user.email = email
         user.name = name
         user.username = username
@@ -170,7 +170,7 @@ def add_user():
             user.hashed_password = util.hash_password(password)
         user.misc_data = misc_data
         user.contests = retrieve_by_ids(contest_ids.split(), model.Contest)
-        user.user_roles = retrieve_by_ids(user_role_ids.split(), model.UserRole)
+        user.user_roles = retrieve_by_names(user_role_ids.split(), model.UserRole)
     else: # add
         if is_dup_user_email(email):
             error = "Failed to add user \'{}\' as user already exists.".format(email)
@@ -183,7 +183,7 @@ def add_user():
                           password=password,
                           misc_data=misc_data,
                           contests=retrieve_by_ids(contest_ids.split(), model.Contest),
-                          user_roles=retrieve_by_ids(user_role_ids.split(), model.UserRole),
+                          user_roles=retrieve_by_names(user_role_ids.split(), model.UserRole),
                           username=username)
         model.db.session.add(user)
 
@@ -209,7 +209,7 @@ def display_user_add_form(user_id):
                                action_label="Add",
                                user=None)
     else: # edit
-        user = model.User.query.filter_by(id=user_id).scalar()
+        user = model.User.query.filter_by(id=util.i(user_id)).scalar()
         if user is None:
             error = "Failed to edit user \'{}\' as user doesn't exist.".format(user_id)
             current_app.logger.info(error)
@@ -253,8 +253,16 @@ def retrieve_by_ids(ids, table):
     rows = []
 
     for id in ids:
-        row = table.query.filter_by(id=id).scalar()
+        row = table.query.filter_by(id=util.i(id)).scalar()
         if row:
             rows.append(row)
     return rows
 
+def retrieve_by_names(names, table):
+    rows = []
+
+    for name in names:
+        row = table.query.filter_by(name=name).scalar()
+        if row:
+            rows.append(row)
+    return rows

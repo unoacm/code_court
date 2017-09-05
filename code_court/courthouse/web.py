@@ -41,7 +41,7 @@ from views.auth import auth
 
 # turn down log level for werkzeug
 wlog = logging.getLogger('werkzeug')
-wlog.setLevel(logging.ERROR)
+wlog.setLevel(logging.INFO)
 
 log_location = 'logs/code_court.log'
 
@@ -57,16 +57,15 @@ def create_app():
     app = Flask(__name__)
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400 # 1 day
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db" #TODO: put this in config
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ECHO'] = False
     app.config['model'] = model
-    app.config['SECRET_KEY'] = 'secret key1234' #TODO: put this in config
+    app.config['SECRET_KEY'] = '2jrlkfjoi1j3kljekdlasjdklasjdk139999d9d' #TODO: put this in config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 
     if app.config.get("SSL"):
         app.config.update(dict(PREFERRED_URL_SCHEME = 'https'))
-
 
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
@@ -331,14 +330,14 @@ def init_db(app):
 
         model.db.session.add_all([model.Configuration("strict_whitespace_diffing", "False", "bool", "admin"),
                                   model.Configuration("contestants_see_sample_output", "True", "bool", "defendant"),
-                                  model.Configuration("max_user_submissions", 5, "integer", "defendant"),
-                                  model.Configuration("user_submission_time_limit", 1, "integer", "defendant"),
-                                  model.Configuration("max_output_length", 10 * 1024, "integer", "defendant")])
+                                  model.Configuration("max_user_submissions", "5", "integer", "defendant"),
+                                  model.Configuration("user_submission_time_limit", "1", "integer", "defendant"),
+                                  model.Configuration("max_output_length", str(10 * 1024), "integer", "defendant")])
 
         model.db.session.add_all([model.ProblemType("input-output",
                                                     '#!/bin/bash\ntest "$1" = "$2"')])
 
-        roles = {x.id: x for x in model.UserRole.query.all()}
+        roles = {x.name: x for x in model.UserRole.query.all()}
         model.db.session.add_all([model.User("admin@example.org", "Admin", "pass", user_roles=[roles['operator']]),
                                   model.User("exec@example.org", "Executioner", "epass", user_roles=[roles['executioner']])])
 
@@ -350,7 +349,7 @@ def dev_init_db(app):
     """
     with app.app_context():
         app.logger.info("Initializing tables with dev data")
-        roles = {x.id: x for x in model.UserRole.query.all()}
+        roles = {x.name: x for x in model.UserRole.query.all()}
 
         model.db.session.add_all([model.User("super@example.org", "SuperUser", "pass", user_roles=list(roles.values())),
                                   model.User("observer@example.org", "ObserverUser", "pass", user_roles=[roles['observer']])])

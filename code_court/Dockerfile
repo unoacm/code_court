@@ -10,6 +10,7 @@ RUN apk add --no-cache python3-dev \
                         py-virtualenv \
                         libxml2-dev \
                         libxslt-dev \
+                        libpq \
                         gcc
 
 

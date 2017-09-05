@@ -89,7 +89,7 @@ class ContestsTestCase(BaseTest):
         }, follow_redirects=True)
 
         # Add test contestants:
-        roles = {x.id: x for x in model.UserRole.query.all()}
+        roles = {x.name: x for x in model.UserRole.query.all()}
         names = ["Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"]
         emails = ["testuser{}@example.org".format(i) for i in range(1,11)]
 

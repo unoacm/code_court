@@ -29,7 +29,10 @@
     <br/>
 
     <div>
-      <button v-on:click="submitCode(true)" class="button is-warning">Submit</button>
+      <button v-on:click="submitCode(true)" class="button is-warning">
+        Submit
+        <pulse-loader v-if="(latestRun && (latestRun.is_submission && latestRun.state == 'Judging'))" :loading="true" size="4px" color="#000" />
+      </button>
     </div>
 
     <br/>
@@ -40,7 +43,10 @@
     <br/>
 
     <div>
-      <button v-on:click="submitCode(false)" class="button is-info">Test</button>
+      <button v-on:click="submitCode(false)" class="button is-info">
+        Test
+        <pulse-loader v-if="(latestRun && (!latestRun.is_submission && latestRun.state == 'Judging'))" :loading="true" size="4px" color="#fff" />
+      </button>
     </div>
 
     <br/>
@@ -60,8 +66,10 @@ import axios from 'axios'
 
 import Editor from '@/components/Editor'
 import RunCollapse from '@/components/RunCollapse'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
 export default {
+
   data () {
     return {
       lang: 'python',
@@ -78,6 +86,9 @@ export default {
     },
     langs () {
       return this.$store.state.langs
+    },
+    latestRun () {
+      return this.problem.runs[this.problem.runs.length - 1]
     },
     sourceCode: {
       get () {
@@ -152,7 +163,8 @@ export default {
   },
   components: {
     Editor,
-    RunCollapse
+    RunCollapse,
+    PulseLoader
   }
 }
 </script>

@@ -90,7 +90,7 @@ def submit_writ(run_id):
     }
     """
     model = util.get_model()
-    run = model.Run.query.filter_by(id=run_id).scalar()
+    run = model.Run.query.filter_by(id=util.i(run_id)).scalar()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s", run_id)
         abort(404)
@@ -128,7 +128,7 @@ def return_without_run(run_id):
     experiencing errors or are shutting down
     """
     model = util.get_model()
-    run = model.Run.query.filter_by(id=run_id).first()
+    run = model.Run.query.filter_by(id=util.i(run_id)).first()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s", run_id)
         abort(404)
@@ -171,7 +171,7 @@ def get_all_problems():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     problems = model.Problem.query.filter_by(is_enabled=True).all()
 
@@ -193,7 +193,7 @@ def get_clarifications():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     clarifications = model.Clarification.query.filter(or_(is_public=True,
         initiating_user=user)).all()
@@ -208,7 +208,7 @@ def submit_clarification():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    user = model.User.query.filter_by(id=current_user_id).scalar()
+    user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     subject = request.json.get('subject', None)
     contents = request.json.get('contents', None)
@@ -249,7 +249,7 @@ def get_current_user():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     resp = None
     if current_user:
@@ -264,7 +264,7 @@ def submit_run():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    user = model.User.query.filter_by(id=current_user_id).scalar()
+    user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     MAX_RUNS = util.get_configuration("max_user_submissions")
     TIME_LIMIT = util.get_configuration("user_submission_time_limit")
@@ -332,7 +332,7 @@ def get_scoreboard():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     if len(current_user.contests) == 0:
         return make_response(jsonify({'error': 'User has no contests'}), 400)
@@ -341,7 +341,7 @@ def get_scoreboard():
     contest = current_user.contests[0]
 
     defendants = model.User.query\
-                    .filter(model.User.user_roles.any(id="defendant"))\
+                    .filter(model.User.user_roles.any(name="defendant"))\
                     .filter(model.User.contests.any(id=contest.id))\
                     .all()
 
@@ -388,7 +388,7 @@ def get_contest_info():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     contests = current_user.contests
 
@@ -413,7 +413,7 @@ def make_user():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     if ("judge" not in current_user.user_roles and
         "operator" not in current_user.user_roles):
@@ -432,7 +432,7 @@ def make_user():
     if existing_user:
         return make_response(jsonify({'error': 'Invalid request, user already exists'}), 400)
 
-    defedant_role = model.UserRole.query.filter_by(id="defendant").scalar()
+    defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(email=email, name=name, password=password, user_roles=[defedant_role], username=username)
 
@@ -457,7 +457,7 @@ def update_user_metadata():
     model = util.get_model()
 
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(id=current_user_id).scalar()
+    current_user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
     if ("judge" not in current_user.user_roles and
         "operator" not in current_user.user_roles):
@@ -492,7 +492,7 @@ def signout_user(email):
     if not matching_user:
         return make_response(jsonify({'error': "Invalid request, couldn't find user"}), 400)
 
-    matching_user.merge_metadata({"signout": int(time.time())})
+    matching_user.merge_metadata({"signout": util.i(time.time())})
     model.db.session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)

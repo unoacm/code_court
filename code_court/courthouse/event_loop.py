@@ -1,4 +1,6 @@
 import datetime
+import os
+
 from time import sleep
 
 from flask import Flask
@@ -23,7 +25,7 @@ def reset_overdue_runs():
 
 def event_loop():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/code_court.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['model'] = model
 

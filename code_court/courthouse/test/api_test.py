@@ -77,7 +77,7 @@ class APITestCase(BaseTest):
 
 
 def setup_contest():
-    roles = {x.id: x for x in model.UserRole.query.all()}
+    roles = {x.name: x for x in model.UserRole.query.all()}
     test_contestant = model.User("testuser@xample.org", "Test User", "pass", user_roles=[roles['defendant']])
     test_executioner = model.User("testexec@example.org", "Test Executioner", "epass", user_roles=[roles['executioner']])
     test_contest = model.Contest("test_contest", model.str_to_dt("2017-02-05T22:04Z"),
