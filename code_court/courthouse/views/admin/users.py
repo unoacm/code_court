@@ -1,14 +1,9 @@
-import collections
-import json
-import re
-import sqlalchemy
-
 import util
 
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
-from flask_login import login_required, current_user
+from flask_login import current_user
 
 from flask import (
     abort,
@@ -18,11 +13,10 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash,
-)
+    flash, )
 
-users = Blueprint('users', __name__,
-                  template_folder='templates/users')
+users = Blueprint('users', __name__, template_folder='templates/users')
+
 
 @users.route("/", methods=["GET"], defaults={'page': 1})
 @users.route("/<int:page>", methods=["GET"])
@@ -43,10 +37,11 @@ def users_view(page):
 
     if user_search:
         term = '%' + user_search + '%'
-        users_query = users_query.filter(or_(model.User.name.ilike(term),
-                                             model.User.email.ilike(term)))
+        users_query = users_query.filter(
+            or_(model.User.name.ilike(term), model.User.email.ilike(term)))
     if user_role and user_role != "all":
-        users_query = users_query.join(model.User.user_roles).filter(model.UserRole.name==user_role)
+        users_query = users_query.join(model.User.user_roles).filter(
+            model.UserRole.name == user_role)
 
     users_pagination = users_query.paginate(page, 30)
     users = users_pagination.items
@@ -57,16 +52,19 @@ def users_view(page):
 
         run_query = model.Run.query.filter_by(user_id=user.id)
 
-        user_metrics["num_runs"] = run_query.count();
-        user_metrics["last_run"] = run_query.order_by(model.Run.submit_time.desc()).limit(1).first()
+        user_metrics["num_runs"] = run_query.count()
+        user_metrics["last_run"] = run_query.order_by(
+            model.Run.submit_time.desc()).limit(1).first()
 
         metrics[user.id] = user_metrics
 
-    return render_template("users/view.html", users_pagination=users_pagination,
-                                              users=users,
-                                              metrics=metrics,
-                                              user_role=user_role,
-                                              search=user_search)
+    return render_template(
+        "users/view.html",
+        users_pagination=users_pagination,
+        users=users,
+        metrics=metrics,
+        user_role=user_role,
+        search=user_search)
 
 
 @users.route("/add/", methods=["GET", "POST"], defaults={'user_id': None})
@@ -82,13 +80,13 @@ def users_add(user_id):
     Returns:
         a rendered add/edit template or a redirect to the user view page
     """
-    model = util.get_model()
-    if request.method == "GET": # display add form
+    if request.method == "GET":  # display add form
         return display_user_add_form(user_id)
-    elif request.method == "POST": # process added/edited user
+    elif request.method == "POST":  # process added/edited user
         return add_user()
     else:
-        current_app.logger.info("invalid user add request method: %s", request.method)
+        current_app.logger.info("invalid user add request method: %s",
+                                request.method)
         abort(400)
 
 
@@ -109,13 +107,15 @@ def users_del(user_id):
     user = model.User.query.filter_by(id=util.i(user_id)).scalar()
 
     if user is None:
-        error = "Failed to delete user \'{}\' as it does not exist.".format(user_id)
+        error = "Failed to delete user \'{}\' as it does not exist.".format(
+            user_id)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
     if current_user.id == user.id:
-        error = "Failed to delete user \'{}\' because user cannot delete itself.".format(user_id)
+        error = "Failed to delete user \'{}\' because user cannot delete itself.".format(
+            user_id)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
@@ -126,7 +126,8 @@ def users_del(user_id):
         flash("Deleted user \'{}\'".format(user.email), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(user_id)
+        error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(
+            user_id)
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -156,12 +157,13 @@ def add_user():
     user_role_ids = request.form.get("user_role_ids")
 
     if password != confirm_password:
-        error = "Failed to add/edit \'{}\' due to password mismatch.".format(email)
+        error = "Failed to add/edit \'{}\' due to password mismatch.".format(
+            email)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
-    if user_id: # edit
+    if user_id:  # edit
         user = model.User.query.filter_by(id=util.i(user_id)).one()
         user.email = email
         user.name = name
@@ -170,21 +172,25 @@ def add_user():
             user.hashed_password = util.hash_password(password)
         user.misc_data = misc_data
         user.contests = retrieve_by_ids(contest_ids.split(), model.Contest)
-        user.user_roles = retrieve_by_names(user_role_ids.split(), model.UserRole)
-    else: # add
+        user.user_roles = retrieve_by_names(user_role_ids.split(),
+                                            model.UserRole)
+    else:  # add
         if is_dup_user_email(email):
-            error = "Failed to add user \'{}\' as user already exists.".format(email)
+            error = "Failed to add user \'{}\' as user already exists.".format(
+                email)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("users.users_view"))
 
-        user = model.User(email=email,
-                          name=name,
-                          password=password,
-                          misc_data=misc_data,
-                          contests=retrieve_by_ids(contest_ids.split(), model.Contest),
-                          user_roles=retrieve_by_names(user_role_ids.split(), model.UserRole),
-                          username=username)
+        user = model.User(
+            email=email,
+            name=name,
+            password=password,
+            misc_data=misc_data,
+            contests=retrieve_by_ids(contest_ids.split(), model.Contest),
+            user_roles=retrieve_by_names(user_role_ids.split(),
+                                         model.UserRole),
+            username=username)
         model.db.session.add(user)
 
     model.db.session.commit()
@@ -204,23 +210,22 @@ def display_user_add_form(user_id):
     """
     model = util.get_model()
 
-    if user_id is None: # add
-        return render_template("users/add_edit.html",
-                               action_label="Add",
-                               user=None)
-    else: # edit
+    if user_id is None:  # add
+        return render_template(
+            "users/add_edit.html", action_label="Add", user=None)
+    else:  # edit
         user = model.User.query.filter_by(id=util.i(user_id)).scalar()
         if user is None:
-            error = "Failed to edit user \'{}\' as user doesn't exist.".format(user_id)
+            error = "Failed to edit user \'{}\' as user doesn't exist.".format(
+                user_id)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("users.users_view"))
-        return render_template("users/add_edit.html",
-                               action_label="Edit",
-                               user=user)
+        return render_template(
+            "users/add_edit.html", action_label="Edit", user=user)
 
 
-## Util functions
+# Util functions
 def is_dup_user_email(email):
     """
     Checks if an email is a duplicate of another user
@@ -258,6 +263,7 @@ def retrieve_by_ids(ids, table):
             rows.append(row)
     return rows
 
+
 def retrieve_by_names(names, table):
     rows = []
 
@@ -266,3 +272,4 @@ def retrieve_by_names(names, table):
         if row:
             rows.append(row)
     return rows
+

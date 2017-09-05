@@ -11,6 +11,7 @@ class EventLoopTestCase(BaseTest):
     """
     Contains tests for the event loop
     """
+
     def test_reset_overdue_run(self):
         """tests if an overdue run gets reset"""
         EXECUTOR_TIMEOUT_MINS = 5
@@ -32,7 +33,8 @@ class EventLoopTestCase(BaseTest):
             "is_submission": True,
         }
         run = model.Run(**RUN_ARGS)
-        run.started_execing_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=EXECUTOR_TIMEOUT_MINS+1)
+        run.started_execing_time = datetime.datetime.utcnow(
+        ) - datetime.timedelta(minutes=EXECUTOR_TIMEOUT_MINS + 1)
         run.finished_execing_time = None
         model.db.session.add(run)
         model.db.session.commit()
@@ -64,7 +66,8 @@ class EventLoopTestCase(BaseTest):
             "is_submission": True,
         }
         run = model.Run(**RUN_ARGS)
-        run.started_execing_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=EXECUTOR_TIMEOUT_MINS-1)
+        run.started_execing_time = datetime.datetime.utcnow(
+        ) - datetime.timedelta(minutes=EXECUTOR_TIMEOUT_MINS - 1)
         run.finished_execing_time = None
         model.db.session.add(run)
         model.db.session.commit()
@@ -73,7 +76,9 @@ class EventLoopTestCase(BaseTest):
 
         queried_run = model.Run.query.scalar()
 
-        self.assertEqual(queried_run.started_execing_time, run.started_execing_time)
+        self.assertEqual(queried_run.started_execing_time,
+                         run.started_execing_time)
+
 
 def get_problem_type():
     """returns a test ProblemType"""
@@ -87,6 +92,7 @@ def get_problem_type():
 
     return PROBLEM_TYPE_ARGS, problem_type
 
+
 def get_problem():
     """returns a test Problem"""
     problem_type_args, problem_type = get_problem_type()
@@ -98,7 +104,8 @@ def get_problem():
         "sample_input": "3",
         "sample_output": "Hello, World!Hello, World!Hello, World!",
         "secret_input": "4",
-        "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
+        "secret_output":
+        "Hello, World!Hello, World!Hello, World!Hello, World!",
     }
 
     problem = model.Problem(**PROBLEM_ARGS)
@@ -106,6 +113,7 @@ def get_problem():
     model.db.session.commit()
 
     return PROBLEM_ARGS, problem
+
 
 def get_language():
     """returns a test Language"""
@@ -123,14 +131,20 @@ def get_language():
 
     return LANG_ARGS, lang
 
+
 def get_user():
     """returns a test user"""
     USER_ARGS = {
-        "email": "testuser@example.org",
-        "name": "Test A. B. User",
-        "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-        "creation_time": model.str_to_dt("2017-01-01T12:12Z"),
-        "misc_data": '{"teacher": "Cavanaugh"}',
+        "email":
+        "testuser@example.org",
+        "name":
+        "Test A. B. User",
+        "password":
+        "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
+        "creation_time":
+        model.str_to_dt("2017-01-01T12:12Z"),
+        "misc_data":
+        '{"teacher": "Cavanaugh"}',
     }
 
     # create and add user
@@ -139,6 +153,7 @@ def get_user():
     model.db.session.commit()
 
     return USER_ARGS, user
+
 
 def get_contest():
     """returns a test contest"""

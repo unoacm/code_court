@@ -1,29 +1,24 @@
-import json
-import re
-
 import util
 
 from sqlalchemy.exc import IntegrityError
-
-from flask_login import login_required
 
 from flask import (
     abort,
     Blueprint,
     current_app,
-    flash,
     redirect,
     render_template,
     request,
     url_for,
-    flash,
-)
+    flash, )
 
-languages = Blueprint('languages', __name__,
-                  template_folder='templates/language')
+languages = Blueprint(
+    'languages', __name__, template_folder='templates/language')
+
 
 class ModelMissingException(Exception):
     pass
+
 
 @languages.route("/", methods=["GET"], defaults={'page': 1})
 @languages.route("/<int:page>", methods=["GET"])
@@ -41,6 +36,7 @@ def languages_view(page):
 
     return render_template("language/view.html", languages=languages)
 
+
 @languages.route("/add/", methods=["GET", "POST"], defaults={'lang_id': None})
 @languages.route("/edit/<int:lang_id>/", methods=["GET"])
 @util.login_required("operator")
@@ -54,13 +50,13 @@ def languages_add(lang_id):
     Returns:
         a rendered add/edit template or a redirect to the language view page
     """
-    model = util.get_model()
-    if request.method == "GET": # display add form
+    if request.method == "GET":  # display add form
         return display_lang_add_form(lang_id)
-    elif request.method == "POST": # process added/edited lang
+    elif request.method == "POST":  # process added/edited lang
         return add_lang()
     else:
-        current_app.logger.info("invalid lang add request method: %s", request.method)
+        current_app.logger.info("invalid lang add request method: %s",
+                                request.method)
         abort(400)
 
 
@@ -80,7 +76,8 @@ def languages_del(lang_id):
 
     lang = model.Language.query.filter_by(id=util.i(lang_id)).scalar()
     if lang is None:
-        error = "Failed to delete language \'{}\' as it does not exist.".format(lang_id)
+        error = "Failed to delete language \'{}\' as it does not exist.".format(
+            lang_id)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("languages.languages_view"))
@@ -91,7 +88,8 @@ def languages_del(lang_id):
         flash("Deleted language \'{}\'".format(lang.name), "warning")
     except IntegrityError:
         model.db.session.rollback()
-        error = "Failed to delete language \'{}\' as it's referenced in another DB element".format(lang_id)
+        error = "Failed to delete language \'{}\' as it's referenced in another DB element".format(
+            lang_id)
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -114,7 +112,8 @@ def add_lang():
     syntax_mode = request.form.get("syntax_mode")
     is_enabled = request.form.get("is_enabled")
     run_script = request.form.get("run_script", "").replace('\r\n', '\n')
-    default_template = request.form.get("default_template", "").replace('\r\n', '\n')
+    default_template = request.form.get("default_template", "").replace(
+        '\r\n', '\n')
 
     if name is None:
         error = "Failed to add language due to undefined language name."
@@ -131,27 +130,30 @@ def add_lang():
     # convert is_enabled to a bool
     is_enabled_bool = util.checkbox_result_to_bool(is_enabled)
     if is_enabled_bool is None:
-        error = "Failed to add language \'{}\' due to invalid is_enabled check.".format(name)
+        error = "Failed to add language \'{}\' due to invalid is_enabled check.".format(
+            name)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("languages.languages_view"))
 
     lang_id = util.i(request.form.get('lang_id'))
-    if lang_id: # edit
+    if lang_id:  # edit
         lang = model.Language.query.filter_by(id=lang_id).one()
         lang.name = name
         lang.syntax_mode = syntax_mode
         lang.is_enabled = is_enabled_bool
         lang.run_script = run_script
         lang.default_template = default_template
-    else: # add
+    else:  # add
         if is_dup_lang_name(name):
-            error = "Failed to add language \'{}\' as language already exists.".format(name)
+            error = "Failed to add language \'{}\' as language already exists.".format(
+                name)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("languages.languages_view"))
 
-        lang = model.Language(name, syntax_mode, is_enabled_bool, run_script, default_template)
+        lang = model.Language(name, syntax_mode, is_enabled_bool, run_script,
+                              default_template)
         model.db.session.add(lang)
 
     model.db.session.commit()
@@ -171,27 +173,29 @@ def display_lang_add_form(lang_id):
     """
     model = util.get_model()
 
-    if lang_id is None: # add
+    if lang_id is None:  # add
         return render_template("language/add_edit.html", action_label="Add")
-    else: # edit
+    else:  # edit
         lang = model.Language.query.filter_by(id=lang_id).scalar()
         if lang is None:
-            error = "Failed to edit language \'{}\' as language doesn't exist.".format(lang_id)
+            error = "Failed to edit language \'{}\' as language doesn't exist.".format(
+                lang_id)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("languages.languages_view"))
 
-        return render_template("language/add_edit.html",
-                               action_label="Edit",
-                               lang_id=lang_id,
-                               name=lang.name,
-                               syntax_mode=lang.syntax_mode,
-                               is_enabled=lang.is_enabled,
-                               run_script=lang.run_script,
-                               default_template=lang.default_template)
+        return render_template(
+            "language/add_edit.html",
+            action_label="Edit",
+            lang_id=lang_id,
+            name=lang.name,
+            syntax_mode=lang.syntax_mode,
+            is_enabled=lang.is_enabled,
+            run_script=lang.run_script,
+            default_template=lang.default_template)
 
 
-## Util functions
+# Util functions
 def is_dup_lang_name(name):
     """
     Checks if a name is a duplicate of another lang
@@ -208,3 +212,4 @@ def is_dup_lang_name(name):
         return True
     else:
         return False
+

@@ -1,13 +1,4 @@
-import collections
-import json
-import re
-import sqlalchemy
-
 import util
-
-from sqlalchemy import or_
-
-from flask_login import login_required
 
 from flask import (
     abort,
@@ -17,11 +8,11 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash,
-)
+    flash, )
 
-configurations = Blueprint('configurations', __name__,
-                  template_folder='templates/configurations')
+configurations = Blueprint(
+    'configurations', __name__, template_folder='templates/configurations')
+
 
 @configurations.route("/", methods=["GET", "POST"], defaults={'page': 1})
 @configurations.route("/<int:page>", methods=["GET", "POST"])
@@ -37,12 +28,14 @@ def configurations_view(page):
 
     config_query = model.Configuration.query
 
-    configs = config_query.order_by(model.Configuration.category.asc()).paginate(page, 30)
+    configs = config_query.order_by(
+        model.Configuration.category.asc()).paginate(page, 30)
 
     return render_template("configurations/view.html", configs=configs)
 
 
-@configurations.route("/add/", methods=["GET", "POST"], defaults={'config_id': None})
+@configurations.route(
+    "/add/", methods=["GET", "POST"], defaults={'config_id': None})
 @configurations.route("/edit/<int:config_id>/", methods=["GET"])
 @util.login_required("operator")
 def configurations_add(config_id):
@@ -55,13 +48,13 @@ def configurations_add(config_id):
     Returns:
         a rendered add/edit template or a redirect to the config view page
     """
-    model = util.get_model()
-    if request.method == "GET": # display add form
+    if request.method == "GET":  # display add form
         return display_config_add_form(config_id)
-    elif request.method == "POST": # process added/edited config
+    elif request.method == "POST":  # process added/edited config
         return add_config()
     else:
-        current_app.logger.info("invalid config add request method: %s", request.method)
+        current_app.logger.info("invalid config add request method: %s",
+                                request.method)
         abort(400)
 
 
@@ -82,7 +75,8 @@ def configurations_del(config_id):
     config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
 
     if config is None:
-        error = "Failed to delete config \'{}\' as config doesn't exist.".format(config_id)
+        error = "Failed to delete config \'{}\' as config doesn't exist.".format(
+            config_id)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("configurations.configurations_view"))
@@ -111,23 +105,22 @@ def add_config():
     valType = request.form.get("valType")
     category = request.form.get("category")
 
-    if config_id: # edit
+    if config_id:  # edit
         config = model.Configuration.query.filter_by(id=int(config_id)).one()
         config.key = key
         config.val = val
         config.valType = valType
         config.category = category
-    else: # add
+    else:  # add
         if is_dup_config_key(key):
-            error = "Failed to add config \'{}\' as config already exists.".format(key)
+            error = "Failed to add config \'{}\' as config already exists.".format(
+                key)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("configurations.configurations_view"))
 
-        config = model.Configuration(key=key,
-                                     val=val,
-                                     valType=valType,
-                                     category=category)
+        config = model.Configuration(
+            key=key, val=val, valType=valType, category=category)
         model.db.session.add(config)
 
     model.db.session.commit()
@@ -147,24 +140,24 @@ def display_config_add_form(config_id):
     """
     model = util.get_model()
 
-    if config_id is None: # add
-        return render_template("configurations/add_edit.html",
-                               action_label="Add",
-                               config=None)
-    else: # edit
-        config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
+    if config_id is None:  # add
+        return render_template(
+            "configurations/add_edit.html", action_label="Add", config=None)
+    else:  # edit
+        config = model.Configuration.query.filter_by(
+            id=int(config_id)).scalar()
         if config is None:
-            error = "Failed to edit config \'{}\' as config doesn't exist.".format(config_id)
+            error = "Failed to edit config \'{}\' as config doesn't exist.".format(
+                config_id)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("configurations.configurations_view"))
 
-        return render_template("configurations/add_edit.html",
-                               action_label="Edit",
-                               config=config)
+        return render_template(
+            "configurations/add_edit.html", action_label="Edit", config=config)
 
 
-## Util functions
+# Util functions
 def is_dup_config_key(key):
     """
     Checks if a key is a duplicate of another config
@@ -181,3 +174,4 @@ def is_dup_config_key(key):
         return True
     else:
         return False
+

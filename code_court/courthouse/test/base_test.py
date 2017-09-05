@@ -1,15 +1,16 @@
 import logging
-import os
 import unittest
 
 from flask_login import current_user
 
 from web import app, model, setup_database
 
+
 class BaseTest(unittest.TestCase):
     """
     Contains tests for the problems blueprint
     """
+
     def setUp(self):
         logging.disable(logging.CRITICAL)
 
@@ -18,8 +19,8 @@ class BaseTest(unittest.TestCase):
         self.app = app.test_client()
 
         logging.info("Droping database for test")
-            # commit needs to be run before drop_all for
-            # postgres, or it will silently fail
+        # commit needs to be run before drop_all for
+        # postgres, or it will silently fail
         model.db.session.commit()
         model.db.drop_all()
         model.db.session.commit()
@@ -29,10 +30,10 @@ class BaseTest(unittest.TestCase):
 
     def login(self, email, password):
         with self.app:
-            rv = self.app.post('/admin/login', data=dict(
-                email=email,
-                password=password
-            ), follow_redirects=True)
+            rv = self.app.post(
+                '/admin/login',
+                data=dict(email=email, password=password),
+                follow_redirects=True)
 
             self.assertEqual(rv.status_code, 200, "Failed to login")
             self.assertNotEqual(current_user, None, "Failed to login")
@@ -60,3 +61,4 @@ class BaseTest(unittest.TestCase):
             model.db.session.commit()
             model.db.drop_all()
             model.db.session.commit()
+
