@@ -31,48 +31,6 @@ def index():
 
 RunState = Enum("RunState", "judging passed failed")
 
-
-@defendant.route("/scoreboard", methods=["GET"])
-def scoreboard():
-    model = util.get_model()
-
-    defendants = model.User.query.filter(
-        model.User.user_roles.any(id="defendant")).all()
-    problems = model.Problem.query.all()
-    contest = model.Contest.query.first()  # TODO: replace with correct contest
-
-    # compute scoreboard
-    scores = collections.OrderedDict()
-    for user in defendants:
-        user_scores = collections.OrderedDict()
-        for problem in problems:
-            runs = model.Run.query.filter_by(
-                is_submission=True,
-                user=user,
-                contest=contest,
-                problem=problem).all()
-
-            grid = []
-            for run in runs:
-                if not run.is_judged:
-                    val = RunState.judging
-                elif run.is_passed:
-                    val = RunState.passed
-                else:
-                    val = RunState.failed
-                grid.append(val)
-
-            user_scores[problem.id] = grid
-        scores[user.id] = user_scores
-
-    return render_template(
-        "defendant/scoreboard.html",
-        users=defendants,
-        problems=problems,
-        scores=scores,
-        RunState=RunState)
-
-
 @defendant.route("/problem/<problem_id>/", methods=["GET"])
 @defendant.route("/problem/<problem_id>/", methods=["POST"])
 def problem(problem_id):
