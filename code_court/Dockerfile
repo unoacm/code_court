@@ -11,7 +11,8 @@ RUN apk add --no-cache python3-dev \
                         libxml2-dev \
                         libxslt-dev \
                         libpq \
-                        gcc
+                        gcc \
+                        postgresql-dev
 
 
 COPY courthouse/requirements.txt /tmp/courthouse_requirements.txt
@@ -27,7 +28,7 @@ COPY courthouse /courthouse
 
 COPY docker_scripts /docker_scripts
 
-ENV CODE_COURT_PRODUCTION true
+# ENV CODE_COURT_PRODUCTION true
 
 EXPOSE 9191
 

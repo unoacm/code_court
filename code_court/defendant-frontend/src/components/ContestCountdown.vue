@@ -21,7 +21,6 @@ export default {
   },
   methods: {
     isContestOver () {
-      console.log(isContestOver(this.contest))
       return isContestOver(this.contest)
     }
   },

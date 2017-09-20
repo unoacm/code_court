@@ -30,6 +30,7 @@ def event_loop():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         "CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_ECHO'] = False
     app.config['model'] = model
 
     db.init_app(app)

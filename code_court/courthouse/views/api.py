@@ -342,6 +342,9 @@ def get_scoreboard():
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
 
+    if not current_user:
+        return make_response(jsonify({'error': 'Not logged in'}), 400)
+
     if len(current_user.contests) == 0:
         return make_response(jsonify({'error': 'User has no contests'}), 400)
 
@@ -408,6 +411,9 @@ def get_contest_info():
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
 
+    if not current_user:
+        return make_response(jsonify({'error': 'Not logged in'}), 400)
+
     contests = current_user.contests
 
     if len(contests) > 1:
@@ -437,6 +443,9 @@ def make_user():
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
+
+    if not current_user:
+        return make_response(jsonify({'error': 'Not logged in'}), 400)
 
     if ("judge" not in current_user.user_roles
             and "operator" not in current_user.user_roles):
@@ -493,6 +502,8 @@ def update_user_metadata():
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
+    if not current_user:
+        return make_response(jsonify({'error': 'Not logged in'}), 400)
 
     if ("judge" not in current_user.user_roles
             and "operator" not in current_user.user_roles):

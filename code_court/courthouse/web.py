@@ -47,6 +47,8 @@ log_location = 'logs/code_court.log'
 
 app = Flask(__name__)
 
+CODE_COURT_PRODUCTION_ENV_VAR = "CODE_COURT_PRODUCTION"
+
 
 def create_app():
     """
@@ -69,6 +71,8 @@ def create_app():
 
     if app.config.get("SSL"):
         app.config.update(dict(PREFERRED_URL_SCHEME='https'))
+
+    app.config['RUNMODE'] = "PRODUCTION" if os.getenv(CODE_COURT_PRODUCTION_ENV_VAR) else "DEVELOPMENT"
 
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
@@ -152,8 +156,7 @@ def setup_database(app):
             db.create_all()
             db.session.commit()
             init_db(app)
-            if not app.config['TESTING'] and not os.getenv(
-                    "CODE_COURT_PRODUCTION"):
+            if not app.config['TESTING'] and app.config['RUNMODE'] == "DEVELOPMENT":
                 dev_init_db(app)
 
 

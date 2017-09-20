@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 HOST_POSTGRES_PORT=21381
-export CODE_COURT_DB_URI="postgresql+pypostgresql://codecourt:benpass@localhost:$HOST_POSTGRES_PORT/codecourt"
+export CODE_COURT_DB_URI="postgresql+psycopg2://codecourt:benpass@localhost:$HOST_POSTGRES_PORT/codecourt"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR

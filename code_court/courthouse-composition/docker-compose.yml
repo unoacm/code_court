@@ -4,7 +4,7 @@ services:
         image: code-court
         restart: unless-stopped
         environment:
-            - CODE_COURT_DB_URI=postgresql+pypostgresql://codecourt:benpass@postgres/codecourt
+            - CODE_COURT_DB_URI=postgresql+psycopg2://codecourt:benpass@postgres/codecourt
         volumes:
             - ./courthouse_data:/tmp
         expose:
@@ -26,5 +26,5 @@ services:
             - POSTGRES_USER=codecourt
             - POSTGRES_PASSWORD=benpass
             - POSTGRES_DB=codecourt
-        volumes:
-            - ./postgres:/var/lib/postgresql/data
+        # volumes:
+        #     - ./postgres_data:/var/lib/postgresql/data

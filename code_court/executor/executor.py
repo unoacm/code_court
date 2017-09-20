@@ -44,6 +44,7 @@ PID_LIMIT = 50
 MEM_SWAPPINESS = 0 # disable container swapping
 CONTAINER_USER = "user"
 OUTPUT_LIMIT = 100000 # chars
+WAIT_SECONDS = 5
 
 client = docker.from_env()
 
@@ -61,10 +62,10 @@ def main():
             continue
         except CourtHouseConnectionError:
             logging.error("Couldn't connect to courthouse")
-            time.sleep(5)
+            time.sleep(WAIT_SECONDS)
             continue
         except NoWritsAvailable:
-            time.sleep(1)
+            time.sleep(WAIT_SECONDS)
             continue
 
         logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])

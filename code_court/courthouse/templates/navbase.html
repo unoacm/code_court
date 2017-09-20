@@ -27,10 +27,6 @@
                     <a href="{{ url_for('defendant.index') }}">Defendant</a>
                 </li>
                 {% endif %}
-
-                <li {% if request.path.startswith('/defendant/scoreboard') %}class="active"{% endif %}>
-                    <a href="{{ url_for('defendant.scoreboard') }}">Scoreboard</a>
-                </li>
             </ul>
             <span class="navbar-right">
                 {% if current_user.email %}
