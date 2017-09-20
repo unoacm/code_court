@@ -10,4 +10,16 @@
     <li><a href="{{ url_for("runs.runs_view") }}">runs</a>
     <li><a href="{{ url_for("contests.contests_view") }}">contests</a>
 </ul>
+
+<h1>Info</h2>
+<table class="table">
+    <tbody>
+        {% for key, val in info.items() %}
+        <tr>
+            <td><strong>{{ key }}</strong></td>
+            <td>{{ val }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

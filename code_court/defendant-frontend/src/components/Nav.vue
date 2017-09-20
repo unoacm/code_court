@@ -5,7 +5,6 @@
         <div class="level-left">
           <span v-if="is_active"><router-link to="/" exact>Info</router-link></span>
           <span v-if="is_active"><router-link to="/scoreboard">Scoreboard</router-link></span>
-          <!--<span v-if="user"><router-link to="/clarifications">Clarification <div class="tag is-dark">5</div></router-link></span>-->
         </div>
 
         <div>
@@ -36,7 +35,7 @@
 
 <script>
 import Notification from '@/components/Notification'
-import isContestOver from '@/util'
+// import isContestOver from '@/util'
 
 export default {
   name: 'app',
@@ -61,7 +60,7 @@ export default {
       return this.$store.state.alerts
     },
     is_active () {
-      return this.$store.state.user != null && isContestOver(this.contest)
+      return this.$store.state.user != null // && isContestOver(this.contest)
     }
   },
   methods: {

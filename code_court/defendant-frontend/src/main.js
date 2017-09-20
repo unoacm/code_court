@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 
 import axios from 'axios'
+
 import { sync } from 'vuex-router-sync'
 
 import 'font-awesome-webpack'
@@ -11,6 +12,12 @@ import 'font-awesome-webpack'
 sync(store, router)
 
 Vue.config.productionTip = false
+
+if (process.env.NODE_ENV === 'development') {
+  axios.defaults.baseURL = 'http://localhost:9191'
+} else {
+  axios.defaults.baseURL = ''
+}
 
 if (store.state.loginToken) {
   axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
