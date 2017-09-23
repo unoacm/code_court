@@ -40,11 +40,7 @@ def hash_password(plaintext_password):
     Returns:
         str: a bcrpyt hash
     """
-    if current_app.config.get('TESTING'):
-        # reduce number of rounds for quicker tests
-        num_rounds = 4
-    else:
-        num_rounds = 10
+    num_rounds = 4
 
     hashed_password = bcrypt.hashpw(
         plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))

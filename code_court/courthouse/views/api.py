@@ -23,6 +23,8 @@ from flask import (
     request,
     url_for, )
 
+import model
+
 api = Blueprint('api', __name__, template_folder='templates')
 executioner_auth = HTTPBasicAuth()
 
@@ -30,7 +32,6 @@ executioner_auth = HTTPBasicAuth()
 # api auth
 @executioner_auth.verify_password
 def verify_password(email, password):
-    model = util.get_model()
     user = model.User.query.filter_by(email=email).scalar()
     if not user or not user.verify_password(password):
         return False
@@ -47,7 +48,6 @@ def unauthorized():
 @executioner_auth.login_required
 def get_writ():
     """endpoint for executioners to get runs to execute"""
-    model = util.get_model()
 
     # choose oldest priority run
     chosen_run = model.Run.query.filter_by(is_priority=True, started_execing_time=None, finished_execing_time=None)\
@@ -94,7 +94,6 @@ def submit_writ(run_id):
         "output": "..."
     }
     """
-    model = util.get_model()
     run = model.Run.query.filter_by(id=util.i(run_id)).scalar()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s",
@@ -138,7 +137,6 @@ def return_without_run(run_id):
     """Allows for executors to return a writ without running if they are
     experiencing errors or are shutting down
     """
-    model = util.get_model()
     run = model.Run.query.filter_by(id=util.i(run_id)).first()
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s",
@@ -158,8 +156,6 @@ def return_without_run(run_id):
 
 @api.route('/login', methods=['POST'])
 def login():
-    model = util.get_model()
-
     email = request.json.get('email', None)
     password = request.json.get('password', None)
 
@@ -174,8 +170,6 @@ def login():
 
 @api.route("/problem/<slug>", methods=["GET"])
 def get_problem(slug):
-    model = util.get_model()
-
     problem = model.Problem.query.filter_by(slug=slug).scalar()
 
     return make_response(jsonify(problem.get_output_dict()), 200)
@@ -184,8 +178,6 @@ def get_problem(slug):
 @api.route("/problems", methods=["GET"])
 @jwt_required
 def get_all_problems():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -209,8 +201,6 @@ def get_all_problems():
 @api.route("/submit_clarification", methods=["POST"])
 @jwt_required
 def submit_clarification():
-    model = util.get_model()
-
     subject = request.json.get('subject', None)
     contents = request.json.get('contents', None)
     problem_slug = request.json.get('problem_slug', None)
@@ -238,8 +228,6 @@ def submit_clarification():
 
 @api.route("/languages", methods=["GET"])
 def get_languages():
-    model = util.get_model()
-
     langs = model.Language.query.all()
     filter_langs = [x.get_output_dict() for x in langs if x.is_enabled]
 
@@ -249,8 +237,6 @@ def get_languages():
 @api.route("/current-user", methods=["GET"])
 @jwt_required
 def get_current_user():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -265,8 +251,6 @@ def get_current_user():
 @api.route("/submit-run", methods=["POST"])
 @jwt_required
 def submit_run():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
 
@@ -336,8 +320,6 @@ def submit_run():
 @api.route("/scores", methods=["GET"])
 @jwt_required
 def get_scoreboard():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -405,8 +387,6 @@ def get_scoreboard():
 @api.route("/get-contest-info")
 @jwt_required
 def get_contest_info():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -438,8 +418,6 @@ def make_user():
     - get auth token: curl -H "Content-Type: application/json" --data '{"email": "admin@example.org", "password": "pass"}' http://localhost:9191/api/login
     - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "email": "ben@bendoan.me", "password": "pass"}' http://localhost:9191/api/make-defendant-user
     """
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -497,8 +475,6 @@ def make_user():
 @api.route("/update-user-metadata", methods=["POST"])
 @jwt_required
 def update_user_metadata():
-    model = util.get_model()
-
     current_user_id = get_jwt_identity()
     current_user = model.User.query.filter_by(
         id=util.i(current_user_id)).scalar()
@@ -538,11 +514,152 @@ def update_user_metadata():
     return make_response(jsonify({'status': 'Success'}), 200)
 
 
+@api.route("/load-test")
+def load_test():
+    current_user = model.User.query.filter_by(
+        id=util.i(5)).scalar()
+    existing_user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+
+    contest = model.Contest.query.first()
+    defendants = model.User.query\
+                      .filter(model.User.user_roles.any(name="defendant"))\
+                      .filter(model.User.contests.any(id=contest.id))\
+                      .all()
+
+    problems = model.Problem.query\
+                    .filter(model.Problem.contests.any(id=contest.id))\
+                    .filter(model.Problem.is_enabled)\
+                    .all()
+
+    user_points = []
+    for user in defendants:
+        problem_states = {}
+        penalty = 0
+        for problem in problems:
+            is_passed = 0 < len(
+                model.Run.query.filter_by(
+                    is_submission=True,
+                    is_passed=True,
+                    user=user,
+                    contest=contest,
+                    problem=problem).all())
+            problem_states[problem.slug] = is_passed
+
+            failed_subs = model.Run.query.filter_by(
+                is_submission=True,
+                is_passed=False,
+                user=user,
+                contest=contest,
+                problem=problem).all()
+
+            for sub in failed_subs:
+                penalty += 1  # TODO we may want to use the time submitted instead of 1
+                #      to match ICPC scoring
+
+        user_points.append({
+            "user":
+            user.get_output_dict(),
+            "num_solved":
+            len([x for x in problem_states.values() if x]),
+            "penalty":
+            penalty,
+            "problem_states":
+            problem_states
+        })
+
+    user_points.sort(
+        key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
+
+    user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+    if not user or not user.verify_password("test"):
+        pass
+
+    user = model.User.query.filter_by(email="notauser@example.org").scalar()
+    if not user or not user.verify_password("password"):
+        pass
+
+    langs = model.Language.query.all()
+    filter_langs = [x.get_output_dict() for x in langs if x.is_enabled]
+
+    current_user = model.User.query.filter_by(
+        id=util.i(5)).scalar()
+    contests = current_user.contests
+
+    resp = None
+    if current_user:
+        resp = current_user.get_output_dict()
+
+    over_limit_runs_query = model.Run.submit_time >\
+                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=5))
+    run_count = model.Run.query.filter_by(user_id=current_user.id)\
+                               .filter(over_limit_runs_query)\
+                               .count()
+
+    matching_user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+
+    current_user_id = 5
+    user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
+
+    MAX_RUNS = util.get_configuration("max_user_submissions")
+    TIME_LIMIT = util.get_configuration("user_submission_time_limit")
+
+    over_limit_runs_query = model.Run.submit_time >\
+                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))
+    run_count = model.Run.query.filter_by(user_id=user.id)\
+                               .filter(over_limit_runs_query)\
+                               .count()
+
+    contest = user.contests[0]
+
+    lang_name = "python"
+    problem_slug = "fizzbuzz"
+    source_code = "asjdnsadjkasd"*10000
+    is_submission = False
+    user_test_input = "asdkamdlkamdklas"*10000
+
+    lang = model.Language.query.filter_by(name=lang_name).one()
+    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+
+    run_input = None
+    run_output = None
+    if is_submission:
+        run_input = problem.secret_input
+        run_output = problem.secret_output
+    else:
+        if user_test_input:
+            run_input = user_test_input
+        else:
+            run_input = problem.sample_input
+        run_output = problem.sample_output
+
+    run = model.Run(user, contest, lang, problem,
+                    datetime.datetime.utcnow(), source_code, run_input,
+                    run_output, is_submission)
+    run.state = "Judging"
+
+    resp = None
+    if datetime.datetime.utcnow() > contest.end_time:
+        run.state = "ContestEnded"
+        run.started_execing_time = datetime.datetime.utcnow()
+        run.finished_execing_time = datetime.datetime.utcnow()
+        resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
+    elif datetime.datetime.utcnow() < contest.start_time:
+        run.state = "ContestHasNotBegun"
+        run.started_execing_time = datetime.datetime.utcnow()
+        run.finished_execing_time = datetime.datetime.utcnow()
+        resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
+    else:
+        resp = make_response(jsonify({'status': 'good'}), 200)
+
+    model.db.session.add(run)
+    model.db.session.commit()
+
+    return "good"
+
+
 @api.route("/signout/<email>", methods=["GET"])
 @util.login_required("operator")
 def signout_user(email):
-    model = util.get_model()
-
     matching_user = model.User.query.filter_by(email=email).scalar()
 
     if not matching_user:

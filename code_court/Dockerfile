@@ -2,9 +2,11 @@ FROM alpine:edge
 
 RUN apk update
 RUN apk add --no-cache python3-dev \
+                        curl \
                         nodejs \
                         bash \
                         musl-dev \
+                        linux-headers \
                         libffi-dev \
                         nodejs-npm \
                         py-virtualenv \
