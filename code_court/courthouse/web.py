@@ -39,6 +39,7 @@ from views.admin.contests import contests
 from views.defendant import defendant
 from views.auth import auth
 
+
 # turn down log level for werkzeug
 wlog = logging.getLogger('werkzeug')
 wlog.setLevel(logging.INFO)
@@ -58,6 +59,8 @@ def create_app():
         Flask: the initialized flask app
     """
     app = Flask(__name__)
+
+
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # 1 day
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
@@ -508,6 +511,10 @@ def setup_logging(app):
 
 
 app = create_app()
+
+import sys
+# from werkzeug.contrib.profiler import ProfilerMiddleware
+# app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
 
 setup_logging(app)
 
