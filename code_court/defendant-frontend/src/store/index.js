@@ -25,8 +25,8 @@ const store = new Vuex.Store({
         context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },
-    LOAD_SCORES: function (context) {
-      axios.get('/api/scores').then((response) => {
+    LOAD_SCORES: function (context, contestId) {
+      axios.get('/api/scores/' + contestId).then((response) => {
         context.commit('SET_SCORES', { scores: response.data })
       })
     },
@@ -38,6 +38,7 @@ const store = new Vuex.Store({
     LOAD_CONTEST: function (context) {
       axios.get('/api/get-contest-info').then((response) => {
         context.commit('SET_CONTEST', { contest: response.data })
+        context.dispatch('LOAD_SCORES', response.data.id)
       })
     },
     LOAD_LANGS: function (context) {

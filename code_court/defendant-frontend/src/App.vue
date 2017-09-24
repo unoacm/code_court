@@ -25,8 +25,12 @@ export default {
   name: 'app',
   created: function () {
   },
+  computed: {
+    contest () {
+      return this.$store.state.contest
+    }
+  },
   mounted: function () {
-    this.$store.dispatch('LOAD_SCORES')
     this.$store.dispatch('LOAD_USER')
     this.$store.dispatch('LOAD_LANGS')
 
@@ -39,7 +43,7 @@ export default {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
-      this.$store.dispatch('LOAD_SCORES')
+      this.$store.dispatch('LOAD_SCORES', this.contest.id)
     }.bind(this), 20000)
 
     setInterval(function () {
