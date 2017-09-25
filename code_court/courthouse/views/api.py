@@ -3,16 +3,16 @@ Contains api endpoints for the defendant frontend
 and external services
 """
 import datetime
-import uuid
 import time
-
-import six
+import uuid
 
 import util
 
 from flask_httpauth import HTTPBasicAuth
 from flask_login import current_user
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+
+import six
 
 from flask import (
     abort,
@@ -317,20 +317,12 @@ def submit_run():
     return resp
 
 
-@api.route("/scores", methods=["GET"])
-@jwt_required
-def get_scoreboard():
-    current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+@api.route("/scores/<contest_id>", methods=["GET"])
+def get_scoreboard(contest_id):
+    contest = model.Contest.query.filter_by(id=contest_id).scalar()
 
-    if not current_user:
-        return make_response(jsonify({'error': 'Not logged in'}), 400)
-
-    if len(current_user.contests) == 0:
-        return make_response(jsonify({'error': 'User has no contests'}), 400)
-
-    contest = current_user.contests[0]
+    if not contest:
+        return make_response(jsonify({'error': 'Could not find contest'}), 404)
 
     defendants = model.User.query\
                       .filter(model.User.user_roles.any(name="defendant"))\
@@ -682,4 +674,3 @@ def clean_output_string(s):
 @api.route("/", methods=["GET"])
 def index():
     return abort(404)
-
