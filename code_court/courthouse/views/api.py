@@ -53,12 +53,12 @@ def get_writ():
 
     # choose oldest priority run
     chosen_run = model.Run.query.filter_by(is_priority=True, started_execing_time=None, finished_execing_time=None)\
-                                .order_by(model.Run.submit_time.asc()).first()
+                                .order_by(model.Run.submit_time.asc()).limit(1).first()
 
     # if no priority runs, choose oldest non-priority run
     if chosen_run is None:
         chosen_run = model.Run.query.filter_by(started_execing_time=None, finished_execing_time=None)\
-                                    .order_by(model.Run.submit_time.asc()).first()
+                                    .order_by(model.Run.submit_time.asc()).limit(1).first()
     if chosen_run is None:
         return make_response(jsonify({'status': 'unavailable'}), 404)
 
@@ -67,20 +67,13 @@ def get_writ():
     model.db.session.commit()
 
     resp = {
-        "status":
-        "found",
-        "source_code":
-        chosen_run.source_code,
-        "language":
-        chosen_run.language.name,
-        "run_script":
-        chosen_run.language.run_script,
-        "input":
-        chosen_run.run_input,
-        "run_id":
-        chosen_run.id,
-        "return_url":
-        url_for("api.submit_writ", run_id=chosen_run.id, _external=True)
+        "status": "found",
+        "source_code": chosen_run.source_code,
+        "language": chosen_run.language.name,
+        "run_script": chosen_run.language.run_script,
+        "input": chosen_run.run_input,
+        "run_id": chosen_run.id,
+        "return_url": url_for("api.submit_writ", run_id=chosen_run.id, _external=True)
     }
 
     return make_response(jsonify(resp), 200)
