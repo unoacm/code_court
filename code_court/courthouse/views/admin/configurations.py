@@ -10,6 +10,8 @@ from flask import (
     url_for,
     flash, )
 
+import model
+
 configurations = Blueprint(
     'configurations', __name__, template_folder='templates/configurations')
 
@@ -24,8 +26,6 @@ def configurations_view(page):
     Returns:
         a rendered config view template
     """
-    model = util.get_model()
-
     config_query = model.Configuration.query
 
     configs = config_query.order_by(
@@ -70,8 +70,6 @@ def configurations_del(config_id):
     Returns:
         a redirect to the config view page
     """
-    model = util.get_model()
-
     config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
 
     if config is None:
@@ -97,8 +95,6 @@ def add_config():
     Returns:
         a redirect to the config view page
     """
-    model = util.get_model()
-
     config_id = request.form.get("config_id")
     key = request.form.get("key")
     val = request.form.get("val")
@@ -138,8 +134,6 @@ def display_config_add_form(config_id):
     Returns:
         a rendered config add/edit template
     """
-    model = util.get_model()
-
     if config_id is None:  # add
         return render_template(
             "configurations/add_edit.html", action_label="Add", config=None)
@@ -168,7 +162,6 @@ def is_dup_config_key(key):
     Returns:
         bool: True if the email is a duplicate, False otherwise
     """
-    model = util.get_model()
     dup_config = model.Configuration.query.filter_by(key=key).scalar()
     if dup_config:
         return True

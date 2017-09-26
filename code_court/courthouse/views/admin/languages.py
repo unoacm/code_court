@@ -12,6 +12,8 @@ from flask import (
     url_for,
     flash, )
 
+import model
+
 languages = Blueprint(
     'languages', __name__, template_folder='templates/language')
 
@@ -30,8 +32,6 @@ def languages_view(page):
     Returns:
         a rendered language view template
     """
-    model = util.get_model()
-
     languages = model.Language.query.paginate(page, 30)
 
     return render_template("language/view.html", languages=languages)
@@ -72,8 +72,6 @@ def languages_del(lang_id):
     Returns:
         a redirect to the language view page
     """
-    model = util.get_model()
-
     lang = model.Language.query.filter_by(id=util.i(lang_id)).scalar()
     if lang is None:
         error = "Failed to delete language \'{}\' as it does not exist.".format(
@@ -106,8 +104,6 @@ def add_lang():
     Returns:
         a redirect to the language view page
     """
-    model = util.get_model()
-
     name = request.form.get("name")
     syntax_mode = request.form.get("syntax_mode")
     is_enabled = request.form.get("is_enabled")
@@ -171,8 +167,6 @@ def display_lang_add_form(lang_id):
     Returns:
         a rendered language add/edit template
     """
-    model = util.get_model()
-
     if lang_id is None:  # add
         return render_template("language/add_edit.html", action_label="Add")
     else:  # edit
@@ -206,7 +200,6 @@ def is_dup_lang_name(name):
     Returns:
         bool: True if the name is a duplicate, False otherwise
     """
-    model = util.get_model()
     dup_lang = model.Language.query.filter_by(name=name).scalar()
     if dup_lang:
         return True

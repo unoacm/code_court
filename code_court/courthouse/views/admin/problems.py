@@ -15,6 +15,8 @@ from flask import (
     url_for,
     flash, )
 
+import model
+
 problems = Blueprint(
     'problems', __name__, template_folder='templates/problems')
 
@@ -29,8 +31,6 @@ def problems_view(page):
     Returns:
         a rendered problem view template
     """
-    model = util.get_model()
-
     problems = model.Problem.query.paginate(page, 30)
 
     return render_template("problems/view.html", problems=problems)
@@ -87,7 +87,6 @@ def problems_batch_upload():
     Returns:
         a redirect to the problem view page
     """
-    model = util.get_model()
     if request.method == "POST":  # process added/edited problem
         input_output = model.ProblemType.query.filter_by(
             name="input-output").one()
@@ -164,8 +163,6 @@ def problems_del(problem_id):
     Returns:
         a redirect to the problem view page
     """
-    model = util.get_model()
-
     problem = model.Problem.query.filter_by(id=int(problem_id)).scalar()
     if problem is None:
         error = "Failed to delete problem \'{}\' as it doesn't exist.".format(
@@ -198,8 +195,6 @@ def add_problem():
     Returns:
         a redirect to the problem view page
     """
-    model = util.get_model()
-
     problem_type_id = request.form.get("problem_type_id")
     problem_type = model.ProblemType.query.filter_by(
         id=int(problem_type_id)).one()
@@ -280,7 +275,6 @@ def display_problem_add_form(problem_id):
     Returns:
         a rendered problem add/edit template
     """
-    model = util.get_model()
     problemtypes = model.ProblemType.query.all()
 
     if problem_id is None:  # add
@@ -316,7 +310,6 @@ def is_dup_problem_slug(slug):
     Returns:
         bool: True if the slug is a duplicate, False otherwise
     """
-    model = util.get_model()
     dup_problem = model.Problem.query.filter_by(slug=slug).scalar()
     if dup_problem:
         return True

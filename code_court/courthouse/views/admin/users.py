@@ -15,6 +15,8 @@ from flask import (
     url_for,
     flash, )
 
+import model
+
 users = Blueprint('users', __name__, template_folder='templates/users')
 
 
@@ -28,8 +30,6 @@ def users_view(page):
     Returns:
         a rendered user view template
     """
-    model = util.get_model()
-
     user_search = request.args.get("search")
     user_role = request.args.get("user_role")
 
@@ -102,8 +102,6 @@ def users_del(user_id):
     Returns:
         a redirect to the user view page
     """
-    model = util.get_model()
-
     user = model.User.query.filter_by(id=util.i(user_id)).scalar()
 
     if user is None:
@@ -144,8 +142,6 @@ def add_user():
     Returns:
         a redirect to the user view page
     """
-    model = util.get_model()
-
     user_id = request.form.get("user_id")
     email = request.form.get("email")
     name = request.form.get("name")
@@ -208,8 +204,6 @@ def display_user_add_form(user_id):
     Returns:
         a rendered user add/edit template
     """
-    model = util.get_model()
-
     if user_id is None:  # add
         return render_template(
             "users/add_edit.html", action_label="Add", user=None)
@@ -236,7 +230,6 @@ def is_dup_user_email(email):
     Returns:
         bool: True if the email is a duplicate, False otherwise
     """
-    model = util.get_model()
     dup_user = model.User.query.filter_by(email=email).scalar()
     if dup_user:
         return True

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 HOST_POSTGRES_PORT=21381
 export CODE_COURT_DB_URI="postgresql+psycopg2://codecourt:benpass@localhost:$HOST_POSTGRES_PORT/codecourt"

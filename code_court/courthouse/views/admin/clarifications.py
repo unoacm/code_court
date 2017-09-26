@@ -38,8 +38,6 @@ def clarifications_view():
     Returns:
         a rendered clarifications view template
     """
-    model = util.get_model()
-
     clarifications = model.Clarification.query.all()
 
     return render_template(
@@ -82,8 +80,6 @@ def clarifications_del(clar_id):
     Returns:
         a redirect to the clarification view page
     """
-    model = util.get_model()
-
     clar = model.Clarification.query.filter_by(id=clar_id).scalar()
     if clar is None:
         error = "Failed to delete clarification \'{}\' as it doesn't exist.".format(
@@ -116,8 +112,6 @@ def add_clar():
     Returns:
         a redirect to the clarification view page
     """
-    model = util.get_model()
-
     subject = request.form.get("subject")
     contents = request.form.get("contents")
 
