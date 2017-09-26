@@ -7,6 +7,8 @@ import util
 
 import datetime
 
+import model
+
 from flask_login import current_user
 from flask import (abort, Blueprint, current_app, render_template,
                    request, Markup)
@@ -22,8 +24,6 @@ def index():
     Returns:
         a rendered defendant view template which shows all available problems
     """
-    model = util.get_model()
-
     problems = model.Problem.query.all()
 
     return render_template("defendant/index.html", problems=problems)
@@ -34,9 +34,6 @@ RunState = Enum("RunState", "judging passed failed")
 @defendant.route("/problem/<problem_id>/", methods=["GET"])
 @defendant.route("/problem/<problem_id>/", methods=["POST"])
 def problem(problem_id):
-
-    model = util.get_model()
-
     problems = model.Problem.query.filter_by(id=problem_id).all()
     if len(problems) == 0:
         current_app.logger.info("Probelm %s doesn't exist", problem_id)
@@ -58,9 +55,6 @@ def problem(problem_id):
 
 @defendant.route("/submissions", methods=["GET"])
 def submissions():
-
-    model = util.get_model()
-
     submissions = model.Run.query.filter_by(user=current_user, is_submission=True)\
                                  .order_by(model.Run.submit_time.desc())\
                                  .all()
@@ -79,9 +73,6 @@ def submit_code(problem):
     Returns:
         the submitted source_code as a string
     """
-
-    model = util.get_model()
-
     source_code = request.form.get("source_code")
     if source_code is None:
         # TODO: give better feedback for failure

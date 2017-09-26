@@ -6,6 +6,8 @@ import util
 from flask_login import login_user, logout_user
 from sqlalchemy.orm.exc import NoResultFound
 
+import model
+
 from flask import (
     abort,
     Blueprint,
@@ -28,8 +30,6 @@ def login_view():
 @util.ssl_required
 def login_submit():
     """processes login requests"""
-    model = util.get_model()
-
     if "email" not in request.form:
         flash("Email not found", "danger")
         abort(401)

@@ -12,6 +12,8 @@ from flask import (
     url_for,
     flash, )
 
+import model
+
 contests = Blueprint(
     'contests', __name__, template_folder='templates/contests')
 
@@ -26,8 +28,6 @@ def contests_view(page):
     Returns:
         a rendered contest view template
     """
-    model = util.get_model()
-
     contests = model.Contest.query.paginate(page, 30)
 
     return render_template("contests/view.html", contests=contests)
@@ -69,8 +69,6 @@ def contests_del(contest_id):
     Returns:
         a redirect to the contest view page
     """
-    model = util.get_model()
-
     contest = model.Contest.query.filter_by(id=int(contest_id)).scalar()
     if contest is None:
         error = "Failed to delete contest \'{}\' as it doesn't exist.".format(
@@ -123,8 +121,6 @@ def add_contest():
     Returns:
         a redirect to the contest view page
     """
-    model = util.get_model()
-
     name = request.form.get("name")
     activate_date = request.form.get("activate_date")
     activate_time = request.form.get("activate_time")
@@ -220,8 +216,6 @@ def display_contest_add_form(contest_id):
     Returns:
         a rendered contest add/edit template
     """
-    model = util.get_model()
-
     if contest_id is None:  # add
         return render_template(
             "contests/add_edit.html",
@@ -257,7 +251,6 @@ def is_dup_contest_name(name):
     Returns:
         bool: True if the name is a duplicate, False otherwise
     """
-    model = util.get_model()
     dup_contest = model.Contest.query.filter_by(name=name).scalar()
     if dup_contest:
         return True

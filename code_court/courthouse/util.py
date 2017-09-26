@@ -6,28 +6,11 @@ from flask_login import current_user
 
 from flask import current_app, request, redirect
 
+import model
+
 
 class ModelMissingException(Exception):
     pass
-
-
-def get_model():
-    """
-    Gets the model from the current app,
-
-    Note:
-        must be called from within a request context
-
-    Raises:
-        ModelMissingException: if the model is not accessible from the current_app
-
-    Returns:
-        the model module
-    """
-    model = current_app.config.get('model')
-    if model is None:
-        raise ModelMissingException()
-    return model
 
 
 def hash_password(plaintext_password):
@@ -99,14 +82,12 @@ def checkbox_result_to_bool(res):
 
 
 def jwt_identity(payload):
-    model = get_model()
     user_id = payload['identity']
 
     return model.User.query.filter_by(id=user_id).first()
 
 
 def get_configuration(key):
-    model = get_model()
     config = model.Configuration.query.filter_by(key=key).scalar()
     val_type = config.valType
     if (val_type == "integer"):

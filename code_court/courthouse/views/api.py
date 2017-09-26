@@ -14,6 +14,8 @@ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identi
 
 import six
 
+from sqlalchemy.orm import joinedload
+
 from flask import (
     abort,
     Blueprint,
@@ -334,30 +336,26 @@ def get_scoreboard(contest_id):
                     .filter(model.Problem.is_enabled)\
                     .all()
 
+    passed_runs = model.Run.query.filter_by(
+            is_submission=True,
+            is_passed=True,
+            contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
+
+    failed_runs = model.Run.query.filter_by(
+            is_submission=True,
+            is_passed=False,
+            contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
+
     user_points = []
     for user in defendants:
         problem_states = {}
         penalty = 0
         for problem in problems:
-            is_passed = 0 < len(
-                model.Run.query.filter_by(
-                    is_submission=True,
-                    is_passed=True,
-                    user=user,
-                    contest=contest,
-                    problem=problem).all())
-            problem_states[problem.slug] = is_passed
+            has_solved = len([r for r in passed_runs if r.user.id == user.id and r.problem.id == problem.id]) > 0
+            problem_states[problem.slug] = has_solved
 
-            failed_subs = model.Run.query.filter_by(
-                is_submission=True,
-                is_passed=False,
-                user=user,
-                contest=contest,
-                problem=problem).all()
-
-            for sub in failed_subs:
-                penalty += 1  # TODO we may want to use the time submitted instead of 1
-                #      to match ICPC scoring
+            num_incorrect = len([r for r in failed_runs if r.user.id == user.id and r.problem.id == problem.id])
+            penalty += num_incorrect
 
         user_points.append({
             "user":

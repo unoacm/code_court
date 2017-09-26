@@ -8,6 +8,8 @@ from flask import (
     request,
     url_for, )
 
+import model
+
 runs = Blueprint('runs', __name__, template_folder='templates/runs')
 
 
@@ -25,8 +27,6 @@ def runs_view(page):
     Returns:
         a rendered runs view template
     """
-    model = util.get_model()
-
     run_type = request.args.get("run_type")
     run_status = request.args.get("run_status")
 
@@ -66,8 +66,6 @@ def runs_run(run_id):
     Returns:
         a rendered view run template
     """
-    model = util.get_model()
-
     run = model.Run.query.filter_by(id=run_id).scalar()
 
     return render_template("runs/run.html", run=run)
@@ -75,8 +73,6 @@ def runs_run(run_id):
 
 @runs.route("/<int:run_id>/priority", methods=["GET"])
 def toggle_priority(run_id):
-    model = util.get_model()
-
     run = model.Run.query.filter_by(id=run_id).one()
     run.is_priority = not run.is_priority
 
