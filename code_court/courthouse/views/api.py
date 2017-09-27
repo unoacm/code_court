@@ -178,12 +178,11 @@ def get_all_problems():
         id=util.i(current_user_id)).scalar()
 
     problems = model.Problem.query.filter_by(is_enabled=True).all()
+    runs = model.Run.query.filter_by(user=current_user).all()
 
     resp = {}
     for problem in problems:
-        problem_runs = model.Run.query.filter_by(
-            user=current_user, problem=problem).all()
-        problem_run_dicts = [x.get_output_dict() for x in problem_runs]
+        problem_run_dicts = [x.get_output_dict() for x in runs if x.problem == problem]
 
         problem_dict = problem.get_output_dict()
         problem_dict['runs'] = problem_run_dicts
