@@ -59,6 +59,7 @@ def main():
             current_writ = writ.copy()
         except InvalidWritException as e:
             logging.exception("Exception while requesting writ")
+            time.sleep(1)
             continue
         except CourtHouseConnectionError:
             logging.error("Couldn't connect to courthouse")

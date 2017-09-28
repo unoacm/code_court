@@ -40,11 +40,16 @@ export default {
     }
 
     setInterval(function () {
+      if (this.contest.id) {
+        this.$store.dispatch('LOAD_SCORES', this.contest.id)
+      }
+    }.bind(this), 5000)
+
+    setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS')
       }
-      this.$store.dispatch('LOAD_SCORES', this.contest.id)
-    }.bind(this), 20000)
+    }.bind(this), 30000)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {

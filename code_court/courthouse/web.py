@@ -12,12 +12,15 @@ from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 from os import path
 
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory, request
 
 from flask_cors import CORS
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_jwt_extended import JWTManager
 from flask_login import LoginManager, current_user
+
+from flask_sqlalchemy import get_debug_queries
+
 
 import werkzeug
 
@@ -41,8 +44,7 @@ from views.auth import auth
 
 
 # turn down log level for werkzeug
-wlog = logging.getLogger('werkzeug')
-wlog.setLevel(logging.INFO)
+logging.getLogger('werkzeug').setLevel(logging.INFO)
 
 log_location = 'logs/code_court.log'
 
@@ -67,6 +69,7 @@ def create_app():
         "CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_ECHO'] = False
+    app.config['SQLALCHEMY_RECORD_QUERIES'] = True
     app.config['model'] = model
     app.config[
         'SECRET_KEY'] = '2jrlkfjoi1j3kljekdlasjdklasjdk139999d9d'  #TODO: put this in config
@@ -102,11 +105,16 @@ def create_app():
 
     DebugToolbarExtension(app)
 
+    setup_logging(app)
+
+    app.logger.setLevel(logging.DEBUG)
+
+    app.logger.info("Setting up app")
+
     @login_manager.user_loader
     def load_user(user_email):
         return model.User.query.filter_by(email=user_email).one()
 
-    app.logger.setLevel(logging.DEBUG)
 
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
@@ -147,6 +155,16 @@ def create_app():
         if not current_user.is_authenticated:
             return render_template('auth/login.html'), 401
         return render_template('401.html'), 401
+
+    @app.after_request
+    def after_request(resp):
+        if app.config.get('SQLALCHEMY_RECORD_QUERIES'):
+            with open("/home/ben/sql", "a+") as f:
+                f.write("=========\n{}:\n\n".format(request.url))
+                for q in get_debug_queries():
+                    f.write("{}\n\n".format(q))
+                f.write("=========\n\n")
+        return resp
 
     return app
 
@@ -499,7 +517,7 @@ def setup_logging(app):
     if not path.isdir(path.dirname(log_location)):
         os.makedirs(path.dirname(log_location))
     file_handler = RotatingFileHandler(
-        log_location, maxBytes=10000, backupCount=1)
+        log_location, maxBytes=10000, backupCount=2)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     app.logger.addHandler(file_handler)
@@ -516,7 +534,6 @@ import sys
 # from werkzeug.contrib.profiler import ProfilerMiddleware
 # app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
 
-setup_logging(app)
 
 if __name__ == "__main__":
     PORT = 9191
