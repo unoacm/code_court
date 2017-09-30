@@ -25,6 +25,7 @@ from flask import (
     request,
     url_for, )
 
+from database import db_session
 import model
 
 api = Blueprint('api', __name__, template_folder='templates')
@@ -64,7 +65,7 @@ def get_writ():
 
     # TODO: use a better locking method to prevent dual execution
     chosen_run.started_execing_time = datetime.datetime.utcnow()
-    model.db.session.commit()
+    db_session.commit()
 
     resp = {
         "status": "found",
@@ -89,7 +90,8 @@ def submit_writ(run_id):
         "output": "..."
     }
     """
-    run = model.Run.query.filter_by(id=util.i(run_id)).scalar()
+    run = model.Run.query.get(util.i(run_id))
+
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s",
                                  run_id)
@@ -122,7 +124,7 @@ def submit_writ(run_id):
         if run.state == "Successful" and not is_correct:
             run.state = "Failed"
 
-    model.db.session.commit()
+    db_session.commit()
     return "Good"
 
 
@@ -132,7 +134,7 @@ def return_without_run(run_id):
     """Allows for executors to return a writ without running if they are
     experiencing errors or are shutting down
     """
-    run = model.Run.query.filter_by(id=util.i(run_id)).first()
+    run = model.Run.query.get(util.i(run_id))
     if not run:
         current_app.logger.debug("Received writ without valid run, id: %s",
                                  run_id)
@@ -144,7 +146,7 @@ def return_without_run(run_id):
         abort(400)
 
     run.started_execing_time = None
-    model.db.session.commit()
+    db_session.commit()
 
     return "Good"
 
@@ -174,8 +176,7 @@ def get_problem(slug):
 @jwt_required
 def get_all_problems():
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+    current_user = model.User.query.get(util.i(current_user_id))
 
     problems = model.Problem.query.filter_by(is_enabled=True).all()
     runs = model.Run.query.filter_by(user=current_user).all()
@@ -214,8 +215,8 @@ def submit_clarification():
                                is_public)
     clar.problem = problem
 
-    model.db.session.add(clar)
-    model.db.session.commit()
+    db_session.add(clar)
+    db_session.commit()
 
     return "{}"
 
@@ -232,8 +233,7 @@ def get_languages():
 @jwt_required
 def get_current_user():
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+    current_user = model.User.query.get(util.i(current_user_id))
 
     resp = None
     if current_user:
@@ -246,7 +246,7 @@ def get_current_user():
 @jwt_required
 def submit_run():
     current_user_id = get_jwt_identity()
-    user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
+    user = model.User.query.get(util.i(current_user_id))
 
     MAX_RUNS = util.get_configuration("max_user_submissions")
     TIME_LIMIT = util.get_configuration("user_submission_time_limit")
@@ -305,15 +305,15 @@ def submit_run():
     else:
         resp = make_response(jsonify({'status': 'good'}), 200)
 
-    model.db.session.add(run)
-    model.db.session.commit()
+    db_session.add(run)
+    db_session.commit()
 
     return resp
 
 
 @api.route("/scores/<contest_id>", methods=["GET"])
 def get_scoreboard(contest_id):
-    contest = model.Contest.query.filter_by(id=contest_id).scalar()
+    contest = model.Contest.query.get(contest_id)
 
     if not contest:
         return make_response(jsonify({'error': 'Could not find contest'}), 404)
@@ -370,8 +370,7 @@ def get_scoreboard(contest_id):
 @jwt_required
 def get_contest_info():
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+    current_user = model.User.query.get(util.i(current_user_id))
 
     if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
@@ -401,8 +400,7 @@ def make_user():
     - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "email": "ben@bendoan.me", "password": "pass"}' http://localhost:9191/api/make-defendant-user
     """
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+    current_user = model.User.query.get(util.i(current_user_id))
 
     if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
@@ -439,8 +437,8 @@ def make_user():
         user_roles=[defedant_role],
         username=username)
 
-    model.db.session.add(new_user)
-    model.db.session.commit()
+    db_session.add(new_user)
+    db_session.commit()
 
     contest = model.Contest.query.filter_by(name=contest_name).scalar()
 
@@ -449,7 +447,7 @@ def make_user():
 
     new_user.contests.append(contest)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
 
@@ -458,8 +456,8 @@ def make_user():
 @jwt_required
 def update_user_metadata():
     current_user_id = get_jwt_identity()
-    current_user = model.User.query.filter_by(
-        id=util.i(current_user_id)).scalar()
+    current_user = model.User.query.get(util.i(current_user_id))
+
     if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
 
@@ -491,15 +489,13 @@ def update_user_metadata():
             }), 400)
 
     matching_user.merge_metadata(user_misc_metadata)
-    model.db.session.commit()
+    db_session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
 
 
 @api.route("/load-test")
 def load_test():
-    current_user = model.User.query.filter_by(
-        id=util.i(5)).scalar()
     existing_user = model.User.query.filter_by(email="testuser1@example.org").scalar()
 
     contest = model.Contest.query.first()
@@ -613,29 +609,6 @@ def load_test():
         else:
             run_input = problem.sample_input
         run_output = problem.sample_output
-
-    run = model.Run(user, contest, lang, problem,
-                    datetime.datetime.utcnow(), source_code, run_input,
-                    run_output, is_submission)
-    run.state = "Judging"
-
-    resp = None
-    if datetime.datetime.utcnow() > contest.end_time:
-        run.state = "ContestEnded"
-        run.started_execing_time = datetime.datetime.utcnow()
-        run.finished_execing_time = datetime.datetime.utcnow()
-        resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
-    elif datetime.datetime.utcnow() < contest.start_time:
-        run.state = "ContestHasNotBegun"
-        run.started_execing_time = datetime.datetime.utcnow()
-        run.finished_execing_time = datetime.datetime.utcnow()
-        resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
-    else:
-        resp = make_response(jsonify({'status': 'good'}), 200)
-
-    model.db.session.add(run)
-    model.db.session.commit()
-
     return "good"
 
 
@@ -651,7 +624,7 @@ def signout_user(email):
             }), 400)
 
     matching_user.merge_metadata({"signout": util.i(time.time())})
-    model.db.session.commit()
+    db_session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
 

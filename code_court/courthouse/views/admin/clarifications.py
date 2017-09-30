@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from flask_login import login_required
 from flask_login import current_user
 
+
 from flask import (
     abort,
     Blueprint,
@@ -20,6 +21,9 @@ from flask import (
     request,
     url_for,
     flash, )
+
+import model
+from database import db_session
 
 clarifications = Blueprint(
     'clarifications', __name__, template_folder='templates/clarifications')
@@ -89,11 +93,11 @@ def clarifications_del(clar_id):
         return redirect(url_for("clarifications.clarifications_view"))
 
     try:
-        model.db.session.delete(clar)
-        model.db.session.commit()
+        db_session.delete(clar)
+        db_session.commit()
         flash("Deleted clarification \'{}\'".format(clar_id), "warning")
     except IntegrityError:
-        model.db.session.rollback()
+        db_session.rollback()
         error = "Failed to delete clarification \'{}\' as it's referenced in another DB element".format(
             clar_id)
         current_app.logger.info(error)
@@ -131,8 +135,8 @@ def add_clar():
     is_public = True  # This is a general clarification, which are always public
     clar = model.Clarification(current_user, subject, contents, thread,
                                is_public)
-    model.db.session.add(clar)
-    model.db.session.commit()
+    db_session.add(clar)
+    db_session.commit()
 
     return redirect(url_for("clarifications.clarifications_view"))
 

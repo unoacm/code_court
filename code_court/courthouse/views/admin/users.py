@@ -3,6 +3,8 @@ import util
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
+import paginate_sqlalchemy
+
 from flask_login import current_user
 
 from flask import (
@@ -16,6 +18,7 @@ from flask import (
     flash, )
 
 import model
+from database import db_session
 
 users = Blueprint('users', __name__, template_folder='templates/users')
 
@@ -43,7 +46,7 @@ def users_view(page):
         users_query = users_query.join(model.User.user_roles).filter(
             model.UserRole.name == user_role)
 
-    users_pagination = users_query.paginate(page, 30)
+    users_pagination = util.paginate(users_query, page, 30)
     users = users_pagination.items
 
     metrics = {}
@@ -119,11 +122,11 @@ def users_del(user_id):
         return redirect(url_for("users.users_view"))
 
     try:
-        model.db.session.delete(user)
-        model.db.session.commit()
+        db_session.delete(user)
+        db_session.commit()
         flash("Deleted user \'{}\'".format(user.email), "warning")
     except IntegrityError:
-        model.db.session.rollback()
+        db_session.rollback()
         error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(
             user_id)
         current_app.logger.info(error)
@@ -187,9 +190,9 @@ def add_user():
             user_roles=retrieve_by_names(user_role_ids.split(),
                                          model.UserRole),
             username=username)
-        model.db.session.add(user)
+        db_session.add(user)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return redirect(url_for("users.users_view"))
 

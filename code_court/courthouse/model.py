@@ -4,48 +4,58 @@ import datetime
 import util
 
 from flask_login import UserMixin
-from flask_sqlalchemy import SQLAlchemy
+from database import Base
 
-db = SQLAlchemy()
+from sqlalchemy.orm import relationship, backref
 
-contest_problem = db.Table('contest_problem', db.Model.metadata,
-                           db.Column('contest_id', db.Integer,
-                                     db.ForeignKey('contest.id')),
-                           db.Column('problem_id', db.Integer,
-                                     db.ForeignKey('problem.id')))
+from sqlalchemy import (
+    Column,
+    Table,
+    ForeignKey,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+)
 
-contest_user = db.Table('contest_user', db.Model.metadata,
-                        db.Column('contest_id', db.Integer,
-                                  db.ForeignKey('contest.id')),
-                        db.Column('user_id', db.Integer,
-                                  db.ForeignKey('user.id')))
+contest_problem = Table('contest_problem', Base.metadata,
+                           Column('contest_id', Integer,
+                                     ForeignKey('contest.id')),
+                           Column('problem_id', Integer,
+                                     ForeignKey('problem.id')))
 
-user_user_role = db.Table('user_user_role', db.Model.metadata,
-                          db.Column('user_id', db.Integer,
-                                    db.ForeignKey('user.id')),
-                          db.Column('user_role_id', db.Integer,
-                                    db.ForeignKey('user_role.id')))
+contest_user = Table('contest_user', Base.metadata,
+                        Column('contest_id', Integer,
+                                  ForeignKey('contest.id')),
+                        Column('user_id', Integer,
+                                  ForeignKey('user.id')))
+
+user_user_role = Table('user_user_role', Base.metadata,
+                          Column('user_id', Integer,
+                                    ForeignKey('user.id')),
+                          Column('user_role_id', Integer,
+                                    ForeignKey('user_role.id')))
 
 
-class Language(db.Model):
+class Language(Base):
     """Stores the configuration for a programming language"""
     __tablename__ = 'language'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     """str: the language name"""
 
-    default_template = db.Column(db.String)
+    default_template = Column(String)
     """str: the languages default template"""
 
-    syntax_mode = db.Column(db.String, nullable=False)
+    syntax_mode = Column(String, nullable=False)
     """str: the syntax mode used by the code editor"""
 
-    is_enabled = db.Column(db.Boolean, nullable=False)
+    is_enabled = Column(Boolean, nullable=False)
     """bool: whether or not the language is enabled"""
 
-    run_script = db.Column(db.String, nullable=False)
+    run_script = Column(String, nullable=False)
     """str: script (with shebang) that compiles and runs scripts for this language"""
 
     def __init__(self,
@@ -76,16 +86,16 @@ class Language(db.Model):
         return "Language({})".format(self.name)
 
 
-class ProblemType(db.Model):
+class ProblemType(Base):
     """Stores information about a problem type"""
     __tablename__ = 'problem_type'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    name = db.Column(db.String, unique=True, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     """str: the name of the problem type"""
 
-    eval_script = db.Column(db.String, nullable=False)
+    eval_script = Column(String, nullable=False)
     """str: script (with shebang) that evaluates this problem type"""
 
     def __init__(self, name, eval_script):
@@ -106,43 +116,43 @@ class ProblemType(db.Model):
         return self.__repr__()
 
 
-class Problem(db.Model):
+class Problem(Base):
     __tablename__ = 'problem'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    problem_type = db.relationship(
-        'ProblemType', backref=db.backref('Problem', lazy='dynamic'))
-    problem_type_id = db.Column(
-        db.Integer, db.ForeignKey('problem_type.id'), nullable=False)
+    problem_type = relationship(
+        'ProblemType', backref=backref('Problem', lazy='dynamic'))
+    problem_type_id = Column(
+        Integer, ForeignKey('problem_type.id'), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
-    slug = db.Column(db.String(20), unique=True, nullable=False)
+    slug = Column(String(20), unique=True, nullable=False)
     """str: the problem's slug, this is a short (<11 chars) string that is used to identify
             a problem. It can only contain the following characters: a-z, A-Z, 0-1, -, _"""
 
-    name = db.Column(db.String, nullable=False)
+    name = Column(String, nullable=False)
     """str: the problem's name"""
 
-    problem_statement = db.Column(db.String, nullable=False)
+    problem_statement = Column(String, nullable=False)
     """str: the problem statement in markdown format"""
 
-    sample_input = db.Column(db.String, nullable=False)
+    sample_input = Column(String, nullable=False)
     """str: the problem's sample input, this may be shown to the user """
 
-    sample_output = db.Column(db.String, nullable=False)
+    sample_output = Column(String, nullable=False)
     """str: the problem's sample output, this may be shown to the user """
 
-    secret_input = db.Column(db.String, nullable=False)
+    secret_input = Column(String, nullable=False)
     """str: the problem's secret input, this may be shown to the user """
 
-    secret_output = db.Column(db.String, nullable=False)
+    secret_output = Column(String, nullable=False)
     """str: the problem's secret output, this may be shown to the user """
 
-    is_enabled = db.Column(db.Boolean, nullable=False, default=True)
+    is_enabled = Column(Boolean, nullable=False, default=True)
     """bool: whether or not the problem is enabled"""
 
-    contests = db.relationship(
+    contests = relationship(
         "Contest", secondary=contest_problem, back_populates="problems")
 
     def __init__(self, problem_type, slug, name, problem_statement,
@@ -174,34 +184,34 @@ class Problem(db.Model):
         return self.__repr__()
 
 
-class User(db.Model, UserMixin):
+class User(Base, UserMixin):
     """Stores information about a user"""
     __tablename__ = 'user'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    email = db.Column(db.String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     """str: the user's email"""
 
-    name = db.Column(db.String, nullable=False)
+    name = Column(String, nullable=False)
     """str: the user's full name, no specific format is assumed"""
 
-    username = db.Column(db.String, nullable=False)
+    username = Column(String, nullable=False)
     """str: the username, for display"""
 
-    hashed_password = db.Column(db.String, nullable=False)
+    hashed_password = Column(String, nullable=False)
     """str: a bcrypt hash of the user's password"""
 
-    creation_time = db.Column(
-        db.DateTime, nullable=False, default=datetime.datetime.utcnow())
+    creation_time = Column(
+        DateTime, nullable=False, default=datetime.datetime.utcnow())
     """str: the creation time of the user"""
 
-    misc_data = db.Column(db.String, nullable=False)
+    misc_data = Column(String, nullable=False)
     """str: misc data about a user, stored as a json object"""
 
-    contests = db.relationship(
+    contests = relationship(
         "Contest", secondary=contest_user, back_populates="users")
-    user_roles = db.relationship(
+    user_roles = relationship(
         "UserRole", secondary=user_user_role, back_populates="users")
 
     def __init__(self,
@@ -275,38 +285,38 @@ class User(db.Model, UserMixin):
         return self.__repr__()
 
 
-class Contest(db.Model):
+class Contest(Base):
     """Stores information about a contest"""
     __tablename__ = 'contest'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
     """str: the contest's name"""
 
-    activate_time = db.Column(db.DateTime)
+    activate_time = Column(DateTime)
     """DateTime: the contest's activation time, users will be able to see the contest,
         but they will not be able to see the problems or upload submissions"""
 
-    start_time = db.Column(db.DateTime, nullable=False)
+    start_time = Column(DateTime, nullable=False)
     """DateTime: the contest's start time, users will be able to upload submissions at this time"""
 
-    freeze_time = db.Column(db.DateTime)
+    freeze_time = Column(DateTime)
     """DateTime: the time when the contest's scoreboard freezes"""
 
-    end_time = db.Column(db.DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
     """DateTime: the time when the contest ends, users will not be able to upload submissions
         after this time"""
 
-    deactivate_time = db.Column(db.DateTime)
+    deactivate_time = Column(DateTime)
     """DateTime: the contest will be hidden at this time"""
 
-    is_public = db.Column(db.Boolean, nullable=False)
+    is_public = Column(Boolean, nullable=False)
     """bool: whether or not the contest can be joined/viewed by anyone"""
 
-    # users = db.relationship("ContestUser", back_populates="contest")
-    users = db.relationship(
+    # users = relationship("ContestUser", back_populates="contest")
+    users = relationship(
         "User", secondary=contest_user, back_populates="contests")
-    problems = db.relationship(
+    problems = relationship(
         "Problem", secondary=contest_problem, back_populates="contests")
 
     def __init__(self,
@@ -348,22 +358,22 @@ class Contest(db.Model):
         return self.__repr__()
 
 
-class Configuration(db.Model):
+class Configuration(Base):
     """Stores general configuration information"""
     __tablename__ = 'configuration'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    key = db.Column(db.String, unique=True, nullable=False)
+    key = Column(String, unique=True, nullable=False)
     """str: the config entry name"""
 
-    val = db.Column(db.String, nullable=False)
+    val = Column(String, nullable=False)
     """str: the config entry val"""
 
-    valType = db.Column(db.String, nullable=False)
+    valType = Column(String, nullable=False)
     """str: the type of the config entry val"""
 
-    category = db.Column(db.String, nullable=False)
+    category = Column(String, nullable=False)
     """str: the config entry category """
 
     def __init__(self, key, val, valType, category):
@@ -382,39 +392,39 @@ class Configuration(db.Model):
         return self.__repr__()
 
 
-class SavedCode(db.Model):
+class SavedCode(Base):
     """Stores general configuration information"""
     __tablename__ = 'saved_code'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    contest = db.relationship(
-        'Contest', backref=db.backref('SavedCode', lazy='dynamic'))
-    contest_id = db.Column(
-        db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    contest = relationship(
+        'Contest', backref=backref('SavedCode', lazy='dynamic'))
+    contest_id = Column(
+        Integer, ForeignKey('contest.id'), nullable=False)
     """int: a foreignkey to the saved_code's contest"""
 
-    problem = db.relationship(
-        'Problem', backref=db.backref('SavedCode', lazy='dynamic'))
-    problem_id = db.Column(
-        db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    problem = relationship(
+        'Problem', backref=backref('SavedCode', lazy='dynamic'))
+    problem_id = Column(
+        Integer, ForeignKey('problem.id'), nullable=False)
     """int: a foreignkey to the saved_code's problem"""
 
-    user = db.relationship(
-        'User', backref=db.backref('SavedCode', lazy='dynamic'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = relationship(
+        'User', backref=backref('SavedCode', lazy='dynamic'))
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the saved_code's user"""
 
-    language = db.relationship(
-        'Language', backref=db.backref('SavedCode', lazy='dynamic'))
-    language_id = db.Column(
-        db.Integer, db.ForeignKey('language.id'), nullable=False)
+    language = relationship(
+        'Language', backref=backref('SavedCode', lazy='dynamic'))
+    language_id = Column(
+        Integer, ForeignKey('language.id'), nullable=False)
     """int: a foreignkey to the saved_code's language"""
 
-    source_code = db.Column(db.String, unique=True, nullable=False)
+    source_code = Column(String, unique=True, nullable=False)
     """str: the saved source code"""
 
-    last_updated_time = db.Column(db.DateTime)
+    last_updated_time = Column(DateTime)
     """DateTime: the time the code was last updated at"""
 
     def __init__(self, contest, problem, user, language, source_code,
@@ -436,65 +446,65 @@ class SavedCode(db.Model):
         return self.__repr__()
 
 
-class Run(db.Model):
+class Run(Base):
     """Stores information about a specific run. This might be a
     submission, or just a test run"""
     __tablename__ = 'run'
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    user = db.relationship('User', backref=db.backref('Run', lazy='dynamic'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = relationship('User', backref=backref('Run', lazy='dynamic'))
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the run's user"""
 
-    contest = db.relationship(
-        'Contest', backref=db.backref('Run', lazy='dynamic'))
-    contest_id = db.Column(
-        db.Integer, db.ForeignKey('contest.id'), nullable=False)
+    contest = relationship(
+        'Contest', backref=backref('Run', lazy='dynamic'))
+    contest_id = Column(
+        Integer, ForeignKey('contest.id'), nullable=False)
     """int: a foreignkey to the run's contest"""
 
-    language = db.relationship(
-        'Language', backref=db.backref('Run', lazy='dynamic'))
-    language_id = db.Column(
-        db.Integer, db.ForeignKey('language.id'), nullable=False)
+    language = relationship(
+        'Language', backref=backref('Run', lazy='dynamic'))
+    language_id = Column(
+        Integer, ForeignKey('language.id'), nullable=False)
     """int: a foreignkey to the run's language"""
 
-    problem = db.relationship(
-        'Problem', backref=db.backref('Run', lazy='dynamic'))
-    problem_id = db.Column(
-        db.Integer, db.ForeignKey('problem.id'), nullable=False)
+    problem = relationship(
+        'Problem', backref=backref('Run', lazy='dynamic'))
+    problem_id = Column(
+        Integer, ForeignKey('problem.id'), nullable=False)
     """int: a foreignkey to the run's problem"""
 
-    source_code = db.Column(db.String, nullable=False)
+    source_code = Column(String, nullable=False)
     """str: the submitted source code"""
 
-    submit_time = db.Column(db.DateTime, nullable=False)
+    submit_time = Column(DateTime, nullable=False)
     """DateTime: the time the code was submitted"""
 
-    started_execing_time = db.Column(db.DateTime)
+    started_execing_time = Column(DateTime)
     """DateTime: the time the code started being executed"""
 
-    finished_execing_time = db.Column(db.DateTime)
+    finished_execing_time = Column(DateTime)
     """DateTime: the time the code finished being executed"""
 
-    run_input = db.Column(db.String, nullable=False)
+    run_input = Column(String, nullable=False)
     """str: input text passed to the submitted program"""
 
-    correct_output = db.Column(db.String)
+    correct_output = Column(String)
     """str: the correct output of the submitted program"""
 
-    run_output = db.Column(db.String)
+    run_output = Column(String)
     """str: the output of the submitted program"""
 
-    is_submission = db.Column(db.Boolean, nullable=False)
+    is_submission = Column(Boolean, nullable=False)
     """bool: if true the run is a submission, if false it's a test run"""
 
-    is_passed = db.Column(db.Boolean, nullable=True)
+    is_passed = Column(Boolean, nullable=True)
     """bool: indicates whether or not a run has been judged as passing or failing"""
 
-    is_priority = db.Column(db.Boolean, default=False)
+    is_priority = Column(Boolean, default=False)
     """bool: indicates whether or not a run has priority status, which expedites execution"""
 
-    state = db.Column(db.String)
+    state = Column(String)
     """str: information about the execution of the program"""
 
     @property
@@ -555,44 +565,44 @@ class Run(db.Model):
         return Run.query.filter(Run.finished_execing_time is None).all()
 
 
-class Clarification(db.Model):
+class Clarification(Base):
     """Stores information about a user or judge clarification"""
     __tablename__ = 'clarification'
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
 
-    problem = db.relationship(
-        'Problem', backref=db.backref('Clarification', lazy='dynamic'))
-    problem_id = db.Column(
-        db.Integer, db.ForeignKey('problem.id'), nullable=True)
+    problem = relationship(
+        'Problem', backref=backref('Clarification', lazy='dynamic'))
+    problem_id = Column(
+        Integer, ForeignKey('problem.id'), nullable=True)
     """int: a foreignkey to the clarification's problem, if it is null, the
         the clarification is general"""
 
-    initiating_user = db.relationship(
-        'User', backref=db.backref('Clarification', lazy='dynamic'))
-    initiating_user_id = db.Column(
-        db.Integer, db.ForeignKey('user.id'), nullable=False)
+    initiating_user = relationship(
+        'User', backref=backref('Clarification', lazy='dynamic'))
+    initiating_user_id = Column(
+        Integer, ForeignKey('user.id'), nullable=False)
     """int: a foreignkey to the user that initiated the clarification"""
 
-    parent = db.relationship("Clarification", remote_side=[id])
-    parent_id = db.Column(
-        db.Integer, db.ForeignKey('clarification.id'), nullable=True)
+    parent = relationship("Clarification", remote_side=[id])
+    parent_id = Column(
+        Integer, ForeignKey('clarification.id'), nullable=True)
     """int: a foreignkey to the a parent clarification"""
 
-    thread = db.Column(db.String, nullable=False)
+    thread = Column(String, nullable=False)
     """str: this is a uuid that indicates which thread this clarification belongs to"""
 
-    subject = db.Column(db.String, nullable=False)
+    subject = Column(String, nullable=False)
     """str: the title of the clairification, gives brief idea of contents"""
 
-    contents = db.Column(db.String, nullable=False)
+    contents = Column(String, nullable=False)
     """str: the contents of the clarification"""
 
-    creation_time = db.Column(
-        db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    creation_time = Column(
+        DateTime, default=datetime.datetime.utcnow(), nullable=False)
     """DateTime: the time the clarification was created at"""
 
-    is_public = db.Column(db.Boolean, nullable=False)
+    is_public = Column(Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
     def __init__(self, initiating_user, subject, contents, thread, is_public):
@@ -619,14 +629,14 @@ class Clarification(db.Model):
         return self.__repr__()
 
 
-class UserRole(db.Model):
+class UserRole(Base):
     """Stores system user roles"""
     __tablename__ = 'user_role'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
 
-    users = db.relationship(
+    users = relationship(
         "User", secondary=user_user_role, back_populates="user_roles")
 
     def __init__(self, name):

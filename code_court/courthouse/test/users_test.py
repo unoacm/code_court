@@ -2,8 +2,8 @@ from lxml import html
 
 from base_test import BaseTest
 
-from web import model
-
+import model
+from database import db_session
 
 class UsersTestCase(BaseTest):
     """

@@ -1,7 +1,7 @@
 from base_test import BaseTest
 
-from web import model
-
+import model
+from database import db_session
 
 class ModelsTestCase(BaseTest):
     """
@@ -19,8 +19,8 @@ class ModelsTestCase(BaseTest):
 
         # create and add python lang
         lang = model.Language(**LANG_ARGS)
-        model.db.session.add(lang)
-        model.db.session.commit()
+        db_session.add(lang)
+        db_session.commit()
 
         # fetch lang
         results = model.Language.query.filter_by(name=LANG_ARGS['name']).all()
@@ -44,8 +44,8 @@ class ModelsTestCase(BaseTest):
 
         # create and add user
         user = model.User(**USER_ARGS)
-        model.db.session.add(user)
-        model.db.session.commit()
+        db_session.add(user)
+        db_session.commit()
 
         # fetch user
         results = model.User.query.filter_by(email=USER_ARGS['email']).all()
@@ -71,8 +71,8 @@ class ModelsTestCase(BaseTest):
         contest.users.append(user)
         contest.problems.append(problem)
 
-        model.db.session.add(contest)
-        model.db.session.commit()
+        db_session.add(contest)
+        db_session.commit()
 
         # fetch contest
         results = model.Contest.query.filter_by(
@@ -91,8 +91,8 @@ class ModelsTestCase(BaseTest):
 
         # create and add contest
         conf_type = model.Configuration(**CONF_ARGS)
-        model.db.session.add(conf_type)
-        model.db.session.commit()
+        db_session.add(conf_type)
+        db_session.commit()
 
         # fetch contest
         results = model.Configuration.query.filter_by(
@@ -109,8 +109,8 @@ class ModelsTestCase(BaseTest):
 
         # create and add contest
         problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
-        model.db.session.add(problem_type)
-        model.db.session.commit()
+        db_session.add(problem_type)
+        db_session.commit()
 
         # fetch contest
         results = model.ProblemType.query.filter_by(
@@ -126,8 +126,8 @@ class ModelsTestCase(BaseTest):
             "eval_script": "#!/bin/bash\nexit 0",
         }
         problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
-        model.db.session.add(problem_type)
-        model.db.session.commit()
+        db_session.add(problem_type)
+        db_session.commit()
 
         PROBLEM_ARGS = {
             "problem_type":
@@ -150,8 +150,8 @@ class ModelsTestCase(BaseTest):
 
         # create and add contest
         problem = model.Problem(**PROBLEM_ARGS)
-        model.db.session.add(problem)
-        model.db.session.commit()
+        db_session.add(problem)
+        db_session.commit()
 
         # fetch contest
         results = model.Problem.query.filter_by(
@@ -175,8 +175,8 @@ class ModelsTestCase(BaseTest):
             "last_updated_time": model.str_to_dt('2017-01-26T10:45Z'),
         }
         saved_code = model.SavedCode(**SAVED_CODE_ARGS)
-        model.db.session.add(saved_code)
-        model.db.session.commit()
+        db_session.add(saved_code)
+        db_session.commit()
 
     def test_run(self):
         """test the run table"""
@@ -197,8 +197,8 @@ class ModelsTestCase(BaseTest):
             "is_submission": True,
         }
         run = model.Run(**RUN_ARGS)
-        model.db.session.add(run)
-        model.db.session.commit()
+        db_session.add(run)
+        db_session.commit()
 
     def test_clarification(self):
         """test the clarification table"""
@@ -214,8 +214,8 @@ class ModelsTestCase(BaseTest):
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)
-        model.db.session.add(clarification)
-        model.db.session.commit()
+        db_session.add(clarification)
+        db_session.commit()
 
     def test_user_role(self):
         """test the user_role table"""
@@ -223,8 +223,8 @@ class ModelsTestCase(BaseTest):
             "name": "admin",
         }
         user_role = model.UserRole(**USER_ROLE_ARGS)
-        model.db.session.add(user_role)
-        model.db.session.commit()
+        db_session.add(user_role)
+        db_session.commit()
 
 
 def get_problem_type():
@@ -234,8 +234,8 @@ def get_problem_type():
         "eval_script": "#!/bin/bash\nexit 0",
     }
     problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
-    model.db.session.add(problem_type)
-    model.db.session.commit()
+    db_session.add(problem_type)
+    db_session.commit()
 
     return PROBLEM_TYPE_ARGS, problem_type
 
@@ -256,8 +256,8 @@ def get_problem():
     }
 
     problem = model.Problem(**PROBLEM_ARGS)
-    model.db.session.add(problem)
-    model.db.session.commit()
+    db_session.add(problem)
+    db_session.commit()
 
     return PROBLEM_ARGS, problem
 
@@ -273,8 +273,8 @@ def get_language():
 
     # create and add python lang
     lang = model.Language(**LANG_ARGS)
-    model.db.session.add(lang)
-    model.db.session.commit()
+    db_session.add(lang)
+    db_session.commit()
 
     return LANG_ARGS, lang
 
@@ -296,8 +296,8 @@ def get_user():
 
     # create and add user
     user = model.User(**USER_ARGS)
-    model.db.session.add(user)
-    model.db.session.commit()
+    db_session.add(user)
+    db_session.commit()
 
     return USER_ARGS, user
 
@@ -316,8 +316,8 @@ def get_contest():
 
     # create and add contest
     contest = model.Contest(**CONTEST_ARGS)
-    model.db.session.add(contest)
-    model.db.session.commit()
+    db_session.add(contest)
+    db_session.commit()
 
     return CONTEST_ARGS, contest
 

@@ -16,6 +16,7 @@ from flask import (
     flash, )
 
 import model
+from database import db_session
 
 problems = Blueprint(
     'problems', __name__, template_folder='templates/problems')
@@ -31,7 +32,7 @@ def problems_view(page):
     Returns:
         a rendered problem view template
     """
-    problems = model.Problem.query.paginate(page, 30)
+    problems = util.paginate(model.Problem.query, page, 30)
 
     return render_template("problems/view.html", problems=problems)
 
@@ -116,9 +117,9 @@ def problems_batch_upload():
                     sample_output=data['sample_output'],
                     secret_input=data['secret_input'],
                     secret_output=data['secret_output'])
-                model.db.session.add(problem)
+                db_session.add(problem)
 
-        model.db.session.commit()
+        db_session.commit()
 
         return redirect(url_for("problems.problems_view"))
     else:
@@ -172,11 +173,11 @@ def problems_del(problem_id):
         return redirect(url_for("problems.problems_view"))
 
     try:
-        model.db.session.delete(problem)
-        model.db.session.commit()
+        db_session.delete(problem)
+        db_session.commit()
         flash("Deleted problem \'{}\'".format(problem.slug), "warning")
     except IntegrityError:
-        model.db.session.rollback()
+        db_session.rollback()
         error = "Failed to delete problem \'{}\' as it's referenced in another DB element".format(
             problem.slug)
         current_app.logger.info(error)
@@ -258,9 +259,9 @@ def add_problem():
                                 sample_input, sample_output, secret_input,
                                 secret_output)
         problem.is_enabled = is_enabled_bool
-        model.db.session.add(problem)
+        db_session.add(problem)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return redirect(url_for("problems.problems_view"))
 

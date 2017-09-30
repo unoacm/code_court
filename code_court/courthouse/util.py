@@ -4,6 +4,8 @@ import bcrypt
 
 from flask_login import current_user
 
+from flask_sqlalchemy import BaseQuery
+
 from flask import current_app, request, redirect
 
 import model
@@ -119,3 +121,9 @@ def i(num):
         return int(num)
     except Exception:
         return None
+
+
+def paginate(sa_query, page, per_page=20, error_out=True):
+    sa_query.__class__ = BaseQuery
+    return sa_query.paginate(page, per_page, error_out)
+

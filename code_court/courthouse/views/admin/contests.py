@@ -13,6 +13,7 @@ from flask import (
     flash, )
 
 import model
+from database import db_session
 
 contests = Blueprint(
     'contests', __name__, template_folder='templates/contests')
@@ -28,7 +29,7 @@ def contests_view(page):
     Returns:
         a rendered contest view template
     """
-    contests = model.Contest.query.paginate(page, 30)
+    contests = util.paginate(model.Contest.query, page, 30)
 
     return render_template("contests/view.html", contests=contests)
 
@@ -78,11 +79,11 @@ def contests_del(contest_id):
         return redirect(url_for("contests.contests_view"))
 
     try:
-        model.db.session.delete(contest)
-        model.db.session.commit()
+        db_session.delete(contest)
+        db_session.commit()
         flash("Deleted contest \'{}\'".format(contest.name), "warning")
     except IntegrityError:
-        model.db.session.rollback()
+        db_session.rollback()
         error = "Failed to delete contest \'{}\' as it's referenced in another DB element".format(
             contest.name)
         current_app.logger.info(error)
@@ -199,9 +200,9 @@ def add_contest():
             deactivate_time=deactivate_date_time,
             users=users_from_emails(user_emails.split(), model),
             problems=problems_from_slugs(problem_slugs.split(), model))
-        model.db.session.add(contest)
+        db_session.add(contest)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return redirect(url_for("contests.contests_view"))
 

@@ -5,8 +5,9 @@ from flask import (
 
 import util
 
-admin = Blueprint('admin', __name__, template_folder='templates')
+from database import db_uri
 
+admin = Blueprint('admin', __name__, template_folder='templates')
 
 @admin.route("/", methods=["GET"])
 @util.login_required("operator")
@@ -16,7 +17,7 @@ def index():
     a list of links to other admin pages
     """
     info = {
-        "Database URI": current_app.config['SQLALCHEMY_DATABASE_URI'],
+        "Database URI": db_uri,
         "Run Mode": current_app.config['RUNMODE']
     }
     return render_template("admin_index.html", info=info)

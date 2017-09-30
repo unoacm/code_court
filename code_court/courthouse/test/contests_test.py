@@ -2,8 +2,8 @@ from lxml import html
 
 from base_test import BaseTest
 
-from web import model
-
+import model
+from database import db_session
 
 class ContestsTestCase(BaseTest):
     """
@@ -124,7 +124,7 @@ class ContestsTestCase(BaseTest):
                 names[i - 1],
                 "pass",
                 user_roles=[roles['defendant']])
-            model.db.session.add(test_contestant)
+            db_session.add(test_contestant)
 
         self._contest_add(init_contest_name, emails[0:7])
         self._contest_edit(init_contest_name, edit_contest_name, emails[0:7])

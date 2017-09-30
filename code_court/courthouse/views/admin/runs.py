@@ -9,6 +9,7 @@ from flask import (
     url_for, )
 
 import model
+from database import db_session
 
 runs = Blueprint('runs', __name__, template_folder='templates/runs')
 
@@ -44,7 +45,7 @@ def runs_view(page):
     elif run_status == "pending":
         run_query = run_query.filter_by(finished_execing_time=None)
 
-    runs = run_query.order_by(model.Run.submit_time.desc()).paginate(page, 30)
+    runs = util.paginate(run_query.order_by(model.Run.submit_time.desc()), page, 30)
 
     return render_template(
         "runs/view.html",
@@ -76,8 +77,8 @@ def toggle_priority(run_id):
     run = model.Run.query.filter_by(id=run_id).one()
     run.is_priority = not run.is_priority
 
-    model.db.session.add(run)
-    model.db.session.commit()
+    db_session.add(run)
+    db_session.commit()
 
     return redirect(url_for("runs.runs_run", run_id=run_id))
 

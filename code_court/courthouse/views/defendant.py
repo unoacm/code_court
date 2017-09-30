@@ -8,6 +8,7 @@ import util
 import datetime
 
 import model
+from database import db_session
 
 from flask_login import current_user
 from flask import (abort, Blueprint, current_app, render_template,
@@ -93,8 +94,8 @@ def submit_code(problem):
                     source_code, problem.secret_input, problem.secret_output,
                     is_submission)
 
-    model.db.session.add(run)
-    model.db.session.commit()
+    db_session.add(run)
+    db_session.commit()
 
     return source_code
 

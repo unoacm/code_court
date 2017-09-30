@@ -11,6 +11,7 @@ from flask import (
     flash, )
 
 import model
+from database import db_session
 
 configurations = Blueprint(
     'configurations', __name__, template_folder='templates/configurations')
@@ -28,8 +29,8 @@ def configurations_view(page):
     """
     config_query = model.Configuration.query
 
-    configs = config_query.order_by(
-        model.Configuration.category.asc()).paginate(page, 30)
+    configs = util.paginate(config_query.order_by(
+        model.Configuration.category.asc()), page, 30)
 
     return render_template("configurations/view.html", configs=configs)
 
@@ -79,8 +80,8 @@ def configurations_del(config_id):
         flash(error, "danger")
         return redirect(url_for("configurations.configurations_view"))
 
-    model.db.session.delete(config)
-    model.db.session.commit()
+    db_session.delete(config)
+    db_session.commit()
 
     return redirect(url_for("configurations.configurations_view"))
 
@@ -117,9 +118,9 @@ def add_config():
 
         config = model.Configuration(
             key=key, val=val, valType=valType, category=category)
-        model.db.session.add(config)
+        db_session.add(config)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return redirect(url_for("configurations.configurations_view"))
 

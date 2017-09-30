@@ -13,6 +13,7 @@ from flask import (
     flash, )
 
 import model
+from database import db_session
 
 languages = Blueprint(
     'languages', __name__, template_folder='templates/language')
@@ -32,7 +33,7 @@ def languages_view(page):
     Returns:
         a rendered language view template
     """
-    languages = model.Language.query.paginate(page, 30)
+    languages = util.paginate(model.Language.query, page, 30)
 
     return render_template("language/view.html", languages=languages)
 
@@ -81,11 +82,11 @@ def languages_del(lang_id):
         return redirect(url_for("languages.languages_view"))
 
     try:
-        model.db.session.delete(lang)
-        model.db.session.commit()
+        db_session.delete(lang)
+        db_session.commit()
         flash("Deleted language \'{}\'".format(lang.name), "warning")
     except IntegrityError:
-        model.db.session.rollback()
+        db_session.rollback()
         error = "Failed to delete language \'{}\' as it's referenced in another DB element".format(
             lang_id)
         current_app.logger.info(error)
@@ -150,9 +151,9 @@ def add_lang():
 
         lang = model.Language(name, syntax_mode, is_enabled_bool, run_script,
                               default_template)
-        model.db.session.add(lang)
+        db_session.add(lang)
 
-    model.db.session.commit()
+    db_session.commit()
 
     return redirect(url_for("languages.languages_view"))
 

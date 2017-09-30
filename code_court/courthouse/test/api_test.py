@@ -4,8 +4,8 @@ from base64 import b64encode
 
 from base_test import BaseTest
 
-from web import model
-
+import model
+from database import db_session
 
 class APITestCase(BaseTest):
     """
@@ -117,8 +117,8 @@ def setup_contest():
         'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
         test_problem.secret_input, test_problem.secret_output, True)
 
-    model.db.session.add_all([
+    db_session.add_all([
         test_executioner, test_contestant, test_contest, test_problem, test_run
     ])
-    model.db.session.commit()
+    db_session.commit()
 
