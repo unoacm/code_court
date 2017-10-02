@@ -14,6 +14,7 @@
             <th>started_execing_time</th>
             <th>finished_execing_time</th>
             <th>is_submission</th>
+            <th>state</th>
             <th>is_passed</th>
             <th>is_priority</th>
         </tr>
@@ -28,13 +29,16 @@
             <td class="run_started_execing_time">{{ run.started_execing_time }}</td>
             <td class="run_finished_execing_time">{{ run.finished_execing_time }}</td>
             <td class="run_is_submission">{{ run.is_submission }}</td>
+            <td class="run_state">{{ run.state }}</td>
             <td class="run_is_passed">
-                {% if run.is_passed == True %}
-                    <span class="green">&#10003;</span>
-                {% elif run.is_passed == False %}
-                    <span class="red">&#215;</span>
-                {% else %}
-                    <span>&#8635;</span>
+                {% if run.is_submission %}
+                    {% if run.is_passed == True %}
+                        <span class="green">&#10003;</span>
+                    {% elif run.is_passed == False %}
+                        <span class="red">&#215;</span>
+                    {% else %}
+                        <span>&#8635;</span>
+                    {% endif %}
                 {% endif %}
             </td>
             <td class="run_is_priority">{{ run.is_priority }}</td>
