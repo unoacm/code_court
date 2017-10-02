@@ -3,8 +3,9 @@ import util
 
 from flask import (
     Blueprint,
-    render_template,
+    current_app,
     redirect,
+    render_template,
     request,
     url_for, )
 
@@ -73,8 +74,8 @@ def runs_run(run_id):
 
 
 @runs.route("/<int:run_id>/priority", methods=["GET"])
-def toggle_priority(run_id):
-    run = model.Run.query.filter_by(id=run_id).one()
+def priority(run_id):
+    run = model.Run.query.get(run_id)
     run.is_priority = not run.is_priority
 
     db_session.add(run)
@@ -82,3 +83,17 @@ def toggle_priority(run_id):
 
     return redirect(url_for("runs.runs_run", run_id=run_id))
 
+@runs.route("/<int:run_id>/rejudge", methods=["GET"])
+def rejudge(run_id):
+    run = model.Run.query.get(run_id)
+
+    run.started_execing_time = None
+    run.finished_execing_time = None
+    run.run_output = None
+    if run.is_submission:
+        run.run_input = run.problem.secret_input
+        run.correct_output = run.problem.secret_output
+
+    db_session.commit()
+
+    return redirect(url_for("runs.runs_run", run_id=run_id))

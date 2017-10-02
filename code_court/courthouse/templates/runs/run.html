@@ -52,12 +52,10 @@
 
 <link rel="stylesheet" href="{{ url_for('main.send_flask_static', path='codemirror-5.23.0/addon/merge/merge.css') }}">
 
-<a style="float: right;" href="{{ url_for('runs.toggle_priority', run_id=run.id) }}"
-   {% if run.is_judged == False %}
-      class="btn btn-default"
-   {% else %}
-      class="btn btn-default disabled"
-   {% endif %}>Toggle Priority</a>
+{% if not run.is_judged and not run.is_priority %}
+<a style="float: right;" href="{{ url_for('runs.priority', run_id=run.id) }}" class="btn btn-default">Mark priority</a>
+{% endif %}
+<a style="float: right;" href="{{ url_for('runs.rejudge', run_id=run.id) }}" class="btn btn-default">Rejudge</a>
 
 <div class="row">
     <div class="col-md-12">

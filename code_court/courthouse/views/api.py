@@ -275,20 +275,20 @@ def submit_run():
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
 
     run_input = None
-    run_output = None
+    correct_output = None
     if is_submission:
         run_input = problem.secret_input
-        run_output = problem.secret_output
+        correct_output = problem.secret_output
     else:
         if user_test_input:
             run_input = user_test_input
         else:
             run_input = problem.sample_input
-        run_output = problem.sample_output
+        correct_output = problem.sample_output
 
     run = model.Run(user, contest, lang, problem,
                     datetime.datetime.utcnow(), source_code, run_input,
-                    run_output, is_submission)
+                    correct_output, is_submission)
     run.state = "Judging"
 
     resp = None

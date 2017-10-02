@@ -83,6 +83,42 @@ class APITestCase(BaseTest):
         rv = self.app.get('/api/get-writ', headers=auth_headers)
         self.assertEqual(rv.status_code, 404)
 
+    def test_rejudging(self):
+        """Tests rejudging endpoint"""
+        setup_contest()
+        self.login("admin@example.org", "pass")
+
+        test_run = model.Run.query.first()
+
+        self._judge_writ(test_run)
+
+        self.assertIsNotNone(test_run.started_execing_time)
+        self.assertIsNotNone(test_run.finished_execing_time)
+        self.assertIsNotNone(test_run.run_output)
+
+        rv = self.app.get('/admin/runs/{}/rejudge'.format(test_run.id), follow_redirects=True)
+        self.assertEqual(rv.status_code, 200)
+
+        self.assertIsNone(test_run.started_execing_time)
+        self.assertIsNone(test_run.finished_execing_time)
+        self.assertIsNone(test_run.run_output)
+
+    def _judge_writ(self, run):
+            auth_headers = {
+                'Authorization':
+                'Basic %s' %
+                b64encode(b"testexec@example.org:epass").decode("ascii")
+            }
+
+            rv = self.app.get('/api/get-writ', headers=auth_headers)
+            writ_data = json.loads(rv.data.decode("utf-8"))
+
+            self.app.post(
+                '/api/submit-writ/{}'.format(writ_data['run_id']),
+                headers=auth_headers,
+                data=json.dumps({'output': 'run_output'}),
+                content_type='application/json')
+
 
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
