@@ -385,7 +385,7 @@ def dev_populate_db():
         "Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben",
         "Josiah", "Micah"
     ]
-    for i in range(1, 11):
+    for i in range(1, 3):
         test_contestant = model.User(
             "testuser{}@example.org".format(i),
             names[i - 1],
@@ -474,7 +474,7 @@ def dev_populate_db():
     problem_subs = []
     for problem in problems:
         for user in contestants:
-            for _ in range(10):
+            for _ in range(2):
                 problem_subs.append((problem, user))
 
     random.shuffle(problem_subs)

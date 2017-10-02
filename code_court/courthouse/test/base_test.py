@@ -22,6 +22,7 @@ class BaseTest(unittest.TestCase):
         app.app_context().push()
         self.app = app.test_client()
 
+        db_session.commit()
         Base.metadata.drop_all(engine)
         db_session.commit()
         Base.metadata.create_all(engine)
@@ -59,6 +60,7 @@ class BaseTest(unittest.TestCase):
         except Exception:
             self.fail("Failed to logout")
         finally:
+            db_session.commit()
             Base.metadata.drop_all(engine)
             db_session.commit()
             Base.metadata.create_all(engine)

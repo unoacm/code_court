@@ -11,7 +11,7 @@ import IPython
 from flask import Flask
 
 import model
-from model import db
+from database import db_session
 
 app = Flask(__name__)
 
@@ -19,9 +19,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
     "CODE_COURT_DB_URI") or "sqlite:////tmp/code_court.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['model'] = model
-
-db.init_app(app)
-
 
 def _main():
     with app.app_context():
