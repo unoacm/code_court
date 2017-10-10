@@ -60,7 +60,7 @@ class BaseTest(unittest.TestCase):
             "email": email,
             "password": password,
         }), content_type='application/json')
-        j = json.loads(rv.data)
+        j = json.loads(rv.data.decode("UTF-8"))
         return j['access_token']
 
     def post_json(self, url, data, auth_token=None, headers=None):
