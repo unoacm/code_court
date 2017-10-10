@@ -384,7 +384,7 @@ def dev_populate_db():
         "Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben",
         "Josiah", "Micah"
     ]
-    for i in range(1, 3):
+    for i in range(1, 5):
         test_contestant = model.User(
             "testuser{}@example.org".format(i),
             names[i - 1],

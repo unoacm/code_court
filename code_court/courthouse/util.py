@@ -127,3 +127,10 @@ def paginate(sa_query, page, per_page=20, error_out=True):
     sa_query.__class__ = BaseQuery
     return sa_query.paginate(page, per_page, error_out)
 
+
+def invalidate_cache_item(cache_name, key):
+    try:
+        import uwsgi
+        uwsgi.cache_del(key, cache_name)
+    except ImportError:
+        pass
