@@ -171,6 +171,18 @@ class APITestCase(BaseTest):
         contest = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(contest.get('name'), 'test_contest')
 
+    def test_get_languages(self):
+        """Tests the /api/languages endpoint"""
+        setup_contest()
+
+        num_langs = model.Language.query.count()
+
+        rv = self.jwt_get('/api/languages')
+        self.assertEqual(rv.status_code, 200)
+
+        langs = json.loads(rv.data.decode("utf-8"))
+        self.assertEqual(len(langs), num_langs)
+
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
     test_contestant = model.User(

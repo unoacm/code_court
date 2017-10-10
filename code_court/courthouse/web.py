@@ -111,7 +111,6 @@ def create_app():
     def load_user(user_email):
         return model.User.query.filter_by(email=user_email).one()
 
-
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
     app.register_blueprint(admin, url_prefix='/admin')
