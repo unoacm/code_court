@@ -549,7 +549,7 @@ class Run(Base):
             d["correct_output"] = self.correct_output
 
             run_output = self.run_output
-            if len(self.run_output) > MAX_RUN_OUTPUT_LENGTH:
+            if run_output and len(run_output) > MAX_RUN_OUTPUT_LENGTH:
                 run_output = run_output[0:MAX_RUN_OUTPUT_LENGTH]
                 run_output += "\n...[truncated]..."
 
