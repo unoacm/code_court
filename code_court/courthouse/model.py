@@ -18,6 +18,8 @@ from sqlalchemy import (
     DateTime,
 )
 
+MAX_RUN_OUTPUT_LENGTH = 2000
+
 contest_problem = Table('contest_problem', Base.metadata,
                            Column('contest_id', Integer,
                                      ForeignKey('contest.id')),
@@ -544,8 +546,14 @@ class Run(Base):
 
         if not self.is_submission:
             d["run_input"] = self.run_input
-            d["run_output"] = self.run_output
             d["correct_output"] = self.correct_output
+
+            run_output = self.run_output
+            if len(self.run_output) > MAX_RUN_OUTPUT_LENGTH:
+                run_output = run_output[0:MAX_RUN_OUTPUT_LENGTH]
+                run_output += "\n...[truncated]..."
+
+            d["run_output"] = run_output
 
         return d
 
