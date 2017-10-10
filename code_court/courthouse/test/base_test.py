@@ -1,3 +1,4 @@
+import json
 import logging
 import unittest
 
@@ -53,6 +54,27 @@ class BaseTest(unittest.TestCase):
             self.assertTrue(current_user.is_anonymous, "Failed to logout")
 
             return rv
+
+    def get_jwt_token(self, email, password):
+        rv = self.app.post('/api/login', data=json.dumps({
+            "email": email,
+            "password": password,
+        }), content_type='application/json')
+        j = json.loads(rv.data)
+        return j['access_token']
+
+    def post_json(self, url, data, auth_token=None, headers=None):
+        if not headers:
+            h = {}
+
+        if auth_token:
+            h["Authorization"] = "Bearer " + auth_token
+
+        return self.app.post(url,
+            data=json.dumps(data),
+            headers=h,
+            content_type='application/json',
+            follow_redirects=True)
 
     def tearDown(self):
         try:

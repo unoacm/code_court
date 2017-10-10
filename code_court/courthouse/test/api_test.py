@@ -119,11 +119,27 @@ class APITestCase(BaseTest):
                 data=json.dumps({'output': 'run_output'}),
                 content_type='application/json')
 
+    def test_submit_run(self):
+        """Tests the run submit endpoint"""
+        setup_contest()
+        token = self.get_jwt_token("testuser@example.org", "pass")
+
+        data = dict(
+            lang="python",
+            problem_slug="fizzbuzz",
+            source_code="adasdiajdasdjasldjaslkasd",
+            is_submission=True,
+            user_test_input=None
+        )
+
+        rv = self.post_json('/api/submit-run', data, auth_token=token)
+        self.assertEqual(rv.status_code, 200)
+
 
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
     test_contestant = model.User(
-        "testuser@xample.org",
+        "testuser@example.org",
         "Test User",
         "pass",
         user_roles=[roles['defendant']])
