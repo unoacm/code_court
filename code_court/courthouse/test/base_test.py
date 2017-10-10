@@ -63,6 +63,18 @@ class BaseTest(unittest.TestCase):
         j = json.loads(rv.data.decode("UTF-8"))
         return j['access_token']
 
+    def jwt_get(self, url, auth_token=None, headers=None):
+        if not headers:
+            h = {}
+
+        if auth_token:
+            h["Authorization"] = "Bearer " + auth_token
+
+        return self.app.get(url,
+            headers=h,
+            content_type='application/json',
+            follow_redirects=True)
+
     def post_json(self, url, data, auth_token=None, headers=None):
         if not headers:
             h = {}

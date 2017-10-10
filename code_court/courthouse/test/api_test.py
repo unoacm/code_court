@@ -135,6 +135,18 @@ class APITestCase(BaseTest):
         rv = self.post_json('/api/submit-run', data, auth_token=token)
         self.assertEqual(rv.status_code, 200)
 
+    def test_get_problems(self):
+        """Tests the /api/problems endpoint"""
+        setup_contest()
+        token = self.get_jwt_token("testuser@example.org", "pass")
+
+        rv = self.jwt_get('/api/problems', auth_token=token)
+        self.assertEqual(rv.status_code, 200)
+
+        problems = json.loads(rv.data)
+        self.assertIn('fizzbuzz', problems)
+
+        self.assertEqual(1, len(problems['fizzbuzz']['runs']))
 
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
