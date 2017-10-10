@@ -143,7 +143,7 @@ class APITestCase(BaseTest):
         rv = self.jwt_get('/api/problems', auth_token=token)
         self.assertEqual(rv.status_code, 200)
 
-        problems = json.loads(rv.data)
+        problems = json.loads(rv.data.decode("utf-8"))
         self.assertIn('fizzbuzz', problems)
 
         self.assertEqual(1, len(problems['fizzbuzz']['runs']))
@@ -156,7 +156,7 @@ class APITestCase(BaseTest):
         rv = self.jwt_get('/api/current-user', auth_token=token)
         self.assertEqual(rv.status_code, 200)
 
-        user = json.loads(rv.data)
+        user = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(user.get('email'), "testuser@example.org")
         self.assertEqual(user.get('username'), "testuser")
 
@@ -168,7 +168,7 @@ class APITestCase(BaseTest):
         rv = self.jwt_get('/api/get-contest-info', auth_token=token)
         self.assertEqual(rv.status_code, 200)
 
-        contest = json.loads(rv.data)
+        contest = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(contest.get('name'), 'test_contest')
 
 def setup_contest():
