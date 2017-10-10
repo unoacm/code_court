@@ -3,6 +3,7 @@ Contains api endpoints for the defendant frontend
 and external services
 """
 import datetime
+import itertools
 import time
 import uuid
 
@@ -328,26 +329,19 @@ def get_scoreboard(contest_id):
                     .filter(model.Problem.is_enabled)\
                     .all()
 
-    passed_runs = model.Run.query.filter_by(
+    runs = model.Run.query.filter_by(
             is_submission=True,
-            is_passed=True,
             contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
 
-    failed_runs = model.Run.query.filter_by(
-            is_submission=True,
-            is_passed=False,
-            contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
+    runs = {k: list(v) for k, v in itertools.groupby(runs, lambda x: (x.user.id, x.problem.id, x.is_passed))}
 
     user_points = []
     for user in defendants:
         problem_states = {}
         penalty = 0
         for problem in problems:
-            has_solved = len([r for r in passed_runs if r.user.id == user.id and r.problem.id == problem.id]) > 0
-            problem_states[problem.slug] = has_solved
-
-            num_incorrect = len([r for r in failed_runs if r.user.id == user.id and r.problem.id == problem.id])
-            penalty += num_incorrect
+            problem_states[problem.slug] = len(runs.get((user.id, problem.id, True), [])) > 0
+            penalty += len(runs.get((user.id, problem.id, True), []))
 
         user_points.append({
             "user":
