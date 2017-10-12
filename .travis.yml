@@ -8,3 +8,6 @@ install:
 script:
   - cd code_court/courthouse/
   - nosetests
+  - cd ../defendant-frontend
+  - npm install
+  - npm run test

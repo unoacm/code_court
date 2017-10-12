@@ -2,7 +2,7 @@
   <div>
     <h1 class="title is-1">Info</h1>
     <h2 class="title is-2">Contest Info</h2>
-    <p>Contest ends in {{ contestEnd }}</p>
+    <p>Contest ends in <span id="ending-in">{{ contestEnd }}</span></p>
   </div>
 </template>
 

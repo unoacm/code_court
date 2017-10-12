@@ -1,11 +1,14 @@
 import Vue from 'vue'
-import Hello from '@/components/Hello'
+import Notification from '@/components/Notification'
 
-describe('Hello.vue', () => {
+describe('Notification.vue', () => {
   it('should render correct contents', () => {
-    const Constructor = Vue.extend(Hello)
-    const vm = new Constructor().$mount()
-    expect(vm.$el.querySelector('.hello h1').textContent)
-      .to.equal('Welcome to Your Vue.js App')
+    const propsData = {
+      message: 'hello'
+    }
+
+    const Constructor = Vue.extend(Notification)
+    const vm = new Constructor({ propsData }).$mount()
+    expect(vm.$el.querySelector('.notification').textContent.trim()).to.equal('hello')
   })
 })
