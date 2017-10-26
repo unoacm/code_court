@@ -14,7 +14,7 @@ module.exports = function (config) {
     browsers: ['PhantomJS'],
     frameworks: ['mocha', 'sinon-chai'],
     reporters: ['spec', 'coverage'],
-    files: ['../../node_modules/babel-polyfill/dist/polyfill.js','./index.js'],
+    files: ['./index.js'],
     preprocessors: {
       './index.js': ['webpack', 'sourcemap']
     },
