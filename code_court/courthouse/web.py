@@ -60,7 +60,6 @@ def create_app():
     """
     app = Flask(__name__)
 
-
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # 1 day
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -152,9 +151,8 @@ def create_app():
         return render_template('401.html'), 401
 
     @app.teardown_appcontext
-    def after_request(exception=None):
+    def teardown(exception=None):
         db_session.remove()
-
 
     @app.after_request
     def after_request(resp):
@@ -322,6 +320,21 @@ def populate_db():
                        textwrap.dedent('''
                                         #!/bin/bash
                                         cat $1 | ruby $2
+                                        exit $?''').strip()),
+        model.Language("rust", "rust", True,
+                       textwrap.dedent('''
+                                        #!/bin/bash
+                                        cp /share/program /scratch/main.rs
+
+                                        cd /scratch
+
+                                        rustc /scratch/main.rs
+
+                                        if [[ $? != 0 ]]; then
+                                          exit $?
+                                        fi
+
+                                        cat $1 | ./main
                                         exit $?''').strip())
     ])
 
@@ -524,11 +537,6 @@ def setup_logging(app):
 
 
 app = create_app()
-
-import sys
-# from werkzeug.contrib.profiler import ProfilerMiddleware
-# app.wsgi_app = ProfilerMiddleware(app.wsgi_app)
-
 
 if __name__ == "__main__":
     PORT = 9191
