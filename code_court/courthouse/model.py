@@ -129,7 +129,7 @@ class Problem(Base):
         Integer, ForeignKey('problem_type.id'), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
-    slug = Column(String(20), unique=True, nullable=False)
+    slug = Column(String(200), unique=True, nullable=False)
     """str: the problem's slug, this is a short (<11 chars) string that is used to identify
             a problem. It can only contain the following characters: a-z, A-Z, 0-1, -, _"""
 
