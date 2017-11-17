@@ -52,7 +52,7 @@
     <br/>
 
     <h3 class="subtitle is-3">Runs</h3>
-    <RunCollapse v-for="(run, i) in problem.runs.slice().reverse()"
+    <RunCollapse v-for="(run, i) in problem.runs.sort((x) => x.submit_time)"
                  :key="run.id"
                  :run="run"
                  :disable-toggle="i == 0 ? true : false"/>
