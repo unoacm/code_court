@@ -482,6 +482,9 @@ class Run(Base):
     submit_time = Column(DateTime, nullable=False)
     """DateTime: the time the code was submitted"""
 
+    local_submit_time = Column(DateTime, nullable=True)
+    """DateTime: the time the code was submitted"""
+
     started_execing_time = Column(DateTime)
     """DateTime: the time the code started being executed"""
 
@@ -519,7 +522,7 @@ class Run(Base):
         return self.finished_execing_time is not None
 
     def __init__(self, user, contest, language, problem, submit_time,
-                 source_code, run_input, correct_output, is_submission):
+                 source_code, run_input, correct_output, is_submission, local_submit_time =None):
         self.user = user
         self.contest = contest
         self.language = language
@@ -529,6 +532,8 @@ class Run(Base):
         self.run_input = run_input
         self.correct_output = correct_output
         self.is_submission = is_submission
+        if local_submit_time:
+            self.local_submit_time = local_submit_time
 
     def get_output_dict(self):
         d = {
@@ -543,6 +548,9 @@ class Run(Base):
             "is_priority": self.is_priority,
             "state": self.state
         }
+
+        if self.local_submit_time:
+            d["local_submit_time"] = self.local_submit_time
 
         if not self.is_submission:
             d["run_input"] = self.run_input

@@ -122,7 +122,8 @@ def submit_writ(run_id):
             run.run_output) == clean_output_string(run.correct_output)
         run.is_passed = is_correct
 
-        util.invalidate_cache_item('scorecache', str(run.contest.id))
+        if run.is_passed:
+            util.invalidate_cache_item('scorecache', str(run.contest.id))
 
         if run.state == "Successful" and not is_correct:
             run.state = "Failed"
@@ -291,7 +292,7 @@ def submit_run():
 
     run = model.Run(user, contest, lang, problem,
                     datetime.datetime.utcnow(), source_code, run_input,
-                    correct_output, is_submission)
+                    correct_output, is_submission, local_submit_time=datetime.datetime.now())
     run.state = "Judging"
 
     resp = None

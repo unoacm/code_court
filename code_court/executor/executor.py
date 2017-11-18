@@ -41,9 +41,9 @@ RUN_TIMEOUT = 5
 CPU_PERIOD = 500000
 MEM_LIMIT = "128m"
 PID_LIMIT = 50
-MEM_SWAPPINESS = 0 # disable container swapping
+MEM_SWAPPINESS = 0  # disable container swapping
 CONTAINER_USER = "user"
-OUTPUT_LIMIT = 100000 # chars
+OUTPUT_LIMIT = 100000  # chars
 WAIT_SECONDS = 5
 
 client = docker.from_env()

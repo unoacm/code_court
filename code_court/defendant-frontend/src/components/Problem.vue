@@ -52,7 +52,7 @@
     <br/>
 
     <h3 class="subtitle is-3">Runs</h3>
-    <RunCollapse v-for="(run, i) in problem.runs.sort((x) => x.submit_time)"
+    <RunCollapse v-for="(run, i) in runs"
                  :key="run.id"
                  :run="run"
                  :disable-toggle="i == 0 ? true : false"/>
@@ -88,7 +88,10 @@ export default {
       return this.$store.state.langs
     },
     latestRun () {
-      return this.problem.runs[this.problem.runs.length - 1]
+      return this.runs[0]
+    },
+    runs () {
+      return this.problem.runs.slice().sort((a, b) => a.id - b.id).reverse()
     },
     sourceCode: {
       get () {
@@ -138,7 +141,7 @@ export default {
       if (this.problem.runs.length === 0) {
         runId = 1
       } else {
-        runId = this.problem.runs[this.problem.runs.length - 1].id + 1
+        runId = this.latestRun.id + 1
       }
       this.$store.commit('ADD_FAKE_RUN', {
         id: runId,
