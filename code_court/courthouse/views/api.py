@@ -367,7 +367,7 @@ def get_scoreboard(contest_id):
         })
 
     user_points.sort(
-        key=lambda x: (x["num_solved"], x["penalty"]), reverse=True)
+        key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
 
     return make_response(jsonify(user_points))
 
