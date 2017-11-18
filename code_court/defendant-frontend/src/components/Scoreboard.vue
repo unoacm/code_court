@@ -83,6 +83,7 @@ export default {
 
 .correct {
   background-color:#60e760;
+  text-align: center;
 }
 
 .incorrect {
