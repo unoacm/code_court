@@ -4,7 +4,7 @@
       <div class="hero-body">
         <div class="container has-text-centered">
           <h1 class="title">
-            code_court
+            {{ contest.name }}
           </h1>
           <div>
             Ends <contest-countdown />
