@@ -352,7 +352,7 @@ def get_scoreboard(contest_id):
         penalty = 0
         for problem in problems:
             problem_states[problem.slug] = len(runs.get((user.id, problem.id, True), [])) > 0
-            penalty += len(runs.get((user.id, problem.id, True), []))
+            penalty += len(runs.get((user.id, problem.id, False), []))
 
         user_points.append({
             "user":
