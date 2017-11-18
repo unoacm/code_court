@@ -185,6 +185,12 @@ def get_all_problems():
     problems = model.Problem.query.filter_by(is_enabled=True).all()
     runs = model.Run.query.filter_by(user=current_user).all()
 
+    if len(current_user.contests) == 0:
+        return make_response(
+            jsonify({
+                'error': 'User has no contests'
+            }), 400)
+
     problems = [p for p in problems if current_user.contests[0] in p.contests]
 
     resp = {}
