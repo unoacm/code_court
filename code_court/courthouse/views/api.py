@@ -185,6 +185,8 @@ def get_all_problems():
     problems = model.Problem.query.filter_by(is_enabled=True).all()
     runs = model.Run.query.filter_by(user=current_user).all()
 
+    problems = [p for p in problems if current_user.contests[0] in p.contests]
+
     resp = {}
     for problem in problems:
         problem_run_dicts = [x.get_output_dict() for x in runs if x.problem == problem]
