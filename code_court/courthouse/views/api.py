@@ -343,8 +343,9 @@ def get_scoreboard(contest_id):
     runs = model.Run.query.filter_by(
             is_submission=True,
             contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
+    key = lambda x: (x.user.id, x.problem.id, x.is_passed)
 
-    runs = {k: list(v) for k, v in itertools.groupby(runs, lambda x: (x.user.id, x.problem.id, x.is_passed))}
+    runs = {k: list(v) for k, v in itertools.groupby(sorted(runs, key=key), key=key)}
 
     user_points = []
     for user in defendants:
@@ -352,7 +353,7 @@ def get_scoreboard(contest_id):
         penalty = 0
         for problem in problems:
             problem_states[problem.slug] = len(runs.get((user.id, problem.id, True), [])) > 0
-            penalty += len(runs.get((user.id, problem.id, False), []))
+            penalty += len(runs.get((user.id, problem.id, False), [])) if (user.id, problem.id, True) in runs else 0
 
         user_points.append({
             "user":
