@@ -345,7 +345,7 @@ def get_scoreboard(contest_id):
             contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
     key = lambda x: (x.user.id, x.problem.id, x.is_passed)
 
-    runs = {k: list(v) for k, v in itertools.groupby(sorted(runs, key=key), key=key)}
+    runs = {k: list(v) for k, v in itertools.groupby(sorted(filter(lambda x: x.user.id is not None and x.problem.id is not None and x.is_passed is not None, runs), key=key), key=key)}
 
     user_points = []
     for user in defendants:
