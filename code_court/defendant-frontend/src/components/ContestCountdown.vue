@@ -1,6 +1,6 @@
 <template>
   <span :v-if="!isContestOver()">
-      {{ contestEnd }}
+    <span :title="contest.end_time">{{ contestEnd }}</span>
   </span>
 </template>
 
