@@ -2,7 +2,7 @@
   <div id="app">
     <section class="hero is-primary">
       <div class="hero-body">
-        <div class="container has-text-centered">
+        <div v-if="contest && user" class="container has-text-centered">
           <h1 class="title">
             {{ contest.name }}
           </h1>
@@ -28,6 +28,9 @@ export default {
   computed: {
     contest () {
       return this.$store.state.contest
+    },
+    user () {
+      return this.$store.state.user
     }
   },
   mounted: function () {
