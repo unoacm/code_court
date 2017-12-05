@@ -246,6 +246,10 @@ class User(Base, UserMixin):
         else:
             self.username = email.split("@")[0]
 
+    @property
+    def misc_data_dict(self):
+        return json.loads(self.misc_data)
+
     def verify_password(self, plainext_password):
         return util.is_password_matching(plainext_password,
                                          self.hashed_password)
