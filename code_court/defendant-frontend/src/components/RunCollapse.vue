@@ -2,7 +2,7 @@
   <div>
     <article class="message" :class="run_status">
       <div class="message-header" :class="{ hasToggle: !disableToggle }" v-on:click="isToggled = !isToggled">
-        <p>Run #{{ run.id }} - {{ run.local_submit_time }}</p>
+        <p>Run #{{ run.id }}</p>
         <a class="card-header-icon">
           <span class="tag">{{ run.language }}</span>
           <span  class="tag is-info">

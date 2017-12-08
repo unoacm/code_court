@@ -1,6 +1,6 @@
 <template>
   <span :v-if="!isContestOver()">
-    <span :title="contest.end_time">{{ contestEnd }}</span>
+    <span :title="localEndTime">{{ contestEnd }}</span>
   </span>
 </template>
 
@@ -27,6 +27,9 @@ export default {
   computed: {
     contest () {
       return this.$store.state.contest
+    },
+    localEndTime () {
+      return moment(this.contest.end_time).local().format('YYYY-MM-DD HH:mm:ss')
     }
   },
   mounted: function () {
