@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h1 class="title is-1">Info</h1>
     <h2 class="title is-2">Contest Info</h2>
     <p>Contest ends in {{ contestEnd }}</p>
     <div v-html="convertToMarkdown(info)" class="content"></div>
@@ -15,7 +14,6 @@ import tzdata from '!json-loader!moment-timezone/data/packed/latest.json'
 var instructions = `
 # Instructions
 
-- Go to <codecourt.org> and login.
 - Select a problem from the navigation bar
 - Read the problem description
 - Select the language that you want to enter your solution in
