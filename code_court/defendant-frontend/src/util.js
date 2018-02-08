@@ -5,7 +5,7 @@ function iso8601ToMoment (is8601Str) {
 }
 
 function isContestOver (contest) {
-  return iso8601ToMoment(contest.end_time) >= moment()
+  return iso8601ToMoment(contest.end_time) <= moment().local()
 }
 
 export { iso8601ToMoment, isContestOver }

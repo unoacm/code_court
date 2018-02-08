@@ -1,7 +1,11 @@
 <template>
-  <span :v-if="!isContestOver()">
-    <span :title="localEndTime">{{ contestEnd }}</span>
-  </span>
+  <div>
+    <div v-if="!isContestOver()">
+      <span :title="'Ends at ' + localEndTime">Ends {{ contestEndStatement }}</span>
+    </div>
+    <div v-else>Contest is over</div>
+
+  </div>
 </template>
 
 <script>
@@ -16,7 +20,6 @@ moment.tz.load(tzdata)
 export default {
   data () {
     return {
-      contestEnd: null
     }
   },
   methods: {
@@ -30,13 +33,15 @@ export default {
     },
     localEndTime () {
       return moment(this.contest.end_time).local().format('YYYY-MM-DD HH:mm:ss')
+    },
+    contestEndStatement () {
+      return iso8601ToMoment(this.contest.end_time).fromNow()
     }
   },
   mounted: function () {
-    this.contestEnd = iso8601ToMoment(this.contest.end_time).fromNow()
     setInterval(function () {
-      this.contestEnd = iso8601ToMoment(this.contest.end_time).fromNow()
-    }.bind(this), 30000)
+      this.$forceUpdate()
+    }.bind(this), 5000)
   }
 }
 </script>

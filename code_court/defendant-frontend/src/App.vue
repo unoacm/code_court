@@ -7,7 +7,7 @@
             {{ contest.name }}
           </h1>
           <div>
-            Ends <contest-countdown />
+            <contest-countdown />
           </div>
         </div>
       </div>
