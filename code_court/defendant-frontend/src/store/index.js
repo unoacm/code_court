@@ -58,8 +58,8 @@ const store = new Vuex.Store({
         context.dispatch('LOAD_USER')
         context.dispatch('LOAD_PROBLEMS')
         context.dispatch('LOAD_CONTEST')
+        context.dispatch('DELETE_ALERTS')
 
-        // clear old alerts here
         router.push({ path: '/' })
       }).catch(function (error) {
         console.log(error)

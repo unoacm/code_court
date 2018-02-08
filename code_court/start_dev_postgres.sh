@@ -7,4 +7,4 @@ docker run -it \
     -e POSTGRES_DB=codecourt \
     -p 43242:5432 \
     postgres
-    # -v $(pwd)/postgres_data:/var/lib/postgresql/data
+    # -v $(pwd)/postgres_data:/var/lib/postgresql/data \
