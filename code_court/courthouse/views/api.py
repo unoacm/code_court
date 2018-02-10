@@ -180,7 +180,7 @@ def get_problem(slug):
 @jwt_required
 def get_all_problems():
     current_user_id = get_jwt_identity()
-    _user = model.User.query.get(util.i(current_user_id))
+    current_user = model.User.query.get(util.i(current_user_id))
 
     problems = model.Problem.query.filter_by(is_enabled=True).all()
     runs = model.Run.query.filter_by(user=current_user).all()
@@ -245,11 +245,11 @@ def get_languages():
 @jwt_required
 def get_current_user():
     current_user_id = get_jwt_identity()
-    curr_user = model.User.query.get(util.i(current_user_id))
+    current_user = model.User.query.get(util.i(current_user_id))
 
     resp = None
-    if curr_user:
-        resp = curr_user.get_output_dict()
+    if current_user:
+        resp = current_user.get_output_dict()
 
     return make_response(jsonify(resp), 200)
 
@@ -376,12 +376,12 @@ def get_scoreboard(contest_id):
 @jwt_required
 def get_contest_info():
     current_user_id = get_jwt_identity()
-    curr_user = model.User.query.get(util.i(current_user_id))
+    current_user = model.User.query.get(util.i(current_user_id))
 
-    if not curr_user:
+    if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
 
-    contests = curr_user.contests
+    contests = current_user.contests
 
     if len(contests) > 1:
         return make_response(
@@ -406,13 +406,13 @@ def make_user():
     - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "email": "ben@bendoan.me", "password": "pass"}' http://localhost:9191/api/make-defendant-user
     """
     current_user_id = get_jwt_identity()
-    curr_user = model.User.query.get(util.i(current_user_id))
+    current_user = model.User.query.get(util.i(current_user_id))
 
-    if not curr_user:
+    if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
 
-    if ("judge" not in curr_user.user_roles
-            and "operator" not in curr_user.user_roles):
+    if ("judge" not in current_user.user_roles
+            and "operator" not in current_user.user_roles):
         return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
     email = request.json.get('email')
@@ -462,13 +462,13 @@ def make_user():
 @jwt_required
 def update_user_metadata():
     current_user_id = get_jwt_identity()
-    curr_user = model.User.query.get(util.i(current_user_id))
+    current_user = model.User.query.get(util.i(current_user_id))
 
-    if not curr_user:
+    if not current_user:
         return make_response(jsonify({'error': 'Not logged in'}), 400)
 
-    if ("judge" not in curr_user.user_roles
-            and "operator" not in curr_user.user_roles):
+    if ("judge" not in current_user.user_roles
+            and "operator" not in current_user.user_roles):
         return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
     user_email = request.json.get('user_email')
@@ -565,17 +565,17 @@ def load_test():
     langs = model.Language.query.all()
     filter_langs = [x.get_output_dict() for x in langs if x.is_enabled]
 
-    curr_user = model.User.query.filter_by(
+    current_user = model.User.query.filter_by(
         id=util.i(5)).scalar()
-    contests = curr_user.contests
+    contests = current_user.contests
 
     resp = None
-    if curr_user:
-        resp = curr_user.get_output_dict()
+    if current_user:
+        resp = current_user.get_output_dict()
 
     over_limit_runs_query = model.Run.submit_time >\
                             (datetime.datetime.utcnow() - datetime.timedelta(minutes=5))
-    run_count = model.Run.query.filter_by(user_id=curr_user.id)\
+    run_count = model.Run.query.filter_by(user_id=current_user.id)\
                                .filter(over_limit_runs_query)\
                                .count()
 
