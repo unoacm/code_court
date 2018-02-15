@@ -16,6 +16,7 @@ import 'brace/mode/lua'
 import 'brace/mode/javascript'
 import 'brace/mode/c_cpp'
 import 'brace/mode/lisp'
+import 'brace/mode/rust'
 
 import 'brace/theme/chrome'
 import 'brace/theme/solarized_light'
@@ -31,7 +32,8 @@ var langToMode = {
   'c': 'c_cpp',
   'c++': 'c_cpp',
   'java': 'java',
-  'ruby': 'ruby'
+  'ruby': 'ruby',
+  'rust': 'rust'
 }
 
 export default {

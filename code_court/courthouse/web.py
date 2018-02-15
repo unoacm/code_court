@@ -335,7 +335,11 @@ def populate_db():
                                         fi
 
                                         cat $1 | ./main
-                                        exit $?''').strip())
+                                        exit $?''').strip(),
+                        textwrap.dedent('''
+                                        fn main() {
+                                        }
+                        ''').strip())
     ])
 
     db_session.add_all([
