@@ -20,8 +20,11 @@ const store = new Vuex.Store({
     loginToken: ''
   },
   actions: {
-    LOAD_PROBLEMS: function (context) {
-      axios.get('/api/problems').then((response) => {
+    LOAD_PROBLEMS: function (context, userId) {
+      if (!userId) {
+        userId = ''
+      }
+      axios.get('/api/problems/' + userId).then((response) => {
         context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },

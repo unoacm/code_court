@@ -92,7 +92,7 @@ def create_app():
         app.config['MAX_CONTENT_LENGTH'] = util.get_configuration(
             "max_output_length") * 1024  # kilobytes
 
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     JWTManager(app)
 
@@ -506,7 +506,7 @@ def dev_populate_db():
                              is_submission)
         test_run.is_correct = is_correct
         test_run.is_priority = is_priority
-        test_run.state = "Judging"
+        test_run.state = model.RunState.JUDGING
 
         db_session.add(test_run)
     db_session.commit()

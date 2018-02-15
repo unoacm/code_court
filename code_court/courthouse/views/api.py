@@ -118,17 +118,21 @@ def submit_writ(run_id):
     run.finished_execing_time = datetime.datetime.utcnow()
 
     if run.is_submission:
-        is_correct = clean_output_string(
+        run.is_passed = clean_output_string(
             run.run_output) == clean_output_string(run.correct_output)
-        run.is_passed = is_correct
 
         if run.is_passed:
-            util.invalidate_cache_item('scorecache', str(run.contest.id))
+            util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
 
-        if run.state == "Successful" and not is_correct:
-            run.state = "Failed"
+        if run.state == model.RunState.EXECUTED:
+            if run.is_passed:
+                run.state = model.RunState.SUCCESSFUL
+            else:
+                run.state = model.RunState.FAILED
 
     db_session.commit()
+
+    util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
     return "Good"
 
 
@@ -176,9 +180,10 @@ def get_problem(slug):
     return make_response(jsonify(problem.get_output_dict()), 200)
 
 
-@api.route("/problems", methods=["GET"])
+@api.route("/problems/<user_id>")
+@api.route("/problems")
 @jwt_required
-def get_all_problems():
+def get_all_problems(user_id=None):
     current_user_id = get_jwt_identity()
     curr_user = model.User.query.get(util.i(current_user_id))
 
@@ -191,7 +196,7 @@ def get_all_problems():
                 'error': 'User has no contests'
             }), 400)
 
-    problems = [p for p in problems if curr_user.contests[0] in p.contests]
+    problems = (p for p in problems if curr_user.contests[0] in p.contests)
 
     resp = {}
     for problem in problems:
@@ -275,6 +280,7 @@ def submit_run():
                 'error': 'Submission rate limit exceeded'
             }), 400)
 
+
     contest = user.contests[0]
 
     lang_name = request.json.get('lang', None)
@@ -301,16 +307,14 @@ def submit_run():
     run = model.Run(user, contest, lang, problem,
                     datetime.datetime.utcnow(), source_code, run_input,
                     correct_output, is_submission, local_submit_time=datetime.datetime.now())
-    run.state = "Judging"
+    run.state = model.RunState.JUDGING
 
     resp = None
     if datetime.datetime.utcnow() > contest.end_time:
-        run.state = "ContestEnded"
-        run.started_execing_time = datetime.datetime.utcnow()
-        run.finished_execing_time = datetime.datetime.utcnow()
+        run.state = model.RunState.CONTEST_ENDED
         resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
     elif datetime.datetime.utcnow() < contest.start_time:
-        run.state = "ContestHasNotBegun"
+        run.state = model.RunState.CONTEST_HAS_NOT_BEGUN
         run.started_execing_time = datetime.datetime.utcnow()
         run.finished_execing_time = datetime.datetime.utcnow()
         resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
@@ -319,6 +323,8 @@ def submit_run():
 
     db_session.add(run)
     db_session.commit()
+
+    # util.invalidate_cache_item(util.RUN_CACHE_NAME, user.id)
 
     return resp
 

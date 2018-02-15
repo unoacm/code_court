@@ -89,6 +89,8 @@ def contests_del(contest_id):
         current_app.logger.info(error)
         flash(error, "danger")
 
+    util.invalidate_cache_item("contestinfocache", 'info')
+
     return redirect(url_for("contests.contests_view"))
 
 
@@ -203,6 +205,8 @@ def add_contest():
         db_session.add(contest)
 
     db_session.commit()
+
+    util.invalidate_cache_item("contestinfocache", 'info')
 
     return redirect(url_for("contests.contests_view"))
 
