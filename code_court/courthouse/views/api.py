@@ -161,6 +161,9 @@ def return_without_run(run_id):
 
 @api.route('/login', methods=['POST'])
 def login():
+    if not request.json:
+        return jsonify({"msg": "Bad request"}), 401
+
     email = request.json.get('email', None)
     password = request.json.get('password', None)
 
