@@ -58,7 +58,7 @@ export default {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_CONTEST')
       }
-    }.bind(this), 30000)
+    }.bind(this), 120000)
   },
   components: {
     'nav-disp': Nav,

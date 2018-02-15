@@ -292,8 +292,26 @@ def submit_run():
     is_submission = request.json.get('is_submission', False)
     user_test_input = request.json.get('user_test_input', None)
 
-    lang = model.Language.query.filter_by(name=lang_name).one()
+    if not all([lang_name, problem_slug, source_code]):
+        return make_response(
+            jsonify({
+                'error': 'Invalid submission, missing input'
+            }), 400)
+
+    lang = model.Language.query.filter_by(name=lang_name).scalar()
+    if not lang:
+        return make_response(
+            jsonify({
+                'error': 'Invalid language'
+            }), 400)
+
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+    if not problem:
+        return make_response(
+            jsonify({
+                'error': 'Invalid problem slug'
+            }), 400)
+
 
     run_input = None
     correct_output = None
