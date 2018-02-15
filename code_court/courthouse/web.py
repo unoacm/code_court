@@ -415,7 +415,7 @@ def dev_populate_db():
     test_contest = model.Contest(
         name="test_contest",
         start_time=now,
-        end_time=now + datetime.timedelta(minutes=30),
+        end_time=now + datetime.timedelta(hours=2),
         is_public=True,
         activate_time=now,
         freeze_time=None,
