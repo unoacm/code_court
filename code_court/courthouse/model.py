@@ -723,3 +723,14 @@ def dt_to_time_str(dt):
         return None
     return datetime.datetime.strftime(dt, '%H:%M')
 
+
+class RunState:
+    CONTEST_HAS_NOT_BEGUN = "ContestHasNotBegun"
+    CONTEST_ENDED = "ContestEnded"
+    SUCCESSFUL = "Successful"
+    FAILED = "Failed"
+    EXECUTED = "Executed"
+    JUDGING = "Judging"
+    NO_OUTPUT = "NoOutput"
+    TIMED_OUT = "TimedOut"
+    OUTPUT_LIMIT_EXCEEDED = "OutputLimitExceeded"

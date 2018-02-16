@@ -92,7 +92,7 @@ def create_app():
         app.config['MAX_CONTENT_LENGTH'] = util.get_configuration(
             "max_output_length") * 1024  # kilobytes
 
-    CORS(app)
+    CORS(app, supports_credentials=True)
 
     JWTManager(app)
 
@@ -335,7 +335,11 @@ def populate_db():
                                         fi
 
                                         cat $1 | ./main
-                                        exit $?''').strip())
+                                        exit $?''').strip(),
+                        textwrap.dedent('''
+                                        fn main() {
+                                        }
+                        ''').strip())
     ])
 
     db_session.add_all([
@@ -411,7 +415,7 @@ def dev_populate_db():
     test_contest = model.Contest(
         name="test_contest",
         start_time=now,
-        end_time=now + datetime.timedelta(minutes=30),
+        end_time=now + datetime.timedelta(hours=2),
         is_public=True,
         activate_time=now,
         freeze_time=None,
@@ -506,7 +510,7 @@ def dev_populate_db():
                              is_submission)
         test_run.is_correct = is_correct
         test_run.is_priority = is_priority
-        test_run.state = "Judging"
+        test_run.state = model.RunState.JUDGING
 
         db_session.add(test_run)
     db_session.commit()

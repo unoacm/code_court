@@ -11,6 +11,10 @@ from flask import current_app, request, redirect
 import model
 
 
+RUN_CACHE_NAME = 'runcache'
+SCORE_CACHE_NAME ='scorecache'
+
+
 class ModelMissingException(Exception):
     pass
 
@@ -131,6 +135,6 @@ def paginate(sa_query, page, per_page=20, error_out=True):
 def invalidate_cache_item(cache_name, key):
     try:
         import uwsgi
-        uwsgi.cache_del(key, cache_name)
+        uwsgi.cache_del(str(key), cache_name)
     except ImportError:
         pass

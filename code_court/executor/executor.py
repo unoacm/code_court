@@ -50,101 +50,103 @@ client = docker.from_env()
 
 current_writ = None
 
+
 def main():
     while True:
-        try:
-            writ = get_writ()
+        handle_writ()
 
-            global current_writ
-            current_writ = writ.copy()
-        except InvalidWritException as e:
-            logging.exception("Exception while requesting writ")
-            time.sleep(1)
-            continue
-        except CourtHouseConnectionError:
-            logging.error("Couldn't connect to courthouse")
-            time.sleep(WAIT_SECONDS)
-            continue
-        except NoWritsAvailable:
-            time.sleep(WAIT_SECONDS)
-            continue
 
-        logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
+def handle_writ():
+    try:
+        writ = get_writ()
 
-        input_str = writ['input']
-        program_str = writ['source_code']
-        runner_str = writ['run_script']
-        runner_str = runner_str.replace("$1", "/share/input")
-        runner_str = runner_str.replace("$2", "/share/program")
+        global current_writ
+        current_writ = writ.copy()
+    except InvalidWritException as e:
+        logging.exception("Exception while requesting writ")
+        time.sleep(1)
+        return
+    except CourtHouseConnectionError:
+        logging.error("Couldn't connect to courthouse")
+        time.sleep(WAIT_SECONDS)
+        return
+    except NoWritsAvailable:
+        time.sleep(WAIT_SECONDS)
+        return
 
-        container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
+    logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
 
-        container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
-        os.makedirs(container_shared_data_dir)
+    input_str = writ['input']
+    program_str = writ['source_code']
+    runner_str = writ['run_script']
+    runner_str = runner_str.replace("$1", "/share/input")
+    runner_str = runner_str.replace("$2", "/share/program")
 
-        create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
+    container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
 
-        shared_volumes = {
-            container_shared_data_dir: {
-                "bind": "/share",
-                "mode": "ro"
-            }
+    container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
+    os.makedirs(container_shared_data_dir)
+
+    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
+
+    shared_volumes = {
+        container_shared_data_dir: {
+            "bind": "/share",
+            "mode": "ro"
         }
+    }
 
-        signal.signal(signal.SIGALRM, raise_timeout)
-        signal.alarm(RUN_TIMEOUT)
+    signal.signal(signal.SIGALRM, raise_timeout)
+    signal.alarm(RUN_TIMEOUT)
 
-        container = None
-        try:
-            container = client.containers.run(EXECUTOR_IMAGE_NAME,
-                                                     "/share/runner",
-                                                     detach=True,
-                                                     working_dir="/share",
-                                                     volumes=shared_volumes,
-                                                     user=CONTAINER_USER,
-                                                     network_disabled=True,
-                                                     read_only=False,
-                                                     mem_swappiness=MEM_SWAPPINESS,
-                                                     pids_limit=PID_LIMIT,
-                                                     cpu_period=CPU_PERIOD,
-                                                     mem_limit=MEM_LIMIT)
+    container = None
+    try:
+        container = client.containers.run(EXECUTOR_IMAGE_NAME,
+                                          "/share/runner",
+                                          detach=True,
+                                          working_dir="/share",
+                                          volumes=shared_volumes,
+                                          user=CONTAINER_USER,
+                                          network_disabled=True,
+                                          read_only=False,
+                                          mem_swappiness=MEM_SWAPPINESS,
+                                          pids_limit=PID_LIMIT,
+                                          cpu_period=CPU_PERIOD,
+                                          mem_limit=MEM_LIMIT)
 
-            out = []
-            rolling_size = 0
-            for line in container.logs(stream=True):
-                chunk = line.decode("utf-8")
-                rolling_size += len(chunk)
+        out = []
+        rolling_size = 0
+        for line in container.logs(stream=True):
+            chunk = line.decode("utf-8")
+            rolling_size += len(chunk)
 
-                if rolling_size > OUTPUT_LIMIT:
-                    raise OutputLimitExceeded()
+            if rolling_size > OUTPUT_LIMIT:
+                raise OutputLimitExceeded()
 
-                out.append(chunk)
+            out.append(chunk)
 
-            if rolling_size == 0:
-                raise NoOutputException()
+        if rolling_size == 0:
+            raise NoOutputException()
 
-            signal.alarm(0)
-        except TimedOutException as e:
-            logging.info("Timed out writ %s", writ.get('run_id'))
-            submit_writ(writ, "Error: Timed out", "TimedOut")
-            continue
-        except OutputLimitExceeded as e:
-            logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
-            submit_writ(writ, "Error: Output limit exceeded", "OutputLimitExceeded")
-            continue
-        except NoOutputException as e:
-            logging.info("No output given from writ %s", writ.get('run_id'))
-            submit_writ(writ, "", "NoOutput")
-        except docker.errors.APIError:
-            return_writ_without_output(writ.get('run_id'))
-            traceback.print_exc()
-        finally:
-            signal.alarm(0)
-            if container:
-                container.remove(force=True)
-
-        submit_writ(writ, "".join(out), "Successful")
-
+        signal.alarm(0)
+    except TimedOutException as e:
+        logging.info("Timed out writ %s", writ.get('run_id'))
+        submit_writ(writ, "Error: Timed out", RunState.TIMED_OUT)
+    except OutputLimitExceeded as e:
+        logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
+        submit_writ(writ, "Error: Output limit exceeded", RunState.OUTPUT_LIMIT_EXCEEDED)
+    except NoOutputException as e:
+        logging.info("No output given from writ %s", writ.get('run_id'))
+        submit_writ(writ, "", RunState.NO_OUTPUT)
+    except docker.errors.APIError:
+        return_writ_without_output(writ.get('run_id'))
+        traceback.print_exc()
+    else:
+        submit_writ(writ, "".join(out), RunState.EXECUTED)
+    finally:
+        signal.alarm(0)
+        if container:
+            container.remove(force=True)
         shutil.rmtree(container_shared_data_dir)
 
 
@@ -244,6 +246,17 @@ class CourtHouseConnectionError(Exception):
 
 class NoWritsAvailable(Exception):
     pass
+
+class RunState:
+    CONTEST_HAS_NOT_BEGUN = "ContestHasNotBegun"
+    CONTEST_ENDED = "ContestEnded"
+    SUCCESSFUL = "Successful"
+    FAILED = "Failed"
+    EXECUTED = "Executed"
+    JUDGING = "Judging"
+    NO_OUTPUT = "NoOutput"
+    TIMED_OUT = "TimedOut"
+    OUTPUT_LIMIT_EXCEEDED = "OutputLimitExceeded"
 
 if __name__ == '__main__':
     try:

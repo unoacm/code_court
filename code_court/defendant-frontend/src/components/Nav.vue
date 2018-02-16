@@ -24,7 +24,7 @@
     <hr>
 
     <div class="container alert-container">
-      <notification v-for="alert in localAlerts" :key="alert.text" :message="alert.text" :severity="alert.severity"/>
+      <notification v-for="alert in alerts" :key="alert.text" :message="alert.text" :severity="alert.severity"/>
     </div>
 
     <div class="container">
@@ -35,13 +35,11 @@
 
 <script>
 import Notification from '@/components/Notification'
-// import isContestOver from '@/util'
 
 export default {
   name: 'app',
   data () {
     return {
-      localAlerts: []
     }
   },
   created: function () {
@@ -74,14 +72,6 @@ export default {
         }
       }
       return false
-    }
-  },
-  watch: {
-    alerts: function () {
-      if (this.alerts.length > 0) {
-        this.localAlerts = this.localAlerts.concat(this.alerts)
-        this.$store.commit('DELETE_ALERTS')
-      }
     }
   },
   components: {Notification}

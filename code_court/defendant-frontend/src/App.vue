@@ -7,7 +7,7 @@
             {{ contest.name }}
           </h1>
           <div>
-            Ends <contest-countdown />
+            <contest-countdown />
           </div>
         </div>
       </div>
@@ -38,7 +38,7 @@ export default {
     this.$store.dispatch('LOAD_LANGS')
 
     if (this.$store.getters.isLoggedIn) {
-      this.$store.dispatch('LOAD_PROBLEMS')
+      this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       this.$store.dispatch('LOAD_CONTEST')
     }
 
@@ -50,15 +50,15 @@ export default {
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
-        this.$store.dispatch('LOAD_PROBLEMS')
+        this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       }
-    }.bind(this), 60000)
+    }.bind(this), 5000)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_CONTEST')
       }
-    }.bind(this), 30000)
+    }.bind(this), 120000)
   },
   components: {
     'nav-disp': Nav,

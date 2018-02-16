@@ -20,8 +20,11 @@ const store = new Vuex.Store({
     loginToken: ''
   },
   actions: {
-    LOAD_PROBLEMS: function (context) {
-      axios.get('/api/problems').then((response) => {
+    LOAD_PROBLEMS: function (context, userId) {
+      if (!userId) {
+        userId = ''
+      }
+      axios.get('/api/problems/' + userId).then((response) => {
         context.commit('SET_PROBLEMS', { problems: response.data })
       })
     },
@@ -59,10 +62,13 @@ const store = new Vuex.Store({
         context.dispatch('LOAD_PROBLEMS')
         context.dispatch('LOAD_CONTEST')
 
-        // clear old alerts here
+        context.commit('DELETE_ALERTS')
+
         router.push({ path: '/' })
       }).catch(function (error) {
+        console.log('Failed to login')
         console.log(error)
+        context.commit('DELETE_ALERTS')
         context.commit('PUSH_ALERT', {text: 'Failed to login', severity: 'danger'})
       })
     },
@@ -72,8 +78,11 @@ const store = new Vuex.Store({
         context.commit('SET_LOGIN_TOKEN', { token: '' })
         context.commit('SET_USER', { user: null })
         context.commit('SET_PROBLEMS', { problems: {} })
+        context.commit('SET_CONTEST', { contest: {} })
+        context.commit('SET_SCORES', { scores: {} })
+        context.commit('DELETE_ALERTS')
       }, 200)
-      router.push({ path: '/' })
+      router.push({ path: '/login' })
     }
   },
   mutations: {
