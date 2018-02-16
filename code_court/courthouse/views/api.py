@@ -345,7 +345,7 @@ def submit_run():
     db_session.add(run)
     db_session.commit()
 
-    # util.invalidate_cache_item(util.RUN_CACHE_NAME, user.id)
+    util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
 
     return resp
 

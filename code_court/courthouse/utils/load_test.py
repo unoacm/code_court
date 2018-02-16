@@ -19,7 +19,7 @@ class LoadTester:
         for i in range(n):
             print("Starting user #{}".format(i))
             FakeUser().start()
-            time.sleep(5)
+            time.sleep(1)
 
         while True:
             time.sleep(1)
@@ -65,7 +65,11 @@ class FakeUser:
         headers = {
             "Authorization": "Bearer {}".format(self.login_token)
         }
-        r = requests.get(url, headers=headers)
+        try:
+            r = requests.get(url, headers=headers)
+        except requests.exceptions.ConnectionError:
+            logging.error("Connection error while getting %s", url)
+            return None
 
         if r.status_code != 200:
             logging.error("Error %s while getting %s: %s", r.status_code, url, r.text)
@@ -73,11 +77,16 @@ class FakeUser:
         return r
 
     def _post(self, url, json, login_token=None):
-        chosen_login_token  = login_token if login_token else self.login_token
+        chosen_login_token = login_token if login_token else self.login_token
         headers = {
             "Authorization": "Bearer {}".format(chosen_login_token)
         }
-        r = requests.post(url, json=json, headers=headers)
+
+        try:
+            r = requests.post(url, json=json, headers=headers)
+        except requests.exceptions.ConnectionError:
+            logging.error("Connection error while posting %s", url)
+            return None
 
         if r.status_code != 200:
             logging.error("Error %s while posting %s: %s", r.status_code, url, r.text)
@@ -86,13 +95,19 @@ class FakeUser:
 
     def _get_api(self, part):
         url = urljoin(BASE_URL, part)
-        r =  self._get(url).json()
-        return r
+        r =  self._get(url)
+        if r:
+            return r.json()
+        else:
+            return None
 
     def _post_api(self, part, json, login_token=None):
         url = urljoin(BASE_URL, part)
-        r = self._post(url, json, login_token).json()
-        return r
+        r = self._post(url, json, login_token)
+        if r:
+            return r.json()
+        else:
+            return None
 
     def loop(self):
         while True:
@@ -103,10 +118,12 @@ class FakeUser:
 
     def submit_run(self):
         logging.info("Submitting run")
+        correct_solution = "print('Hello, World!')"
+        incorrect_solution = "for x in range(10000):\n\tprint(x)"
         data = dict(
             lang="python",
             problem_slug="hello-world",
-            source_code="print('hello world')",
+            source_code=random.choice([correct_solution, incorrect_solution]),
             is_submission=False,
             user_test_input="",
         )

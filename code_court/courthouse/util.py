@@ -136,6 +136,5 @@ def invalidate_cache_item(cache_name, key):
     try:
         import uwsgi
         uwsgi.cache_del(str(key), cache_name)
-        uwsgi.cache_clear(cache_name)
     except ImportError:
         pass
