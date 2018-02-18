@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import shutil
 import signal
 import stat
 import subprocess
@@ -24,269 +25,262 @@ logging.basicConfig(level=logging.INFO,
 
 SCRIPT_DIR = path.dirname(path.realpath(__file__))
 
-INSECURE_MODE = True
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
-
-COURTHOUSE_URL = "http://localhost:9191"
-if 'COURTHOUSE_URL' in os.environ:
-    COURTHOUSE_URL = os.getenv('COURTHOUSE_URL')
 
 RUN_TIMEOUT = 5
 CPU_PERIOD = 500000
 MEM_LIMIT = "128m"
 PID_LIMIT = 50
-MEM_SWAPPINESS = 0  # disable container swapping
+MEM_SWAPPINESS = 0
 CONTAINER_USER = "user"
 OUTPUT_LIMIT = 100000  # chars
 WAIT_SECONDS = 5
 
-client = docker.from_env()
 
-current_writ = None
+class Executor:
+    def __init__(self, conf):
+        self.writ = None
+        self.conf = conf
+        self.client = docker.from_env()
 
+    def start(self):
+        try:
+            while True:
+                self.writ = self.get_writ()
+                if not self.writ:
+                    time.sleep(WAIT_SECONDS)
+                else:
+                    self.handle_writ()
+        except KeyboardInterrupt:
+            logging.info("Exiting")
+            if self.writ:
+                self.return_writ_without_output()
+            sys.exit(0)
+        except Exception:
+            logging.exception("Uncaught exception, exiting")
+            sys.exit(1)
 
-def main(conf):
-    while True:
-        handle_writ(conf)
+    def handle_writ(self):
+        logging.info("Executing writ (id: %s, lang: %s)", self.writ.run_id, self.writ.language)
 
+        signal.signal(signal.SIGALRM, raise_timeout)
+        signal.alarm(RUN_TIMEOUT)
 
-def handle_writ(conf):
-    try:
-        writ = get_writ(conf)
+        container = None
+        try:
+            if self.conf['insecure']:
+                out = self.insecure_run_program()
+            else:
+                out = self.docker_run_program()
 
-        global current_writ
-        current_writ = writ.copy()
-    except InvalidWritException:
-        logging.exception("Exception while requesting writ")
-        time.sleep(1)
-        return
-    except CourtHouseConnectionError:
-        logging.error("Couldn't connect to courthouse")
-        time.sleep(WAIT_SECONDS)
-        return
-    except NoWritsAvailable:
-        time.sleep(WAIT_SECONDS)
-        return
-
-    logging.info("Executing writ (id: %s, lang: %s)", writ['run_id'], writ['language'])
-
-    signal.signal(signal.SIGALRM, raise_timeout)
-    signal.alarm(RUN_TIMEOUT)
-
-    container = None
-    try:
-        if conf['insecure']:
-            out = insecure_run_program(writ)
+            signal.alarm(0)
+        except TimedOutException:
+            logging.info("Timed out writ %s", self.writ.run_id)
+            self.submit_writ("Error: Timed out", RunState.TIMED_OUT)
+        except OutputLimitExceeded:
+            logging.info("Output limit exceeded on writ %s", self.writ.run_id)
+            self.submit_writ("Error: Output limit exceeded", RunState.OUTPUT_LIMIT_EXCEEDED)
+        except NoOutputException:
+            logging.info("No output given from writ %s", self.writ.run_id)
+            self.submit_writ("", RunState.NO_OUTPUT)
+        except docker.errors.APIError:
+            self.return_writ_without_output()
+            traceback.print_exc()
         else:
-            out = docker_run_program(writ)
+            self.submit_writ(out, RunState.EXECUTED)
+        finally:
+            signal.alarm(0)
+            if container:
+                container.remove(force=True)
+            try:
+                print("deleting {}", self.writ.shared_data_dir)
+                shutil.rmtree(self.writ.shared_data_dir)
+            except FileNotFoundError:
+                pass
 
-        signal.alarm(0)
-    except TimedOutException:
-        logging.info("Timed out writ %s", writ.get('run_id'))
-        submit_writ(conf, writ, "Error: Timed out", RunState.TIMED_OUT)
-    except OutputLimitExceeded:
-        logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
-        submit_writ(conf, writ, "Error: Output limit exceeded", RunState.OUTPUT_LIMIT_EXCEEDED)
-    except NoOutputException:
-        logging.info("No output given from writ %s", writ.get('run_id'))
-        submit_writ(conf, writ, "", RunState.NO_OUTPUT)
-    except docker.errors.APIError:
-        return_writ_without_output(conf, writ.get('run_id'))
-        traceback.print_exc()
-    else:
-        submit_writ(conf, writ, out, RunState.EXECUTED)
-    finally:
-        signal.alarm(0)
-        if container:
-            container.remove(force=True)
-        # shutil.rmtree(container_shared_data_dir) # TODO: cleanup data dir
+            self.writ = None
 
+    def create_share_files(self, share_folder, runner_str, input_str, program_str):
+        files = {
+            "runner": runner_str,
+            "input": input_str,
+            "program": program_str
+        }
 
-def create_share_files(share_folder, runner_str, input_str, program_str):
-    files = {
-        "runner": runner_str,
-        "input": input_str,
-        "program": program_str
-    }
+        for fname, contents in files.items():
+            loc = path.join(share_folder, fname)
+            with open(loc, "w+") as f:
+                f.write(contents.replace("\r\n", "\n"))
 
-    for fname, contents in files.items():
-        loc = path.join(share_folder, fname)
-        with open(loc, "w+") as f:
-            f.write(contents.replace("\r\n", "\n"))
+            st = os.stat(loc)
+            os.chmod(loc, st.st_mode | stat.S_IEXEC)
 
-        st = os.stat(loc)
-        os.chmod(loc, st.st_mode | stat.S_IEXEC)
-
-
-def get_writ(conf):
-    try:
-        r = requests.get(conf['writ_url'], auth=HTTPBasicAuth(conf['email'], conf['password']))
-    except Exception:
-        raise CourtHouseConnectionError("Couldn't fetch writ from courthouse: %s" % traceback.format_exc())
-
-    if r.status_code == 404:
-        raise NoWritsAvailable()
-
-    if r.status_code != 200:
-        print(r.text)
-        raise InvalidWritException("Received non-200 status code: %s" % r.status_code)
-
-    writ = r.json()
-
-    if writ['status'] != 'found':
-        raise NoWritsAvailable()
-
-    if 'source_code' not in writ:
-        raise InvalidWritException("Received invalid writ, missing source_code")
-
-    if 'run_script' not in writ:
-        raise InvalidWritException("Received invalid writ, missing run_script")
-
-    if 'input' not in writ:
-        raise InvalidWritException("Received invalid writ, missing input")
-
-    if 'return_url' not in writ:
-        raise InvalidWritException("Received invalid writ, missing return_url")
-
-    return writ
-
-
-def submit_writ(conf, writ, out, state):
-    logging.info("Submitting writ %s, state: %s", writ['run_id'], state)
-    try:
-        r = requests.post(conf['submit_url'].format(writ['run_id']),
-                          json={"output": out, "state": state},
-                          auth=HTTPBasicAuth(conf['email'], conf['password']))
+    def get_writ(self):
+        try:
+            r = requests.get(
+                self.conf['writ_url'],
+                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+            )
+        except Exception:
+            logging.info("Failed to connect to courthouse")
+            return None
 
         if r.status_code != 200:
-            logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
+            return None
 
-    except requests.exceptions.ConnectionError:
+        return Writ.from_json(r.json())
+
+    def submit_writ(self, out, state):
+        logging.info("Submitting writ %s, state: %s", self.writ.run_id, state)
         try:
-            return_writ_without_output(conf, writ['run_id'])
-        except Exception:
-            pass
+            r = requests.post(
+                self.conf['submit_url'].format(self.writ.run_id),
+                json={"output": out, "state": state},
+                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+            )
 
-    global current_writ
-    current_writ = None
+            if r.status_code != 200:
+                logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
+        except requests.exceptions.ConnectionError:
+            try:
+                self.return_writ_without_output(self.writrun_id)
+            except Exception:
+                pass
 
-def return_writ_without_output(conf, run_id):
-    logging.info("Returning writ without output: %s", run_id)
+        self.current_writ = None
 
-    url = conf['return_url'] + "/" + str(run_id)
-    try:
-        requests.post(url, auth=HTTPBasicAuth(conf['email'], conf['password']))
-    except requests.exceptions.ConnectionError:
-        logging.exception("Failed to return writ")
+    def return_writ_without_output(self):
+        logging.info("Returning writ without output: %s", self.writ.run_id)
 
+        url = self.conf['return_url'] + "/" + str(self.writ.run_id)
+        try:
+            requests.post(
+                url,
+                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+            )
+        except requests.exceptions.ConnectionError:
+            logging.exception("Failed to return writ")
 
-def insecure_run_program(writ):
-    container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
-    container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
+    def insecure_run_program(self):
+        container_shared_data_dir = self.writ.shared_data_dir
 
-    input_str = writ['input']
-    program_str = writ['source_code']
-    runner_str = writ['run_script']
-    runner_str = runner_str.replace("$1", path.join(container_shared_data_dir, "input"))
-    runner_str = runner_str.replace("$2", path.join(container_shared_data_dir, "program"))
+        runner_str = self.writ.run_script
+        runner_str = runner_str.replace("$1", path.join(container_shared_data_dir, "input"))
+        runner_str = runner_str.replace("$2", path.join(container_shared_data_dir, "program"))
 
-    os.makedirs(container_shared_data_dir)
-    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
+        print("making {}", container_shared_data_dir)
+        os.makedirs(container_shared_data_dir)
+        self.create_share_files(
+            container_shared_data_dir,
+            runner_str,
+            self.writ.input,
+            self.writ.source_code,
+        )
 
-    runner_file = path.join(container_shared_data_dir, "runner")
-    out = subprocess.check_output([runner_file], shell=True).decode('utf-8')
-
-    return out
-
-
-def docker_run_program(writ):
-    container_ident = "{}-{}-{}".format(writ['run_id'], writ['language'], str(uuid.uuid4()))
-    container_shared_data_dir = path.join(SHARED_DATA_DIR, container_ident)
-
-    input_str = writ['input']
-    program_str = writ['source_code']
-    runner_str = writ['run_script']
-    runner_str = runner_str.replace("$1", "/share/input")
-    runner_str = runner_str.replace("$2", "/share/program")
-
-    os.makedirs(container_shared_data_dir)
-    create_share_files(container_shared_data_dir, runner_str, input_str, program_str)
-    shared_volumes = {
-        container_shared_data_dir: {
-            "bind": "/share",
-            "mode": "ro"
-        }
-    }
-    container = client.containers.run(EXECUTOR_IMAGE_NAME,
-                                      "/share/runner",
-                                      detach=True,
-                                      working_dir="/share",
-                                      volumes=shared_volumes,
-                                      user=CONTAINER_USER,
-                                      network_disabled=True,
-                                      read_only=False,
-                                      mem_swappiness=MEM_SWAPPINESS,
-                                      pids_limit=PID_LIMIT,
-                                      cpu_period=CPU_PERIOD,
-                                      mem_limit=MEM_LIMIT)
-
-    out = []
-    rolling_size = 0
-    for line in container.logs(stream=True):
-        chunk = line.decode("utf-8")
-        rolling_size += len(chunk)
-
-        if rolling_size > OUTPUT_LIMIT:
+        runner_file = path.join(container_shared_data_dir, "runner")
+        out = subprocess.check_output([runner_file], shell=True).decode('utf-8')
+        if len(out) > OUTPUT_LIMIT:
             raise OutputLimitExceeded()
 
-        out.append(chunk)
+        if len(out) == 0:
+            raise NoOutputException()
 
-    if rolling_size == 0:
-        raise NoOutputException()
+        return out
 
-    return "".join(out)
+    def docker_run_program(self):
+        container_shared_data_dir = self.writ.shared_data_dir
+
+        runner_str = self.writ.run_script
+        runner_str = runner_str.replace("$1", "/share/input")
+        runner_str = runner_str.replace("$2", "/share/program")
+
+        os.makedirs(container_shared_data_dir)
+        self.create_share_files(
+            container_shared_data_dir,
+            runner_str,
+            self.writ.input,
+            self.writ.source_code
+        )
+        shared_volumes = {
+            container_shared_data_dir: {
+                "bind": "/share",
+                "mode": "ro"
+            }
+        }
+        container = self.client.containers.run(EXECUTOR_IMAGE_NAME,
+                                               "/share/runner",
+                                               detach=True,
+                                               working_dir="/share",
+                                               volumes=shared_volumes,
+                                               user=CONTAINER_USER,
+                                               network_disabled=True,
+                                               read_only=False,
+                                               mem_swappiness=MEM_SWAPPINESS,
+                                               pids_limit=PID_LIMIT,
+                                               cpu_period=CPU_PERIOD,
+                                               mem_limit=MEM_LIMIT)
+
+        out = []
+        rolling_size = 0
+        for line in container.logs(stream=True):
+            chunk = line.decode("utf-8")
+            rolling_size += len(chunk)
+
+            if rolling_size > OUTPUT_LIMIT:
+                raise OutputLimitExceeded()
+
+            out.append(chunk)
+
+        if rolling_size == 0:
+            raise NoOutputException()
+
+        return "".join(out)
 
 
-def raise_timeout(signum, frame):
-    raise TimedOutException()
+class Writ:
+    def __init__(self, source_code, run_script, input, run_id, return_url, language):
+        self.source_code = source_code
+        self.run_script = run_script
+        self.input = input
+        self.run_id = run_id
+        self.return_url = return_url
+        self.language = language
 
+        self.container_ident = "{}-{}-{}".format(self.run_id, self.language, str(uuid.uuid4()))
+        self.shared_data_dir = path.join(SHARED_DATA_DIR, self.container_ident)
 
-class OutputLimitExceeded(Exception):
-    pass
+    @staticmethod
+    def from_json(writ_json):
+        if writ_json.get('status') == 'unavailable':
+            return None
 
+        source_code = writ_json.get('source_code')
+        run_script = writ_json.get('run_script')
+        input = writ_json.get('input')
+        run_id = writ_json.get('run_id')
+        return_url = writ_json.get('return_url')
+        language = writ_json.get('language')
 
-class NoOutputException(Exception):
-    pass
+        if (
+                source_code is None or
+                run_script is None or
+                input is None or
+                run_id is None or
+                return_url is None or
+                language is None):
+            logging.error("Received invalid writ: %s", writ_json)
+            return None
 
-
-class TimedOutException(Exception):
-    pass
-
-
-class InvalidWritException(Exception):
-    pass
-
-
-class CourtHouseConnectionError(Exception):
-    pass
-
-
-class NoWritsAvailable(Exception):
-    pass
-
-
-class RunState:
-    CONTEST_HAS_NOT_BEGUN = "ContestHasNotBegun"
-    CONTEST_ENDED = "ContestEnded"
-    SUCCESSFUL = "Successful"
-    FAILED = "Failed"
-    EXECUTED = "Executed"
-    JUDGING = "Judging"
-    NO_OUTPUT = "NoOutput"
-    TIMED_OUT = "TimedOut"
-    OUTPUT_LIMIT_EXCEEDED = "OutputLimitExceeded"
+        return Writ(
+            source_code=source_code,
+            run_script=run_script,
+            input=input,
+            run_id=run_id,
+            return_url=return_url,
+            language=language,
+        )
 
 
 def get_conf():
@@ -299,7 +293,8 @@ def get_conf():
     )
     parser.add_argument(
         '-u',
-        '--courthouse-url',
+        '--url',
+        default="http://localhost:9191",
         help='the courthouse url',
     )
     parser.add_argument(
@@ -317,22 +312,40 @@ def get_conf():
 
     args = parser.parse_args()
 
-    conf = vars(args)  # turn arggs into dict
-    conf['writ_url'] = "{}/api/get-writ".format(COURTHOUSE_URL)
-    conf['submit_url'] = "{}/api/submit-writ/{{}}".format(COURTHOUSE_URL)
-    conf['return_url'] = "{}/api/return-without-run".format(COURTHOUSE_URL)
+    conf = vars(args)  # turn args into dict
+    conf['writ_url'] = "{}/api/get-writ".format(conf['url'])
+    conf['submit_url'] = "{}/api/submit-writ/{{}}".format(conf['url'])
+    conf['return_url'] = "{}/api/return-without-run".format(conf['url'])
     return conf
 
 
+class OutputLimitExceeded(Exception):
+    pass
+
+
+class NoOutputException(Exception):
+    pass
+
+
+class TimedOutException(Exception):
+    pass
+
+
+def raise_timeout(signum, frame):
+    raise TimedOutException()
+
+
+class RunState:
+    CONTEST_HAS_NOT_BEGUN = "ContestHasNotBegun"
+    CONTEST_ENDED = "ContestEnded"
+    SUCCESSFUL = "Successful"
+    FAILED = "Failed"
+    EXECUTED = "Executed"
+    JUDGING = "Judging"
+    NO_OUTPUT = "NoOutput"
+    TIMED_OUT = "TimedOut"
+    OUTPUT_LIMIT_EXCEEDED = "OutputLimitExceeded"
+
+
 if __name__ == '__main__':
-    config = get_conf()
-    try:
-        main(config)
-    except KeyboardInterrupt:
-        logging.info("Exiting")
-        if current_writ:
-            return_writ_without_output(config, current_writ.get('run_id'))
-        sys.exit(0)
-    except Exception:
-        logging.exception("Uncaught exception, exiting")
-        sys.exit(1)
+    Executor(get_conf()).start()
