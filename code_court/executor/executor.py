@@ -13,10 +13,10 @@ import uuid
 
 from os import path
 
-from requests.auth import HTTPBasicAuth
-
 import docker
 import requests
+
+from requests.auth import HTTPBasicAuth
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s: %(message)s",
@@ -57,7 +57,7 @@ def handle_writ(conf):
 
         global current_writ
         current_writ = writ.copy()
-    except InvalidWritException as e:
+    except InvalidWritException:
         logging.exception("Exception while requesting writ")
         time.sleep(1)
         return
@@ -82,20 +82,20 @@ def handle_writ(conf):
             out = docker_run_program(writ)
 
         signal.alarm(0)
-    except TimedOutException as e:
+    except TimedOutException:
         logging.info("Timed out writ %s", writ.get('run_id'))
         submit_writ(conf, writ, "Error: Timed out", RunState.TIMED_OUT)
-    except OutputLimitExceeded as e:
+    except OutputLimitExceeded:
         logging.info("Output limit exceeded on writ %s", writ.get('run_id'))
         submit_writ(conf, writ, "Error: Output limit exceeded", RunState.OUTPUT_LIMIT_EXCEEDED)
-    except NoOutputException as e:
+    except NoOutputException:
         logging.info("No output given from writ %s", writ.get('run_id'))
         submit_writ(conf, writ, "", RunState.NO_OUTPUT)
     except docker.errors.APIError:
         return_writ_without_output(conf, writ.get('run_id'))
         traceback.print_exc()
     else:
-        submit_writ(writ, out, RunState.EXECUTED)
+        submit_writ(conf, writ, out, RunState.EXECUTED)
     finally:
         signal.alarm(0)
         if container:
@@ -122,7 +122,7 @@ def create_share_files(share_folder, runner_str, input_str, program_str):
 def get_writ(conf):
     try:
         r = requests.get(conf['writ_url'], auth=HTTPBasicAuth(conf['email'], conf['password']))
-    except Exception as e:
+    except Exception:
         raise CourtHouseConnectionError("Couldn't fetch writ from courthouse: %s" % traceback.format_exc())
 
     if r.status_code == 404:
@@ -160,12 +160,12 @@ def submit_writ(conf, writ, out, state):
                           auth=HTTPBasicAuth(conf['email'], conf['password']))
 
         if r.status_code != 200:
-            logging.error("Failed to submit writ, code: %s, response: %s" % (r.status_code, r.text))
+            logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
     except requests.exceptions.ConnectionError:
         try:
             return_writ_without_output(conf, writ['run_id'])
-        except:
+        except Exception:
             pass
 
     global current_writ
@@ -289,29 +289,30 @@ class RunState:
     OUTPUT_LIMIT_EXCEEDED = "OutputLimitExceeded"
 
 
-if __name__ == '__main__':
+def get_conf():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '--insecure',
         '-i',
-        help='executes writs locally without docker in an insecure manner'
+        '--insecure',
+        action='store_true',
+        help='executes writs locally without docker in an insecure manner',
     )
     parser.add_argument(
-        '--courthouse-url',
         '-u',
-        help='the courthouse url'
+        '--courthouse-url',
+        help='the courthouse url',
     )
     parser.add_argument(
-        '--email',
         '-e',
+        '--email',
         default='exec@example.org',
-        help='the email for the executor user'
+        help='the email for the executor user',
     )
     parser.add_argument(
-        '--password',
         '-p',
+        '--password',
         default='epass',
-        help='the password for the executor user'
+        help='the password for the executor user',
     )
 
     args = parser.parse_args()
@@ -320,14 +321,18 @@ if __name__ == '__main__':
     conf['writ_url'] = "{}/api/get-writ".format(COURTHOUSE_URL)
     conf['submit_url'] = "{}/api/submit-writ/{{}}".format(COURTHOUSE_URL)
     conf['return_url'] = "{}/api/return-without-run".format(COURTHOUSE_URL)
+    return conf
 
+
+if __name__ == '__main__':
+    config = get_conf()
     try:
-        main(conf)
+        main(config)
     except KeyboardInterrupt:
         logging.info("Exiting")
         if current_writ:
-            return_writ_without_output(conf, current_writ.get('run_id'))
+            return_writ_without_output(config, current_writ.get('run_id'))
         sys.exit(0)
-    except Exception as e:
+    except Exception:
         logging.exception("Uncaught exception, exiting")
         sys.exit(1)
