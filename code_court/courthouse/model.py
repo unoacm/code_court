@@ -726,7 +726,8 @@ def dt_to_time_str(dt):
 
 class RunState:
     CONTEST_HAS_NOT_BEGUN = "ContestHasNotBegun"
-    CONTEST_ENDED = "ContestEnded"
+    CONTEST_ENDED_PASSED = "ContestEndedPassed"
+    CONTEST_ENDED_FAILED = "ContestEndedFailed"
     SUCCESSFUL = "Successful"
     FAILED = "Failed"
     EXECUTED = "Executed"

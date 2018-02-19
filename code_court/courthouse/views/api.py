@@ -125,10 +125,16 @@ def submit_writ(run_id):
             util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
 
         if run.state == model.RunState.EXECUTED:
-            if run.is_passed:
-                run.state = model.RunState.SUCCESSFUL
+            if run.started_execing_time > run.contest.end_time:
+                if run.is_passed:
+                    run.state = model.RunState.CONTEST_ENDED_PASSED
+                else:
+                    run.state = model.RunState.CONTEST_ENDED_FAILED
             else:
-                run.state = model.RunState.FAILED
+                if run.is_passed:
+                    run.state = model.RunState.SUCCESSFUL
+                else:
+                    run.state = model.RunState.FAILED
 
     db_session.commit()
 

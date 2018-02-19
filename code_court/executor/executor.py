@@ -94,7 +94,6 @@ class Executor:
             if container:
                 container.remove(force=True)
             try:
-                print("deleting {}", self.writ.shared_data_dir)
                 shutil.rmtree(self.writ.shared_data_dir)
             except FileNotFoundError:
                 pass
@@ -170,7 +169,6 @@ class Executor:
         runner_str = runner_str.replace("$1", path.join(container_shared_data_dir, "input"))
         runner_str = runner_str.replace("$2", path.join(container_shared_data_dir, "program"))
 
-        print("making {}", container_shared_data_dir)
         os.makedirs(container_shared_data_dir)
         self.create_share_files(
             container_shared_data_dir,
