@@ -24,6 +24,7 @@ class LoadTester:
         while True:
             time.sleep(1)
 
+
 class FakeUser:
     PROBLEMS_INTERVAL = 5
     SCORES_INTERVAL = 30
@@ -38,24 +39,28 @@ class FakeUser:
 
     def start(self):
         def _scores():
+            time.sleep(random.uniform(0, self.SCORES_INTERVAL))
             while True:
                 self.get_scores()
                 time.sleep(self.SCORES_INTERVAL)
         threading.Thread(target=_scores).start()
 
         def _problems():
+            time.sleep(random.uniform(0, self.PROBLEMS_INTERVAL))
             while True:
                 self.get_problems()
                 time.sleep(self.PROBLEMS_INTERVAL)
         threading.Thread(target=_problems).start()
 
         def _contest():
+            time.sleep(random.uniform(0, self.CONTEST_INTERVAL))
             while True:
                 self.get_contest_info()
                 time.sleep(self.CONTEST_INTERVAL)
         threading.Thread(target=_contest).start()
 
         def _runs():
+            time.sleep(random.uniform(0, self.SUBMIT_RUN_INTERVAL))
             while True:
                 self.submit_run()
                 time.sleep(self.SUBMIT_RUN_INTERVAL)
