@@ -65,7 +65,7 @@ class Executor:
         logging.info("Executing writ (id: %s, lang: %s)", self.writ.run_id, self.writ.language)
 
         signal.signal(signal.SIGALRM, raise_timeout)
-        # signal.alarm(RUN_TIMEOUT)
+        signal.alarm(RUN_TIMEOUT)
 
         container = None
         try:
@@ -166,9 +166,9 @@ class Executor:
         container_shared_data_dir = self.writ.shared_data_dir
 
         runner_str = self.writ.run_script
-        runner_str = runner_str.replace("$1", path.join(container_shared_data_dir, "input"))
-        runner_str = runner_str.replace("$2", path.join(container_shared_data_dir, "program"))
-        runner_str = runner_str.replace("$3", container_shared_data_dir)
+        runner_str = runner_str.replace("$input_file", path.join(container_shared_data_dir, "input"))
+        runner_str = runner_str.replace("$program_file", path.join(container_shared_data_dir, "program"))
+        runner_str = runner_str.replace("$scratch_dir", container_shared_data_dir)
 
         os.makedirs(container_shared_data_dir)
         self.create_share_files(
@@ -179,7 +179,6 @@ class Executor:
         )
 
         runner_file = path.join(container_shared_data_dir, "runner")
-        import IPython; IPython.embed()
         out = subprocess.check_output([runner_file], shell=True).decode('utf-8')
         if len(out) > OUTPUT_LIMIT:
             raise OutputLimitExceeded()
