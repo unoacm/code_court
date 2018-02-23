@@ -204,71 +204,67 @@ def populate_db():
     ])
 
     # TODO: extract these out into a folder
-    # Note: for executor scripts
-    # $1 is the file containing the input
-    # $2 is the file containing the source code
-    # $3 is the scratch directory
     db_session.add_all([
         model.Language("python", "python", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | python3 $2
+                                    cat $input_file | python3 $program_file
                                     exit $?''').strip()),
         model.Language("python2", "python", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | python2 $2
+                                    cat $input_file | python2 $program_file
                                     exit $?''').strip()),
         model.Language("perl", "perl", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | perl $2
+                                    cat $input_file | perl $program_file
                                     exit $?''').strip()),
         model.Language("lua", "lua", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | lua $2
+                                    cat $input_file | lua $program_file
                                     exit $?''').strip()),
         model.Language("nodejs", "javascript", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | node $2
+                                    cat $input_file | node $program_file
                                     exit $?''').strip()),
         model.Language("guile", "scheme", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | guile --no-auto-compile $2
+                                    cat $input_file | guile --no-auto-compile $program_file
                                     exit $?''').strip()),
         model.Language("fortran", "fortran", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.f
+                                cp /share/program $scratch_dir/program.f
 
-                                cd /scratch
+                                cd $scratch_dir
 
-                                gfortran -o program /scratch/program.f
+                                gfortran -o program $scratch_dir/program.f
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip()),
         model.Language("c", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp $2 /scratch/program.c
+                                cp $program_file $scratch_dir/program.c
 
-                                cd /scratch
+                                cd $3
 
-                                gcc -o program /scratch/program.c
+                                gcc -o program $scratch_dir/program.c
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -279,17 +275,17 @@ def populate_db():
         model.Language("c++", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp $2 /scratch/program.cpp
+                                cp $program_file $scratch_dir/program.cpp
 
-                                cd /scratch
+                                cd $scratch_dir
 
-                                g++ -o program /scratch/program.cpp
+                                g++ -o program $scratch_dir/program.cpp
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -303,9 +299,9 @@ def populate_db():
                                 #!/bin/bash
                                 export PATH=$PATH:/usr/lib/jvm/java-1.8-openjdk/bin
 
-                                cp $2 /scratch/Main.java
+                                cp $program_file $scratch_dir/Main.java
 
-                                cd /scratch
+                                cd $scratch_dir
 
                                 javac Main.java
 
@@ -313,7 +309,7 @@ def populate_db():
                                   exit $?
                                 fi
 
-                                cat $1 | java Main
+                                cat $input_file | java Main
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -325,22 +321,22 @@ def populate_db():
         model.Language("ruby", "ruby", True,
                        textwrap.dedent('''
                                         #!/bin/bash
-                                        cat $1 | ruby $2
+                                        cat $input_file | ruby $program_file
                                         exit $?''').strip()),
         model.Language("rust", "rust", True,
                        textwrap.dedent('''
                                         #!/bin/bash
-                                        cp /share/program /scratch/main.rs
+                                        cp /share/program $scratch_dir/main.rs
 
-                                        cd /scratch
+                                        cd $scratch_dir
 
-                                        rustc /scratch/main.rs
+                                        rustc $scratch_dir/main.rs
 
                                         if [[ $? != 0 ]]; then
                                           exit $?
                                         fi
 
-                                        cat $1 | ./main
+                                        cat $input_file | ./main
                                         exit $?''').strip(),
                         textwrap.dedent('''
                                         fn main() {
