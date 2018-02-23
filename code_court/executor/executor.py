@@ -179,7 +179,11 @@ class Executor:
         )
 
         runner_file = path.join(container_shared_data_dir, "runner")
-        out = subprocess.check_output([runner_file], shell=True).decode('utf-8')
+        out = subprocess.check_output(
+            [runner_file],
+            shell=True,
+            stderr=subprocess.STDOUT
+        ).decode('utf-8')
         if len(out) > OUTPUT_LIMIT:
             raise OutputLimitExceeded()
 
