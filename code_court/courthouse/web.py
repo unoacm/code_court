@@ -204,6 +204,10 @@ def populate_db():
     ])
 
     # TODO: extract these out into a folder
+    # Note: for executor scripts
+    # $1 is the file containing the input
+    # $2 is the file containing the source code
+    # $3 is the scratch directory
     db_session.add_all([
         model.Language("python", "python", True,
                        textwrap.dedent('''
@@ -254,7 +258,7 @@ def populate_db():
         model.Language("c", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.c
+                                cp $2 /scratch/program.c
 
                                 cd /scratch
 
@@ -275,7 +279,7 @@ def populate_db():
         model.Language("c++", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.cpp
+                                cp $2 /scratch/program.cpp
 
                                 cd /scratch
 
@@ -297,17 +301,19 @@ def populate_db():
         model.Language("java", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/Main.java
+                                export PATH=$PATH:/usr/lib/jvm/java-1.8-openjdk/bin
+
+                                cp $2 /scratch/Main.java
 
                                 cd /scratch
 
-                                /usr/lib/jvm/java-1.8-openjdk/bin/javac Main.java
+                                javac Main.java
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | /usr/lib/jvm/java-1.8-openjdk/bin/java Main
+                                cat $1 | java Main
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
