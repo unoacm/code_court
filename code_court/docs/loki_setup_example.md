@@ -4,7 +4,7 @@ The courthouse contains the admin interface and acts as the central coordinating
 server for the system. All database access goes through the courthouse, mostly by
 using its api (code is in courthouse/views/api.py)
 
-```
+```bash
 # Install virtualenv
 #
 # We need to go through some contortions on loki, since we don't have root access. On
@@ -53,7 +53,7 @@ it uses docker to securely run submissions, but it has a non-docker
 mode for development. Look at the production setup docs for info on how
 to run the executor using docker
 
-```
+```bash
 # Make sure you've installed virtualenv and cloned the code_court
 # repo (look at the courthouse setup instruction for more on that)
 
@@ -75,5 +75,5 @@ The defendant frontend is the interface that contestants use. It's a pure
 frontend app (written using vuejs) that uses an api to communicate with the courthouse.
 
 ```
-# ERR, I couldn't get npm working on loki, which is required to build the frontend
+# ERROR, I couldn't get npm working on loki, which is required to build the frontend
 ```
