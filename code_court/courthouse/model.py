@@ -350,11 +350,11 @@ class Contest(Base):
             "id": self.id,
             "name": self.name,
             "is_public": self.is_public,
-            "activate_time": dt_to_str(self.activate_time),
-            "start_time": dt_to_str(self.start_time),
-            "freeze_time": dt_to_str(self.freeze_time),
-            "end_time": dt_to_str(self.end_time),
-            "deactivate_time": dt_to_str(self.deactivate_time),
+            "activate_time": util.dt_to_str(self.activate_time),
+            "start_time": util.dt_to_str(self.start_time),
+            "freeze_time": util.dt_to_str(self.freeze_time),
+            "end_time": util.dt_to_str(self.end_time),
+            "deactivate_time": util.dt_to_str(self.deactivate_time),
         }
 
     def __repr__(self):
@@ -687,41 +687,6 @@ class UserRole(Base):
     def __str__(self):
         return self.__repr__()
 
-
-def str_to_dt(s):
-    """Converts a string in format 2017-12-30T12:60Z to datetime"""
-    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%MZ')
-
-
-def strs_to_dt(date_string, time_string):
-    """Converts two strings in formats "2017-12-30" and "12:60" to datetime"""
-    return str_to_dt(date_string + "T" + time_string + "Z")
-
-
-def time_str_to_dt(s):
-    """Converts a string in format 12:59 to datetime"""
-    return datetime.datetime.strptime(s, '%H:%M')
-
-
-def dt_to_str(dt):
-    """Converts a datetime to a string in format 2017-12-30T12:60Z"""
-    if dt is None:
-        return None
-    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%MZ')
-
-
-def dt_to_date_str(dt):
-    """Converts a datetime to a string in format 2017-12-30"""
-    if dt is None:
-        return None
-    return datetime.datetime.strftime(dt, '%Y-%m-%d')
-
-
-def dt_to_time_str(dt):
-    """Converts a datetime to a string in format 12:59"""
-    if dt is None:
-        return None
-    return datetime.datetime.strftime(dt, '%H:%M')
 
 
 class RunState:

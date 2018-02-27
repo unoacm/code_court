@@ -1,11 +1,11 @@
+import datetime
+
 from functools import wraps
 
 import bcrypt
 
 from flask_login import current_user
-
 from flask_sqlalchemy import BaseQuery
-
 from flask import current_app, request, redirect
 
 import model
@@ -138,3 +138,39 @@ def invalidate_cache_item(cache_name, key):
         uwsgi.cache_del(str(key), cache_name)
     except ImportError:
         pass
+
+
+def str_to_dt(s):
+    """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
+    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+
+
+def strs_to_dt(date_string, time_string):
+    """Converts two strings in formats "2017-12-30" and "12:60:20" to datetime"""
+    return str_to_dt(date_string + "T" + time_string + "Z")
+
+
+def time_str_to_dt(s):
+    """Converts a string in format 12:59:10 to datetime"""
+    return datetime.datetime.strptime(s, '%H:%M:%S')
+
+
+def dt_to_str(dt):
+    """Converts a datetime to a string in format 2017-12-30T12:60Z"""
+    if dt is None:
+        return None
+    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M:%SZ')
+
+
+def dt_to_date_str(dt):
+    """Converts a datetime to a string in format 2017-12-30"""
+    if dt is None:
+        return None
+    return datetime.datetime.strftime(dt, '%Y-%m-%d')
+
+
+def dt_to_time_str(dt):
+    """Converts a datetime to a string in format 12:59:10"""
+    if dt is None:
+        return None
+    return datetime.datetime.strftime(dt, '%H:%M:%S')

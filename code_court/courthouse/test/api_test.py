@@ -5,6 +5,7 @@ from base64 import b64encode
 from base_test import BaseTest
 
 import model
+import util
 from database import db_session
 
 class APITestCase(BaseTest):
@@ -196,8 +197,8 @@ def setup_contest():
         "epass",
         user_roles=[roles['executioner']])
     test_contest = model.Contest("test_contest",
-                                 model.str_to_dt("2017-02-05T22:04Z"),
-                                 model.str_to_dt("2030-01-01T11:11Z"), True)
+                                 util.str_to_dt("2017-02-05T22:04:00Z"),
+                                 util.str_to_dt("2030-01-01T11:11:00Z"), True)
     io_problem_type = model.ProblemType.query.filter_by(
         name="input-output").one()
     test_problem = model.Problem(
@@ -212,7 +213,7 @@ def setup_contest():
     python = model.Language.query.filter_by(name="python").one()
     test_run = model.Run(
         test_contestant, test_contest, python, test_problem,
-        model.str_to_dt("2017-02-05T23:00Z"),
+        util.str_to_dt("2017-02-05T23:00:00Z"),
         'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
         test_problem.secret_input, test_problem.secret_output, True)
 

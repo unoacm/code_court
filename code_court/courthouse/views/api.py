@@ -289,7 +289,6 @@ def submit_run():
                 'error': 'Submission rate limit exceeded'
             }), 400)
 
-
     contest = user.contests[0]
 
     lang_name = request.json.get('lang', None)
@@ -298,7 +297,9 @@ def submit_run():
     is_submission = request.json.get('is_submission', False)
     user_test_input = request.json.get('user_test_input', None)
 
-    if not all([lang_name, problem_slug, source_code]):
+    if (lang_name is None or
+        problem_slug is None or
+        source_code is None):
         return make_response(
             jsonify({
                 'error': 'Invalid submission, missing input'
