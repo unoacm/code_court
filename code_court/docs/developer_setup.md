@@ -74,7 +74,7 @@ pip install -r requirements.txt
 The defendant frontend is the interface that contestants use. It's a pure
 frontend app (written using vuejs) that uses an api to communicate with the courthouse.
 
-```
+```bash
 # Install npm dependencieso
 cd code_court/code_court/defendant-frontend
 npm install
@@ -95,8 +95,7 @@ npm run dev
 ## Misc
 
 ## Run courthouse tests
-```
-
+```bash
 cd code_court/code_court/courthouse
 # make sure virtualenv is sourced
 nosetests
