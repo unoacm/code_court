@@ -45,13 +45,16 @@ class Executor:
         self.client = docker.from_env()
 
     def start(self):
+        while True:
+            self._run()
+
+    def _run(self):
         try:
-            while True:
-                self.writ = self.get_writ()
-                if not self.writ:
-                    time.sleep(WAIT_SECONDS)
-                else:
-                    self.handle_writ()
+            self.writ = self.get_writ()
+            if not self.writ:
+                time.sleep(WAIT_SECONDS)
+            else:
+                self.handle_writ()
         except KeyboardInterrupt:
             logging.info("Exiting")
             if self.writ:
@@ -122,7 +125,7 @@ class Executor:
                 auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
             )
         except Exception:
-            logging.info("Failed to connect to courthouse")
+            logging.exception("Failed to connect to courthouse")
             return None
 
         if r.status_code != 200:
@@ -143,10 +146,11 @@ class Executor:
                 logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
         except requests.exceptions.ConnectionError:
+            logging.exception("Failed to submit writ")
             try:
-                self.return_writ_without_output(self.writrun_id)
+                self.return_writ_without_output()
             except Exception:
-                pass
+                logging.exception("Failed to return writ")
 
         self.current_writ = None
 
