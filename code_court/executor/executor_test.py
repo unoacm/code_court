@@ -1,3 +1,4 @@
+import json
 import re
 import unittest
 
@@ -9,6 +10,7 @@ from executor import Executor, get_conf
 def get_test_conf():
     conf = get_conf()
     conf['insecure'] = True
+    conf['timeout'] = 1
     return conf
 
 
@@ -29,9 +31,12 @@ def setup_get_writ_resp(writ):
                   json=writ, status=200)
 
 
-def setup_submit_writ_resp():
-    responses.add(responses.POST, re.compile(r"http://.*?/api/submit-writ/.*?"),
-                  json="Good", status=200)
+def setup_submit_writ_resp(callback):
+    responses.add_callback(
+        responses.POST,
+        re.compile(r"http://.*?/api/submit-writ/.*?"),
+        callback=callback
+    )
 
 
 def setup_return_writ_resp():
@@ -42,8 +47,14 @@ def setup_return_writ_resp():
 class ExecutorTest(unittest.TestCase):
     @responses.activate
     def test_normal_run(self):
+        def submit_callback(request):
+            resp = json.loads(request.body)
+            self.assertEqual(resp['output'], "hello\n")
+            self.assertEqual(resp['state'], "Executed")
+            return (200, {}, "Good")
+
         setup_get_writ_resp(get_test_writ())
-        setup_submit_writ_resp()
+        setup_submit_writ_resp(submit_callback)
         Executor(get_test_conf())._run()
 
     @responses.activate
@@ -52,12 +63,25 @@ class ExecutorTest(unittest.TestCase):
         setup_return_writ_resp()
         Executor(get_test_conf())._run()
 
+    @responses.activate
     def test_run_timelimit(self):
-        pass
+        def submit_callback(request):
+            resp = json.loads(request.body)
+            self.assertEqual(resp['output'], "Error: Timed out")
+            self.assertEqual(resp['state'], "TimedOut")
+            return (200, {}, "Good")
 
+        test_writ = get_test_writ()
+        test_writ['source_code'] = 'import time\ntime.sleep(1000)'
+        setup_get_writ_resp(test_writ)
+        setup_submit_writ_resp(submit_callback)
+        Executor(get_test_conf())._run()
+
+    @responses.activate
     def test_run_outputlimit(self):
         pass
 
+    @responses.activate
     def test_run_with_compile_error(self):
         pass
 

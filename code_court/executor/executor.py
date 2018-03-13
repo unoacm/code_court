@@ -28,7 +28,6 @@ SCRIPT_DIR = path.dirname(path.realpath(__file__))
 EXECUTOR_IMAGE_NAME = "code-court-executor"
 SHARED_DATA_DIR = path.join(SCRIPT_DIR, "share_data")
 
-RUN_TIMEOUT = 5
 CPU_PERIOD = 500000
 MEM_LIMIT = "128m"
 PID_LIMIT = 50
@@ -68,7 +67,7 @@ class Executor:
         logging.info("Executing writ (id: %s, lang: %s)", self.writ.run_id, self.writ.language)
 
         signal.signal(signal.SIGALRM, raise_timeout)
-        signal.alarm(RUN_TIMEOUT)
+        signal.alarm(self.conf['timeout'])
 
         container = None
         try:
@@ -146,7 +145,7 @@ class Executor:
                 logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
         except requests.exceptions.ConnectionError:
-            logging.exception("Failed to submit writ")
+            logging.error("Failed to submit writ")
             try:
                 self.return_writ_without_output()
             except Exception:
@@ -316,6 +315,13 @@ def get_conf():
         '--password',
         default='epass',
         help='the password for the executor user',
+    )
+    parser.add_argument(
+        '-t',
+        '--timeout',
+        default=5,
+        type=int,
+        help='the maximum time a writ can run',
     )
 
     args = parser.parse_args()
