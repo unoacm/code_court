@@ -11,6 +11,7 @@ def get_test_conf():
     conf = get_conf()
     conf['insecure'] = True
     conf['timeout'] = 1
+    conf['char_output_limit'] = 1000
     return conf
 
 
@@ -79,11 +80,31 @@ class ExecutorTest(unittest.TestCase):
 
     @responses.activate
     def test_run_outputlimit(self):
-        pass
+        def submit_callback(request):
+            resp = json.loads(request.body)
+            self.assertEqual(resp['output'], "Error: Output limit exceeded")
+            self.assertEqual(resp['state'], "OutputLimitExceeded")
+            return (200, {}, "Good")
+
+        test_writ = get_test_writ()
+        test_writ['source_code'] = 'print("a"*2000)'
+        setup_get_writ_resp(test_writ)
+        setup_submit_writ_resp(submit_callback)
+        Executor(get_test_conf())._run()
 
     @responses.activate
     def test_run_with_compile_error(self):
-        pass
+        def submit_callback(request):
+            resp = json.loads(request.body)
+            self.assertIn("SyntaxError: unexpected EOF while parsing", resp['output'])
+            self.assertEqual(resp['state'], "Executed")
+            return (200, {}, "Good")
+
+        test_writ = get_test_writ()
+        test_writ['source_code'] = 'if test:'
+        setup_get_writ_resp(test_writ)
+        setup_submit_writ_resp(submit_callback)
+        Executor(get_test_conf())._run()
 
 
 if __name__ == '__main__':

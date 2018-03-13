@@ -33,7 +33,6 @@ MEM_LIMIT = "128m"
 PID_LIMIT = 50
 MEM_SWAPPINESS = 0
 CONTAINER_USER = "user"
-OUTPUT_LIMIT = 100000  # chars
 WAIT_SECONDS = 5
 
 
@@ -182,12 +181,17 @@ class Executor:
         )
 
         runner_file = path.join(container_shared_data_dir, "runner")
-        out = subprocess.check_output(
-            [runner_file],
-            shell=True,
-            stderr=subprocess.STDOUT
-        ).decode('utf-8')
-        if len(out) > OUTPUT_LIMIT:
+        try:
+            out = subprocess.check_output(
+                [runner_file],
+                shell=True,
+                stderr=subprocess.STDOUT
+            ).decode('utf-8')
+        except subprocess.CalledProcessError as e:
+            out = e.output.decode("utf-8")
+
+
+        if len(out) > self.conf['char_output_limit']:
             raise OutputLimitExceeded()
 
         if len(out) == 0:
@@ -235,7 +239,7 @@ class Executor:
             chunk = line.decode("utf-8")
             rolling_size += len(chunk)
 
-            if rolling_size > OUTPUT_LIMIT:
+            if rolling_size > self.conf['char_output_limit']:
                 raise OutputLimitExceeded()
 
             out.append(chunk)
@@ -322,6 +326,13 @@ def get_conf():
         default=5,
         type=int,
         help='the maximum time a writ can run',
+    )
+    parser.add_argument(
+        '-c',
+        '--char-output-limit',
+        default=100000,
+        type=int,
+        help='the maximum number of chars a run can output',
     )
 
     args = parser.parse_args()
