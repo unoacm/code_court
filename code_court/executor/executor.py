@@ -129,7 +129,7 @@ class Executor:
         if r.status_code != 200:
             return None
 
-        return Writ.from_json(r.json())
+        return Writ.from_dict(r.json())
 
     def submit_writ(self, out, state):
         logging.info("Submitting writ %s, state: %s", self.writ.run_id, state)
@@ -263,7 +263,7 @@ class Writ:
         self.shared_data_dir = path.join(SHARED_DATA_DIR, self.container_ident)
 
     @staticmethod
-    def from_json(writ_json):
+    def from_dict(writ_json):
         if writ_json.get('status') == 'unavailable':
             return None
 
