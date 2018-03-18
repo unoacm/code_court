@@ -187,38 +187,36 @@ def signup():
     if not request.json:
         return jsonify({"msg": "Bad request"}), 400
 
-    email = request.json.get('email', None)
-    username = request.json.get('username', None)
-    name = request.json.get('name', None)
-    password = request.json.get('password', None)
-    password2 = request.json.get('password2', None)
-    contest_name = request.json.get('contest_name', None)
+    is_sucess, fields_or_error = _validate_and_get_required_fields([
+        "email",
+        "username",
+        "name",
+        "password",
+        "password2",
+        "contest_name"
+    ])
 
-    error = _validate_required_fields({
-        "email": email,
-        "username": username,
-        "name": name,
-        "password": password,
-        "password2": password2,
-        "contest_name": contest_name,
-    })
-    if error:
-        return error
+    if not is_sucess:
+        return fields_or_error
+    fields = fields_or_error
 
-    user = model.User.query.filter_by(email=email).scalar()
+    if fields['password'] != fields['password2']:
+        return jsonify({"msg": "Passwords don't match"}), 400
+
+    user = model.User.query.filter_by(email=fields['email']).scalar()
     if user:
         return jsonify({"msg": "User already exists with that email"}), 400
 
     defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(
-        email=email,
-        name=name,
-        password=password,
+        email=fields['email'],
+        name=fields['name'],
+        password=fields['password'],
         user_roles=[defedant_role],
-        username=username)
+        username=fields['username'])
 
-    contest = model.Contest.query.filter_by(name=contest_name).scalar()
+    contest = model.Contest.query.filter_by(name=fields['contest_name']).scalar()
 
     if not contest:
         return make_response(jsonify({'error': 'Invalid contest name'}), 400)
@@ -718,16 +716,19 @@ def signout_user(email):
 
     return make_response(jsonify({'status': 'Success'}), 200)
 
-def _validate_required_fields(fields):
+
+def _validate_and_get_required_fields(fields):
+    ret = {field: request.json.get(field, None) for field in fields}
+
     missing = []
-    for field_name, field_val in fields.items():
-        if field_val is None:
-            missing.append(field_name)
+    for field_key, field_value in ret.items():
+        if field_value is None:
+            missing.append(field_key)
 
     if missing:
-        return jsonify({"msg": "Missing required fields: %s" % missing}), 400
+        return (False, (jsonify({"msg": "Missing required fields: %s" % missing}), 400))
     else:
-        return None
+        return (True, ret)
 
 
 def clean_output_string(s):
