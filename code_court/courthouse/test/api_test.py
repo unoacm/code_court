@@ -172,6 +172,25 @@ class APITestCase(BaseTest):
         contest = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(contest.get('name'), 'test_contest')
 
+    def test_signup(self):
+        """Tests the /api/signup endpoint"""
+        setup_contest()
+
+        data = dict(
+            email="signuptest@example.org",
+            name="Signup Test",
+            username="signuptest",
+            password="pass",
+            password2="pass",
+            contest_name="test_contest",
+        )
+
+        rv = self.post_json('/api/signup', data)
+        self.assertEqual(rv.status_code, 200, rv.data)
+
+        token = self.get_jwt_token(data['email'], data['password'])
+        self.assertIsNotNone(token)
+
     def test_get_languages(self):
         """Tests the /api/languages endpoint"""
         setup_contest()

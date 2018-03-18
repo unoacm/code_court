@@ -182,6 +182,56 @@ def login():
         return jsonify({"msg": "Bad username or password"}), 401
 
 
+@api.route('/signup', methods=['POST'])
+def signup():
+    if not request.json:
+        return jsonify({"msg": "Bad request"}), 400
+
+    email = request.json.get('email', None)
+    username = request.json.get('username', None)
+    name = request.json.get('name', None)
+    password = request.json.get('password', None)
+    password2 = request.json.get('password2', None)
+    contest_name = request.json.get('contest_name', None)
+
+    error = _validate_required_fields({
+        "email": email,
+        "username": username,
+        "name": name,
+        "password": password,
+        "password2": password2,
+        "contest_name": contest_name,
+    })
+    if error:
+        return error
+
+    user = model.User.query.filter_by(email=email).scalar()
+    if user:
+        return jsonify({"msg": "User already exists with that email"}), 400
+
+    defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
+
+    new_user = model.User(
+        email=email,
+        name=name,
+        password=password,
+        user_roles=[defedant_role],
+        username=username)
+
+    contest = model.Contest.query.filter_by(name=contest_name).scalar()
+
+    if not contest:
+        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+
+    new_user.contests.append(contest)
+
+    db_session.add(new_user)
+    db_session.commit()
+
+    ret = {'access_token': create_access_token(identity=new_user.id)}
+    return jsonify(ret), 200
+
+
 @api.route("/problem/<slug>", methods=["GET"])
 def get_problem(slug):
     problem = model.Problem.query.filter_by(slug=slug).scalar()
@@ -667,6 +717,17 @@ def signout_user(email):
     db_session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
+
+def _validate_required_fields(fields):
+    missing = []
+    for field_name, field_val in fields.items():
+        if field_val is None:
+            missing.append(field_name)
+
+    if missing:
+        return jsonify({"msg": "Missing required fields: %s" % missing}), 400
+    else:
+        return None
 
 
 def clean_output_string(s):
