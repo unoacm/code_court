@@ -138,17 +138,17 @@ def add_contest():
     problem_slugs = request.form.get("problems")
 
     if activate_date is not "" and activate_time is not "":
-        activate_date_time = model.strs_to_dt(activate_date, activate_time)
+        activate_date_time = util.strs_to_dt(activate_date, activate_time)
     else:
         activate_date_time = None
 
     if freeze_date is not "" and freeze_time is not "":
-        freeze_date_time = model.strs_to_dt(freeze_date, freeze_time)
+        freeze_date_time = util.strs_to_dt(freeze_date, freeze_time)
     else:
         freeze_date_time = None
 
     if deactivate_date is not "" and deactivate_time is not "":
-        deactivate_date_time = model.strs_to_dt(deactivate_date,
+        deactivate_date_time = util.strs_to_dt(deactivate_date,
                                                 deactivate_time)
     else:
         deactivate_date_time = None
@@ -175,9 +175,9 @@ def add_contest():
         contest.is_public = is_public_bool
 
         contest.activate_time = activate_date_time
-        contest.start_time = model.strs_to_dt(start_date, start_time)
+        contest.start_time = util.strs_to_dt(start_date, start_time)
         contest.freeze_time = freeze_date_time
-        contest.end_time = model.strs_to_dt(end_date, end_time)
+        contest.end_time = util.strs_to_dt(end_date, end_time)
         contest.deactivate_time = deactivate_date_time
 
         contest.users = users_from_emails(user_emails.split(), model)
@@ -194,9 +194,9 @@ def add_contest():
             name=name,
             is_public=is_public_bool,
             activate_time=activate_date_time,
-            start_time=model.strs_to_dt(start_date, start_time),
+            start_time=util.strs_to_dt(start_date, start_time),
             freeze_time=freeze_date_time,
-            end_time=model.strs_to_dt(end_date, end_time),
+            end_time=util.strs_to_dt(end_date, end_time),
             deactivate_time=deactivate_date_time,
             users=users_from_emails(user_emails.split(), model),
             problems=problems_from_slugs(problem_slugs.split(), model))

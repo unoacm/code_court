@@ -1,2 +1,3 @@
 logs
 uwsgi-master-process.pid
+env

@@ -125,10 +125,16 @@ def submit_writ(run_id):
             util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
 
         if run.state == model.RunState.EXECUTED:
-            if run.is_passed:
-                run.state = model.RunState.SUCCESSFUL
+            if run.started_execing_time > run.contest.end_time:
+                if run.is_passed:
+                    run.state = model.RunState.CONTEST_ENDED_PASSED
+                else:
+                    run.state = model.RunState.CONTEST_ENDED_FAILED
             else:
-                run.state = model.RunState.FAILED
+                if run.is_passed:
+                    run.state = model.RunState.SUCCESSFUL
+                else:
+                    run.state = model.RunState.FAILED
 
     if run.user.email == "exec@example.org":
         util.add_versions(run.run_output)    
@@ -179,6 +185,54 @@ def login():
         return jsonify(ret), 200
     else:
         return jsonify({"msg": "Bad username or password"}), 401
+
+
+@api.route('/signup', methods=['POST'])
+def signup():
+    if not request.json:
+        return jsonify({"msg": "Bad request"}), 400
+
+    is_sucess, fields_or_error = _validate_and_get_required_fields([
+        "email",
+        "username",
+        "name",
+        "password",
+        "password2",
+        "contest_name"
+    ])
+
+    if not is_sucess:
+        return fields_or_error
+    fields = fields_or_error
+
+    if fields['password'] != fields['password2']:
+        return jsonify({"msg": "Passwords don't match"}), 400
+
+    user = model.User.query.filter_by(email=fields['email']).scalar()
+    if user:
+        return jsonify({"msg": "User already exists with that email"}), 400
+
+    defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
+
+    new_user = model.User(
+        email=fields['email'],
+        name=fields['name'],
+        password=fields['password'],
+        user_roles=[defedant_role],
+        username=fields['username'])
+
+    contest = model.Contest.query.filter_by(name=fields['contest_name']).scalar()
+
+    if not contest:
+        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+
+    new_user.contests.append(contest)
+
+    db_session.add(new_user)
+    db_session.commit()
+
+    ret = {'access_token': create_access_token(identity=new_user.id)}
+    return jsonify(ret), 200
 
 
 @api.route("/problem/<slug>", methods=["GET"])
@@ -288,7 +342,6 @@ def submit_run():
                 'error': 'Submission rate limit exceeded'
             }), 400)
 
-
     contest = user.contests[0]
 
     lang_name = request.json.get('lang', None)
@@ -297,7 +350,9 @@ def submit_run():
     is_submission = request.json.get('is_submission', False)
     user_test_input = request.json.get('user_test_input', None)
 
-    if not all([lang_name, problem_slug, source_code]):
+    if (lang_name is None or
+        problem_slug is None or
+        source_code is None):
         return make_response(
             jsonify({
                 'error': 'Invalid submission, missing input'
@@ -665,6 +720,20 @@ def signout_user(email):
     db_session.commit()
 
     return make_response(jsonify({'status': 'Success'}), 200)
+
+
+def _validate_and_get_required_fields(fields):
+    ret = {field: request.json.get(field, None) for field in fields}
+
+    missing = []
+    for field_key, field_value in ret.items():
+        if field_value is None:
+            missing.append(field_key)
+
+    if missing:
+        return (False, (jsonify({"msg": "Missing required fields: %s" % missing}), 400))
+    else:
+        return (True, ret)
 
 
 def clean_output_string(s):

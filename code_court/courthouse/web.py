@@ -77,9 +77,9 @@ def create_app():
 
     # Add datetime to string filter to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
-    app.jinja_env.filters['dt_to_str'] = model.dt_to_str
-    app.jinja_env.filters['dt_to_date_str'] = model.dt_to_date_str
-    app.jinja_env.filters['dt_to_time_str'] = model.dt_to_time_str
+    app.jinja_env.filters['dt_to_str'] = util.dt_to_str
+    app.jinja_env.filters['dt_to_date_str'] = util.dt_to_date_str
+    app.jinja_env.filters['dt_to_time_str'] = util.dt_to_time_str
 
     setup_logging(app)
     app.logger.setLevel(logging.DEBUG)
@@ -208,63 +208,63 @@ def populate_db():
         model.Language("python", "python", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | python3 $2
+                                    cat $input_file | python3 $program_file
                                     exit $?''').strip()),
         model.Language("python2", "python", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | python2 $2
+                                    cat $input_file | python2 $program_file
                                     exit $?''').strip()),
         model.Language("perl", "perl", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | perl $2
+                                    cat $input_file | perl $program_file
                                     exit $?''').strip()),
         model.Language("lua", "lua", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | lua $2
+                                    cat $input_file | lua $program_file
                                     exit $?''').strip()),
         model.Language("nodejs", "javascript", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | node $2
+                                    cat $input_file | node $program_file
                                     exit $?''').strip()),
         model.Language("guile", "scheme", True,
                        textwrap.dedent('''
                                     #!/bin/bash
-                                    cat $1 | guile --no-auto-compile $2
+                                    cat $input_file | guile --no-auto-compile $program_file
                                     exit $?''').strip()),
         model.Language("fortran", "fortran", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.f
+                                cp /share/program $scratch_dir/program.f
 
-                                cd /scratch
+                                cd $scratch_dir
 
-                                gfortran -o program /scratch/program.f
+                                gfortran -o program $scratch_dir/program.f
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip()),
         model.Language("c", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.c
+                                cp $program_file $scratch_dir/program.c
 
-                                cd /scratch
+                                cd $3
 
-                                gcc -o program /scratch/program.c
+                                gcc -o program $scratch_dir/program.c
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -275,17 +275,17 @@ def populate_db():
         model.Language("c++", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/program.cpp
+                                cp $program_file $scratch_dir/program.cpp
 
-                                cd /scratch
+                                cd $scratch_dir
 
-                                g++ -o program /scratch/program.cpp
+                                g++ -o program $scratch_dir/program.cpp
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | ./program
+                                cat $input_file | ./program
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -297,17 +297,19 @@ def populate_db():
         model.Language("java", "clike", True,
                        textwrap.dedent('''
                                 #!/bin/bash
-                                cp /share/program /scratch/Main.java
+                                export PATH=$PATH:/usr/lib/jvm/java-1.8-openjdk/bin
 
-                                cd /scratch
+                                cp $program_file $scratch_dir/Main.java
 
-                                /usr/lib/jvm/java-1.8-openjdk/bin/javac Main.java
+                                cd $scratch_dir
+
+                                javac Main.java
 
                                 if [[ $? != 0 ]]; then
                                   exit $?
                                 fi
 
-                                cat $1 | /usr/lib/jvm/java-1.8-openjdk/bin/java Main
+                                cat $input_file | java Main
 
                                 exit $?''').strip(),
                        textwrap.dedent('''
@@ -319,22 +321,22 @@ def populate_db():
         model.Language("ruby", "ruby", True,
                        textwrap.dedent('''
                                         #!/bin/bash
-                                        cat $1 | ruby $2
+                                        cat $input_file | ruby $program_file
                                         exit $?''').strip()),
         model.Language("rust", "rust", True,
                        textwrap.dedent('''
                                         #!/bin/bash
-                                        cp /share/program /scratch/main.rs
+                                        cp /share/program $scratch_dir/main.rs
 
-                                        cd /scratch
+                                        cd $scratch_dir
 
-                                        rustc /scratch/main.rs
+                                        rustc $scratch_dir/main.rs
 
                                         if [[ $? != 0 ]]; then
                                           exit $?
                                         fi
 
-                                        cat $1 | ./main
+                                        cat $input_file | ./main
                                         exit $?''').strip(),
                         textwrap.dedent('''
                                         fn main() {

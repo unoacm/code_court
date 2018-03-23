@@ -19,10 +19,11 @@ class LoadTester:
         for i in range(n):
             print("Starting user #{}".format(i))
             FakeUser().start()
-            time.sleep(1)
+            time.sleep(.5)
 
         while True:
             time.sleep(1)
+
 
 class FakeUser:
     PROBLEMS_INTERVAL = 5
@@ -38,30 +39,35 @@ class FakeUser:
 
     def start(self):
         def _scores():
+            time.sleep(random.uniform(0, self.SCORES_INTERVAL))
             while True:
                 self.get_scores()
                 time.sleep(self.SCORES_INTERVAL)
         threading.Thread(target=_scores).start()
 
         def _problems():
+            time.sleep(random.uniform(0, self.PROBLEMS_INTERVAL))
             while True:
                 self.get_problems()
                 time.sleep(self.PROBLEMS_INTERVAL)
         threading.Thread(target=_problems).start()
 
         def _contest():
+            time.sleep(random.uniform(0, self.CONTEST_INTERVAL))
             while True:
                 self.get_contest_info()
                 time.sleep(self.CONTEST_INTERVAL)
         threading.Thread(target=_contest).start()
 
         def _runs():
+            time.sleep(random.uniform(0, self.SUBMIT_RUN_INTERVAL))
             while True:
                 self.submit_run()
                 time.sleep(self.SUBMIT_RUN_INTERVAL)
         threading.Thread(target=_runs).start()
 
     def _get(self, url):
+        start_time = millis()
         headers = {
             "Authorization": "Bearer {}".format(self.login_token)
         }
@@ -74,9 +80,12 @@ class FakeUser:
         if r.status_code != 200:
             logging.error("Error %s while getting %s: %s", r.status_code, url, r.text)
 
+        _log_timing(url, start_time)
+
         return r
 
     def _post(self, url, json, login_token=None):
+        start_time = millis()
         chosen_login_token = login_token if login_token else self.login_token
         headers = {
             "Authorization": "Bearer {}".format(chosen_login_token)
@@ -90,6 +99,8 @@ class FakeUser:
 
         if r.status_code != 200:
             logging.error("Error %s while posting %s: %s", r.status_code, url, r.text)
+
+        _log_timing(url, start_time)
 
         return r
 
@@ -117,7 +128,6 @@ class FakeUser:
             time.sleep(1)
 
     def submit_run(self):
-        logging.info("Submitting run")
         correct_solution = "print('Hello, World!')"
         incorrect_solution = "for x in range(10000):\n\tprint(x)"
         data = dict(
@@ -130,25 +140,20 @@ class FakeUser:
         self._post_api("submit-run", data)
 
     def get_scores(self):
-        logging.info("Requesting scores")
         contest_id = self.contest_info['id']
         return self._get_api("scores/{}".format(contest_id))
 
     def get_problems(self):
-        logging.info("Requesting problems")
         user_id = self.user_info['id']
         return self._get_api("problems/{}".format(user_id))
 
     def get_contest_info(self):
-        logging.info("Requesting contest info")
         return self._get_api("get-contest-info")
 
     def get_user_info(self):
-        logging.info("Requesting user info")
         return self._get_api("current-user")
 
     def create_user(self):
-        logging.info("Creating user")
         admin_login_token = self.get_login_token("admin@example.org", "pass")
         user_id = random.randint(1000, 1_000_000)
         data = dict(
@@ -162,7 +167,6 @@ class FakeUser:
         return (data['email'], data['password'])
 
     def get_login_token(self, email, password):
-        logging.info("Requesting login token")
         url = urljoin(BASE_URL, "login")
         data = dict(
             email=email,
@@ -174,6 +178,31 @@ class FakeUser:
             raise Exception("Failed login request")
 
         return r.json().get("access_token")
+
+
+def millis():
+    return int(round(time.time() * 1000))
+
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def _log_timing(url, start_time):
+    time_taken = millis() - start_time
+    time_taken_str = str(time_taken) + "ms"
+    if time_taken > 100:
+        time_taken_str = bcolors.WARNING + time_taken_str + bcolors.ENDC
+    elif time_taken > 1000:
+        time_taken_str = bcolors.FAIL + time_taken_str + bcolors.ENDC
+    logging.info("Request to %-50s took %s", url, time_taken_str)
 
 
 if __name__ == '__main__':

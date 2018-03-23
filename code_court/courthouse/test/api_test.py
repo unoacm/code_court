@@ -5,6 +5,7 @@ from base64 import b64encode
 from base_test import BaseTest
 
 import model
+import util
 from database import db_session
 
 class APITestCase(BaseTest):
@@ -183,6 +184,25 @@ class APITestCase(BaseTest):
         contest = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(contest.get('name'), 'test_contest')
 
+    def test_signup(self):
+        """Tests the /api/signup endpoint"""
+        setup_contest()
+
+        data = dict(
+            email="signuptest@example.org",
+            name="Signup Test",
+            username="signuptest",
+            password="pass",
+            password2="pass",
+            contest_name="test_contest",
+        )
+
+        rv = self.post_json('/api/signup', data)
+        self.assertEqual(rv.status_code, 200, rv.data)
+
+        token = self.get_jwt_token(data['email'], data['password'])
+        self.assertIsNotNone(token)
+
     def test_get_languages(self):
         """Tests the /api/languages endpoint"""
         setup_contest()
@@ -208,8 +228,8 @@ def setup_contest():
         "epass",
         user_roles=[roles['executioner']])
     test_contest = model.Contest("test_contest",
-                                 model.str_to_dt("2017-02-05T22:04Z"),
-                                 model.str_to_dt("2030-01-01T11:11Z"), True)
+                                 util.str_to_dt("2017-02-05T22:04:00Z"),
+                                 util.str_to_dt("2030-01-01T11:11:00Z"), True)
     io_problem_type = model.ProblemType.query.filter_by(
         name="input-output").one()
     test_problem = model.Problem(
@@ -224,7 +244,7 @@ def setup_contest():
     python = model.Language.query.filter_by(name="python").one()
     test_run = model.Run(
         test_contestant, test_contest, python, test_problem,
-        model.str_to_dt("2017-02-05T23:00Z"),
+        util.str_to_dt("2017-02-05T23:00:00Z"),
         'import sys\nn=raw_input()\nfor i in range(1, n+1): print("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or i)',
         test_problem.secret_input, test_problem.secret_output, True)
 
