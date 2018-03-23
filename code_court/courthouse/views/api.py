@@ -130,7 +130,12 @@ def submit_writ(run_id):
             else:
                 run.state = model.RunState.FAILED
 
+    if run.user.email == "exec@example.org":
+        util.add_versions(run.run_output)    
+    
+
     db_session.commit()
+
 
     util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
     return "Good"

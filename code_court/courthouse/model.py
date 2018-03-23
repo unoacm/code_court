@@ -60,6 +60,8 @@ class Language(Base):
     run_script = Column(String, nullable=False)
     """str: script (with shebang) that compiles and runs scripts for this language"""
 
+    version = Column(String)
+
     def __init__(self,
                  name,
                  syntax_mode,
@@ -78,7 +80,8 @@ class Language(Base):
             "name": self.name,
             "is_enabled": self.is_enabled,
             "run_script": self.run_script,
-            "default_template": self.default_template
+            "default_template": self.default_template,
+            "version": self.version
         }
 
     def __str__(self):
@@ -465,7 +468,7 @@ class Run(Base):
     contest = relationship(
         'Contest', backref=backref('Run', lazy='dynamic'))
     contest_id = Column(
-        Integer, ForeignKey('contest.id'), nullable=False)
+        Integer, ForeignKey('contest.id'), nullable=True)
     """int: a foreignkey to the run's contest"""
 
     language = relationship(
@@ -477,7 +480,7 @@ class Run(Base):
     problem = relationship(
         'Problem', backref=backref('Run', lazy='dynamic'))
     problem_id = Column(
-        Integer, ForeignKey('problem.id'), nullable=False)
+        Integer, ForeignKey('problem.id'), nullable=True)
     """int: a foreignkey to the run's problem"""
 
     source_code = Column(String, nullable=False)
@@ -498,7 +501,7 @@ class Run(Base):
     run_input = Column(String, nullable=False)
     """str: input text passed to the submitted program"""
 
-    correct_output = Column(String)
+    correct_output = Column(String, nullable=False)
     """str: the correct output of the submitted program"""
 
     run_output = Column(String)

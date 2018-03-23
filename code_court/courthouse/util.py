@@ -10,6 +10,10 @@ from flask import current_app, request, redirect
 
 import model
 
+import json
+
+from database import db_session
+
 
 RUN_CACHE_NAME = 'runcache'
 SCORE_CACHE_NAME ='scorecache'
@@ -138,3 +142,11 @@ def invalidate_cache_item(cache_name, key):
         uwsgi.cache_del(str(key), cache_name)
     except ImportError:
         pass
+
+def add_versions(run_output):
+    #print(repr(run_output))
+    versions = json.loads(run_output)
+    for lang in versions:
+        language = model.Language.query.filter_by(name=lang).first()
+        language.version = versions[lang]
+        db_session.commit()

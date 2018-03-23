@@ -377,6 +377,28 @@ def populate_db():
     db_session.commit()
 
 
+    """Version scraper run
+    """
+
+    with open("init_data/printver.py", "r") as f:
+        src_code = "\n".join(f.readlines())
+
+    executioner_user = model.User.query.filter_by(email="exec@example.org").scalar()
+
+    python = model.Language.query.filter_by(name="python").scalar()
+    empty_input = ""
+
+    verscrape_run = model.Run(executioner_user, None, python, None,
+        datetime.datetime.utcnow(), src_code, 
+        empty_input, empty_input, True, None)
+
+    db_session.add(verscrape_run)
+
+    #print("it ran")
+
+    db_session.commit() 
+
+
 def dev_populate_db():
     """Performs the initial database setup for the application
     """
