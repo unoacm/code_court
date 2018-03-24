@@ -17,7 +17,7 @@
     <p class="control">
       <span class="select">
         <select id="lang" v-model="lang">
-          <option v-for="(lang, name) in langs" :value="lang['name']">{{ lang['name'] }}</option>
+          <option v-for="(lang, name) in langs" :value="lang['name']">{{ lang['name'] }} ({{ lang['version'] }})</option>
         </select>
       </span>
     </p>
