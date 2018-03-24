@@ -57,6 +57,8 @@ class APITestCase(BaseTest):
         self.assertEqual(run.finished_execing_time, None)
 
         # verify no more writs
+        #There is the language version run, so get-writ is called twice
+        self.app.get('/api/get-writ', headers=auth_headers)
         rv = self.app.get('/api/get-writ', headers=auth_headers)
         self.assertEqual(rv.status_code, 404)
 
@@ -86,12 +88,18 @@ class APITestCase(BaseTest):
 
     def test_rejudging(self):
         """Tests rejudging endpoint"""
+
+        #A version run is being added on db startup
+        for run in model.Run.query.all():
+            db_session.delete(run)
+        db_session.commit()
+
         setup_contest()
         self.login("admin@example.org", "pass")
 
         test_run = model.Run.query.first()
 
-        self._judge_writ(test_run)
+        self._judge_writ()
 
         self.assertIsNotNone(test_run.started_execing_time)
         self.assertIsNotNone(test_run.finished_execing_time)
@@ -104,7 +112,7 @@ class APITestCase(BaseTest):
         self.assertIsNone(test_run.finished_execing_time)
         self.assertIsNone(test_run.run_output)
 
-    def _judge_writ(self, run):
+    def _judge_writ(self):
             auth_headers = {
                 'Authorization':
                 'Basic %s' %

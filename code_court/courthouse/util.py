@@ -10,6 +10,10 @@ from flask import current_app, request, redirect
 
 import model
 
+import json
+
+from database import db_session
+
 
 RUN_CACHE_NAME = 'runcache'
 SCORE_CACHE_NAME ='scorecache'
@@ -174,3 +178,10 @@ def dt_to_time_str(dt):
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%H:%M:%S')
+
+def add_versions(run_output):
+    versions = json.loads(run_output)
+    for lang in versions:
+        language = model.Language.query.filter_by(name=lang).first()
+        language.version = versions[lang]
+        db_session.commit()
