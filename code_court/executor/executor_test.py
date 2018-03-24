@@ -49,7 +49,7 @@ class ExecutorTest(unittest.TestCase):
     @responses.activate
     def test_normal_run(self):
         def submit_callback(request):
-            resp = json.loads(request.body)
+            resp = json.loads(request.body.decode("utf-8"))
             self.assertEqual(resp['output'], "hello\n")
             self.assertEqual(resp['state'], "Executed")
             return (200, {}, "Good")
@@ -67,7 +67,7 @@ class ExecutorTest(unittest.TestCase):
     @responses.activate
     def test_run_timelimit(self):
         def submit_callback(request):
-            resp = json.loads(request.body)
+            resp = json.loads(request.body.decode("utf-8"))
             self.assertEqual(resp['output'], "Error: Timed out")
             self.assertEqual(resp['state'], "TimedOut")
             return (200, {}, "Good")
@@ -81,7 +81,7 @@ class ExecutorTest(unittest.TestCase):
     @responses.activate
     def test_run_outputlimit(self):
         def submit_callback(request):
-            resp = json.loads(request.body)
+            resp = json.loads(request.body.decode("utf-8"))
             self.assertEqual(resp['output'], "Error: Output limit exceeded")
             self.assertEqual(resp['state'], "OutputLimitExceeded")
             return (200, {}, "Good")
@@ -95,7 +95,7 @@ class ExecutorTest(unittest.TestCase):
     @responses.activate
     def test_run_with_compile_error(self):
         def submit_callback(request):
-            resp = json.loads(request.body)
+            resp = json.loads(request.body.decode("utf-8"))
             self.assertIn("SyntaxError: unexpected EOF while parsing", resp['output'])
             self.assertEqual(resp['state'], "Executed")
             return (200, {}, "Good")
