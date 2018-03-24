@@ -378,6 +378,36 @@ def populate_db():
 
     db_session.commit()
 
+    #Version scraper run
+
+    with open("init_data/printver.py", "r") as f:
+        src_code = "\n".join(f.readlines())
+
+    executioner_user = model.User.query.filter_by(email="exec@example.org").scalar()
+
+    python = model.Language.query.filter_by(name="python").scalar()
+    empty_input = ""
+
+    version_contest = model.Contest(
+        name="version_contest",
+        start_time=datetime.datetime.utcnow(),
+        end_time=datetime.datetime.utcnow() + datetime.timedelta(hours=1),
+        is_public=True,
+        activate_time=datetime.datetime.utcnow(),
+        freeze_time=None,
+        deactivate_time=None)
+
+    db_session.add(version_contest)
+    db_session.commit()
+
+    verscrape_run = model.Run(executioner_user, version_contest, python, None,
+        datetime.datetime.utcnow(), src_code, 
+        empty_input, empty_input, True, None)
+
+    db_session.add(verscrape_run)
+
+    db_session.commit() 
+
 
 def dev_populate_db():
     """Performs the initial database setup for the application

@@ -136,7 +136,14 @@ def submit_writ(run_id):
                 else:
                     run.state = model.RunState.FAILED
 
+    if run.user.email == "exec@example.org":
+        util.add_versions(run.run_output)
+        db_session.delete(run)
+        version_contest = model.Contest.query.filter_by(name="version_contest").first()
+        db_session.delete(version_contest)    
+
     db_session.commit()
+
 
     util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
     return "Good"

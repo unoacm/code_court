@@ -10,6 +10,10 @@ from flask import current_app, request, redirect
 
 import model
 
+import json
+
+from database import db_session
+
 
 RUN_CACHE_NAME = 'runcache'
 SCORE_CACHE_NAME ='scorecache'
@@ -139,7 +143,6 @@ def invalidate_cache_item(cache_name, key):
     except ImportError:
         pass
 
-
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
@@ -174,3 +177,10 @@ def dt_to_time_str(dt):
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%H:%M:%S')
+
+def add_versions(run_output):
+    versions = json.loads(run_output)
+    for lang in versions:
+        language = model.Language.query.filter_by(name=lang).first()
+        language.version = versions[lang]
+        db_session.commit()
