@@ -5,6 +5,9 @@ python:
 install:
   - pip install six
   - pip install -r code_court/courthouse/requirements.txt
+  - pip install -r code_court/executor/requirements.txt
 script:
   - cd code_court/courthouse/
+  - nosetests
+  - cd ../executor
   - nosetests
