@@ -10,7 +10,7 @@ class UtilTestCase(BaseTest):
 
     def test_add_versions(self):
         """test the add_versions function"""
-     
+
         LANG_VER = '{"java": "1.1.1", "c": "2.2.2", "python": "3.3.3"}'
 
         util.add_versions(LANG_VER)

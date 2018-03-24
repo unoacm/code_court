@@ -469,7 +469,7 @@ class Run(Base):
     contest = relationship(
         'Contest', backref=backref('Run', lazy='dynamic'))
     contest_id = Column(
-        Integer, ForeignKey('contest.id'), nullable=False)
+        Integer, ForeignKey('contest.id'), nullable=True)
     """int: a foreignkey to the run's contest"""
 
     language = relationship(
@@ -502,7 +502,7 @@ class Run(Base):
     run_input = Column(String, nullable=False)
     """str: input text passed to the submitted program"""
 
-    correct_output = Column(String, nullable=True)
+    correct_output = Column(String, nullable=False)
     """str: the correct output of the submitted program"""
 
     run_output = Column(String)

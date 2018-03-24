@@ -406,8 +406,7 @@ def populate_db():
 
     db_session.add(verscrape_run)
 
-    db_session.commit()
-
+    db_session.commit() 
 
 
 def dev_populate_db():

@@ -89,6 +89,7 @@ class APITestCase(BaseTest):
     def test_rejudging(self):
         """Tests rejudging endpoint"""
 
+
         #A version run is being added on db startup
         for run in model.Run.query.all():
             db_session.delete(run)

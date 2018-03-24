@@ -143,7 +143,6 @@ def invalidate_cache_item(cache_name, key):
     except ImportError:
         pass
 
-
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
     return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')

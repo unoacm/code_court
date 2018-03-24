@@ -144,6 +144,7 @@ def submit_writ(run_id):
 
     db_session.commit()
 
+
     util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
     return "Good"
 
