@@ -1,7 +1,7 @@
 ## Intro
 Currently code\_court only runs on unix systems (linux, macos, etc). If you only have access to windows machines you have a few options (in order of preferability):
 
-1. [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (I haven't confirmed that this works, but I think it should)
+1. [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Should work for development, however with the current Windows Build(1709), docker is difficult to work with)
 2. Run a linux [virtual machine](https://www.virtualbox.org/)
 3. Run a linux container with [docker](https://www.docker.com/docker-windows)
 4. Use a linux server (I like [Linode](https://www.linode.com/), [AWS](https://aws.amazon.com/) would be a good choice too)
@@ -11,7 +11,7 @@ I've also been playing around with running code\_court on loki, and have had mil
 ## General setup
 
 Here's a rough list of what you'll need to install. This command works for the latest ubuntu; you may need to adjust it for other distros.
-`sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip -y`
+`sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
 
 Next you'll need to clone the repository
 `git clone https://github.com/unoacm/code_court.git`
@@ -75,7 +75,11 @@ The defendant frontend is the interface that contestants use. It's a pure
 frontend app (written using vuejs) that uses an api to communicate with the courthouse.
 
 ```bash
-# Install npm dependencieso
+# Since the Debian and Ubuntu distros package managers have version that lag behind,
+# we need a more recent version of nodejs (this might be WSL specific)
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+sudo apt-get install -y nodejs
+# Install npm dependencies
 cd code_court/code_court/defendant-frontend
 npm install
 
