@@ -72,6 +72,25 @@ const store = new Vuex.Store({
         context.commit('PUSH_ALERT', {text: 'Failed to login', severity: 'danger'})
       })
     },
+    SIGNUP: function (context, creds) {
+      axios.post('/api/signup', creds).then((response) => {
+        context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
+
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + store.state.loginToken
+
+        context.dispatch('LOAD_USER')
+        context.dispatch('LOAD_PROBLEMS')
+        context.dispatch('LOAD_CONTEST')
+
+        context.commit('DELETE_ALERTS')
+
+        router.push({ path: '/' })
+      }).catch(function (error) {
+        context.commit('DELETE_ALERTS')
+        const errorReason = error.response.data.error
+        context.commit('PUSH_ALERT', {text: 'Failed to signup: ' + errorReason, severity: 'danger'})
+      })
+    },
     LOGOUT: function (context) {
       // add timeout to make logout feel more real
       setTimeout(function () {
