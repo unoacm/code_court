@@ -147,7 +147,7 @@ export default {
         id: runId,
         problemSlug: this.problem.slug,
         language: this.lang,
-        source_code: this.sourceCode,
+        source_code: this.$refs.editor.editor.getValue(),
         run_input: isSubmission ? null : this.testInput,
         is_submission: isSubmission,
         is_passed: null,
