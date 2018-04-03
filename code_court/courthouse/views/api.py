@@ -140,7 +140,7 @@ def submit_writ(run_id):
         util.add_versions(run.run_output)
         db_session.delete(run)
         version_contest = model.Contest.query.filter_by(name="version_contest").first()
-        db_session.delete(version_contest)    
+        db_session.delete(version_contest)
 
     db_session.commit()
 
