@@ -42,16 +42,16 @@ class UtilTestCase(BaseTest):
         db_session.add_all([string_config, bool_config, integer_config])
         db_session.commit()
 
-        self.assertIsNotNone(util.get_configuration("String_Config"))
-        self.assertIsNotNone(util.get_configuration("Bool_Config"))
-        self.assertIsNotNone(util.get_configuration("Integer_Config"))
+        self.assertEqual(util.get_configuration("String_Config"), "sample")
+        self.assertEqual(util.get_configuration("Bool_Config"), True)
+        self.assertEqual(util.get_configuration("Integer_Config"), 12)        
 
     def test_i(self):
         """test the i function"""
          
         x = "12"
         value = util.i(x)
-        self.assertEqual(int(x), 12)
+        self.assertEqual(int(x), value)
 
     def test_str_to_dt(self):
         """test the str_to_dt function"""
@@ -82,26 +82,23 @@ class UtilTestCase(BaseTest):
     def test_dt_to_str(self):
         """tests the dt_to_str function"""
 
-        dt = datetime.datetime.utcnow()
-        time = util.dt_to_str(dt)
+        dt = datetime.datetime(2018, 4, 2, 9, 20, 46)
 
-        self.assertEqual(datetime.datetime.strftime(dt, "%Y-%m-%dT%H:%M:%SZ"), time)
+        self.assertEqual(util.dt_to_str(dt), "2018-04-02T09:20:46Z")
 
     def test_dt_to_date_str(self):
         """tests the dt_to_date_str function"""
 
-        dt = datetime.datetime.utcnow()
-        time = util.dt_to_date_str(dt)
+        dt = datetime.datetime(2018, 4, 2, 9, 21, 56)
 
-        self.assertEqual(datetime.datetime.strftime(dt.today(), "%Y-%m-%d"), time)
+        self.assertEqual(util.dt_to_date_str(dt), "2018-04-02")
 
     def test_dt_to_time_str(self):    
         """tests the dt_to_time_str function """
 
-        dt = datetime.datetime.utcnow()
-        time = util.dt_to_time_str(dt)
+        dt = datetime.datetime(2018, 4, 2, 9, 23, 39)
 
-        self.assertEqual(datetime.datetime.strftime(dt, "%H:%M:%S"), time)
+        self.assertEqual(util.dt_to_time_str(dt), "09:23:39")
 
     def test_add_versions(self):
         """test the add_versions function"""
