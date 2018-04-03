@@ -401,12 +401,12 @@ def populate_db():
     db_session.commit()
 
     verscrape_run = model.Run(executioner_user, version_contest, python, None,
-        datetime.datetime.utcnow(), src_code, 
+        datetime.datetime.utcnow(), src_code,
         empty_input, empty_input, True, None)
 
     db_session.add(verscrape_run)
 
-    db_session.commit() 
+    db_session.commit()
 
 
 def dev_populate_db():
@@ -467,11 +467,12 @@ def dev_populate_db():
     test_contest.problems.append(hello_world)
     db_session.add(hello_world)
 
+    n = 5000
     hello_worlds = model.Problem(
         io_problem_type, "hello-worlds", "Hello, Worlds!",
         'Print the string "Hello, World!" n times', "2",
-        "Hello, World!\nHello, World!", "5",
-        "Hello, World!\nHello, World!\nHello, World!\nHello, World!\nHello, World!\n"
+        "Hello, World!\nHello, World!", str(n),
+        "Hello, World!\n"*n
     )
     problems.append(hello_worlds)
     test_contest.problems.append(hello_worlds)
