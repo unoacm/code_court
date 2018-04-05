@@ -92,11 +92,11 @@ def contests_del(contest_id):
     return redirect(url_for("contests.contests_view"))
 
 
-def users_from_emails(emails, model):
+def users_from_usernames(usernames, model):
     users = []
 
-    for email in emails:
-        db_user = model.User.query.filter_by(email=email).scalar()
+    for username in usernames:
+        db_user = model.User.query.filter_by(username=username).scalar()
         if db_user:
             users.append(db_user)
     return users
@@ -134,7 +134,7 @@ def add_contest():
     deactivate_date = request.form.get("deactivate_date")
     deactivate_time = request.form.get("deactivate_time")
     is_public = request.form.get("is_public")
-    user_emails = request.form.get("users")
+    user_usernames = request.form.get("users")
     problem_slugs = request.form.get("problems")
 
     if activate_date is not "" and activate_time is not "":
@@ -149,7 +149,7 @@ def add_contest():
 
     if deactivate_date is not "" and deactivate_time is not "":
         deactivate_date_time = util.strs_to_dt(deactivate_date,
-                                                deactivate_time)
+                                               deactivate_time)
     else:
         deactivate_date_time = None
 
@@ -180,7 +180,7 @@ def add_contest():
         contest.end_time = util.strs_to_dt(end_date, end_time)
         contest.deactivate_time = deactivate_date_time
 
-        contest.users = users_from_emails(user_emails.split(), model)
+        contest.users = users_from_usernames(user_usernames.split(), model)
         contest.problems = problems_from_slugs(problem_slugs.split(), model)
     else:  # add
         if is_dup_contest_name(name):
@@ -198,7 +198,7 @@ def add_contest():
             freeze_time=freeze_date_time,
             end_time=util.strs_to_dt(end_date, end_time),
             deactivate_time=deactivate_date_time,
-            users=users_from_emails(user_emails.split(), model),
+            users=users_from_usernames(user_usernames.split(), model),
             problems=problems_from_slugs(problem_slugs.split(), model))
         db_session.add(contest)
 
@@ -226,7 +226,7 @@ def display_contest_add_form(contest_id):
             "contests/add_edit.html",
             action_label="Add",
             contest=None,
-            user_emails=[user.email for user in model.User.query.all()],
+            user_usernames=[user.username for user in model.User.query.all()],
             problem_slugs=[a.slug for a in model.Problem.query.all()])
     else:  # edit
         contest = model.Contest.query.filter_by(id=util.i(contest_id)).scalar()
@@ -241,7 +241,7 @@ def display_contest_add_form(contest_id):
             "contests/add_edit.html",
             action_label="Edit",
             contest=contest,
-            user_emails=[user.email for user in model.User.query.all()],
+            user_usernames=[user.username for user in model.User.query.all()],
             problem_slugs=[a.slug for a in model.Problem.query.all()])
 
 

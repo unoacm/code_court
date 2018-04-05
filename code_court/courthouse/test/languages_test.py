@@ -64,7 +64,7 @@ class LanguagesTestCase(BaseTest):
         init_lang_name = "benscript49495885"
         edit_lang_name = "josiahscript31231137"
 
-        self.login("admin@example.org", "pass")
+        self.login("admin", "pass")
 
         self._lang_add(init_lang_name)
         self._lang_edit(init_lang_name, edit_lang_name)

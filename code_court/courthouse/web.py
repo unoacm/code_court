@@ -103,12 +103,11 @@ def create_app():
 
     DebugToolbarExtension(app)
 
-
     app.logger.info("Setting up app")
 
     @login_manager.user_loader
-    def load_user(user_email):
-        return model.User.query.filter_by(email=user_email).scalar()
+    def load_user(username):
+        return model.User.query.filter_by(username=username).scalar()
 
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
@@ -365,12 +364,12 @@ def populate_db():
     roles = {x.name: x for x in model.UserRole.query.all()}
     db_session.add_all([
         model.User(
-            "admin@example.org",
+            "admin",
             "Admin",
             "pass",
             user_roles=[roles['operator']]),
         model.User(
-            "exec@example.org",
+            "exec",
             "Executioner",
             "epass",
             user_roles=[roles['executioner']])
@@ -383,7 +382,7 @@ def populate_db():
     with open("init_data/printver.py", "r") as f:
         src_code = "\n".join(f.readlines())
 
-    executioner_user = model.User.query.filter_by(email="exec@example.org").scalar()
+    executioner_user = model.User.query.filter_by(username="exec").scalar()
 
     python = model.Language.query.filter_by(name="python").scalar()
     empty_input = ""
@@ -417,12 +416,12 @@ def dev_populate_db():
 
     db_session.add_all([
         model.User(
-            "super@example.org",
+            "superuser",
             "SuperUser",
             "pass",
             user_roles=list(roles.values())),
         model.User(
-            "observer@example.org",
+            "observer",
             "ObserverUser",
             "pass",
             user_roles=[roles['observer']])
@@ -435,7 +434,7 @@ def dev_populate_db():
     ]
     for i in range(1, 5):
         test_contestant = model.User(
-            "testuser{}@example.org".format(i),
+            "testuser{}".format(i),
             names[i - 1],
             "pass",
             user_roles=[roles['defendant']])

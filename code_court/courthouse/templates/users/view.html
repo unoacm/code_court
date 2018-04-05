@@ -5,7 +5,7 @@
     <div class="row">
         <div class="form-group col-xs-9 col-sm-10">
             <input type="text" class="form-control" id="search" name="search"
-                placeholder="Search term partial matches with user name or email"
+                placeholder="Search term partial matches with username"
                 {% if search %} value="{{ search }}" {% endif %}>
         </div>
         <div class="form-group col-xs-3 col-sm-2">
@@ -39,7 +39,6 @@
     <thead>
         <tr>
             <th>id</th>
-            <th>email</th>
             <th>name</th>
             <th>username</th>
             <th>user_role</th>
@@ -52,7 +51,6 @@
         {% for user in users %}
         <tr>
             <td class="user_id">{{ user.id }}</td>
-            <td class="user_email">{{ user.email }}</td>
             <td class="user_name">{{ user.name }}</td>
             <td class="user_username">{{ user.username }}</td>
             <td class="user_role">{% for user_role in user.user_roles %}{{ user_role.name }} {% endfor %}</td>

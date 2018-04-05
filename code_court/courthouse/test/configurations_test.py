@@ -67,7 +67,7 @@ class ConfigurationsTestCase(BaseTest):
         init_config_key = "init_config_125r32"
         edit_config_key = "edit_config_08294e"
 
-        self.login("admin@example.org", "pass")
+        self.login("admin", "pass")
 
         self._config_add(init_config_key)
         self._config_edit(init_config_key, edit_config_key)

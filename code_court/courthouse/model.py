@@ -196,13 +196,10 @@ class User(Base, UserMixin):
 
     id = Column(Integer, primary_key=True)
 
-    email = Column(String, unique=True, nullable=False)
-    """str: the user's email"""
-
     name = Column(String, nullable=False)
     """str: the user's full name, no specific format is assumed"""
 
-    username = Column(String, nullable=False)
+    username = Column(String, unique=True, nullable=False)
     """str: the username, for display"""
 
     hashed_password = Column(String, nullable=False)
@@ -221,14 +218,13 @@ class User(Base, UserMixin):
         "UserRole", secondary=user_user_role, back_populates="users")
 
     def __init__(self,
-                 email,
+                 username,
                  name,
                  password,
                  creation_time=None,
                  misc_data=None,
                  contests=None,
-                 user_roles=None,
-                 username=None):
+                 user_roles=None):
         if misc_data is None:
             misc_data = json.dumps({})
 
@@ -241,14 +237,10 @@ class User(Base, UserMixin):
         if contests is not None:
             self.contests = contests
 
-        self.email = email
         self.name = name
         self.hashed_password = str(util.hash_password(password))
         self.misc_data = misc_data
-        if username:
-            self.username = username
-        else:
-            self.username = email.split("@")[0]
+        self.username = username
 
     @property
     def misc_data_dict(self):
@@ -278,18 +270,17 @@ class User(Base, UserMixin):
         return False
 
     def get_id(self):
-        return self.email
+        return self.username
 
     def get_output_dict(self):
         return {
             "id": self.id,
-            "email": self.email,
             "name": self.name,
             "username": self.username,
         }
 
     def __repr__(self):
-        return "User({})".format(self.email)
+        return "User({})".format(self.username)
 
     def __str__(self):
         return self.__repr__()

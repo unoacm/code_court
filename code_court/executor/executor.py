@@ -129,7 +129,7 @@ class Executor:
         try:
             r = requests.get(
                 self.conf['writ_url'],
-                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+                auth=HTTPBasicAuth(self.conf['username'], self.conf['password'])
             )
         except Exception:
             logging.warn("Couldn't to courthouse at %s", self.conf['writ_url'])
@@ -153,7 +153,7 @@ class Executor:
             r = requests.post(
                 self.conf['submit_url'].format(self.writ.run_id),
                 json={"output": out, "state": state},
-                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+                auth=HTTPBasicAuth(self.conf['username'], self.conf['password'])
             )
 
             if r.status_code != 200:
@@ -171,7 +171,7 @@ class Executor:
         try:
             requests.post(
                 url,
-                auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
+                auth=HTTPBasicAuth(self.conf['username'], self.conf['password'])
             )
         except requests.exceptions.ConnectionError:
             logging.warn("Failed to return writ: %s", self.writ.run_id)
@@ -314,16 +314,15 @@ def get_conf():
         help='executes writs locally without docker in an insecure manner',
     )
     parser.add_argument(
-        '-u',
         '--url',
         default="http://localhost:9191",
         help='the courthouse url',
     )
     parser.add_argument(
-        '-e',
-        '--email',
-        default='exec@example.org',
-        help='the email for the executor user',
+        '-u',
+        '--username',
+        default='exec',
+        help='the username for the executor user',
     )
     parser.add_argument(
         '-p',

@@ -30,19 +30,19 @@ def login_view():
 @util.ssl_required
 def login_submit():
     """processes login requests"""
-    if "email" not in request.form:
-        flash("Email not found", "danger")
+    if "username" not in request.form:
+        flash("username not found", "danger")
         abort(401)
 
     if "password" not in request.form:
         flash("Password not found", "danger")
         abort(401)
 
-    email = request.form.get("email")
+    username = request.form.get("username")
     password = request.form.get("password")
 
     try:
-        user = model.User.query.filter_by(email=email).one()
+        user = model.User.query.filter_by(username=username).one()
     except NoResultFound as e:
         flash("Invalid username or password", "danger")
         abort(401)

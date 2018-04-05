@@ -24,7 +24,7 @@ class APITestCase(BaseTest):
         wrong_auth_headers = {
             'Authorization':
             'Basic %s' %
-            b64encode(b"wronguser@example.org:wrongpass").decode("ascii")
+            b64encode(b"wronguser:wrongpass").decode("ascii")
         }
         rv = self.app.get('/api/get-writ', headers=wrong_auth_headers)
         self.assertEqual(rv.status_code, 401)
@@ -36,7 +36,7 @@ class APITestCase(BaseTest):
         auth_headers = {
             'Authorization':
             'Basic %s' %
-            b64encode(b"testexec@example.org:epass").decode("ascii")
+            b64encode(b"testexec:epass").decode("ascii")
         }
 
         # get writ
@@ -96,7 +96,7 @@ class APITestCase(BaseTest):
         db_session.commit()
 
         setup_contest()
-        self.login("admin@example.org", "pass")
+        self.login("admin", "pass")
 
         test_run = model.Run.query.first()
 
@@ -117,7 +117,7 @@ class APITestCase(BaseTest):
             auth_headers = {
                 'Authorization':
                 'Basic %s' %
-                b64encode(b"testexec@example.org:epass").decode("ascii")
+                b64encode(b"testexec:epass").decode("ascii")
             }
 
             rv = self.app.get('/api/get-writ', headers=auth_headers)
@@ -132,7 +132,7 @@ class APITestCase(BaseTest):
     def test_submit_run(self):
         """Tests the run submit endpoint"""
         setup_contest()
-        token = self.get_jwt_token("testuser@example.org", "pass")
+        token = self.get_jwt_token("testuser", "pass")
 
         data = dict(
             lang="python",
@@ -148,7 +148,7 @@ class APITestCase(BaseTest):
     def test_get_problems(self):
         """Tests the /api/problems endpoint"""
         setup_contest()
-        token = self.get_jwt_token("testuser@example.org", "pass")
+        token = self.get_jwt_token("testuser", "pass")
 
         rv = self.jwt_get('/api/problems', auth_token=token)
         self.assertEqual(rv.status_code, 200)
@@ -161,19 +161,18 @@ class APITestCase(BaseTest):
     def test_get_current_user(self):
         """Tests the /api/current-user endpoint"""
         setup_contest()
-        token = self.get_jwt_token("testuser@example.org", "pass")
+        token = self.get_jwt_token("testuser", "pass")
 
         rv = self.jwt_get('/api/current-user', auth_token=token)
         self.assertEqual(rv.status_code, 200)
 
         user = json.loads(rv.data.decode("utf-8"))
-        self.assertEqual(user.get('email'), "testuser@example.org")
         self.assertEqual(user.get('username'), "testuser")
 
     def test_get_contest_info(self):
         """Tests the /api/get-contest-info endpoint"""
         setup_contest()
-        token = self.get_jwt_token("testuser@example.org", "pass")
+        token = self.get_jwt_token("testuser", "pass")
 
         rv = self.jwt_get('/api/get-contest-info', auth_token=token)
         self.assertEqual(rv.status_code, 200)
@@ -186,9 +185,8 @@ class APITestCase(BaseTest):
         setup_contest()
 
         data = dict(
-            email="signuptest@example.org",
-            name="Signup Test",
             username="signuptest",
+            name="Signup Test",
             password="pass",
             password2="pass",
             contest_name="test_contest",
@@ -197,7 +195,7 @@ class APITestCase(BaseTest):
         rv = self.post_json('/api/signup', data)
         self.assertEqual(rv.status_code, 200, rv.data)
 
-        token = self.get_jwt_token(data['email'], data['password'])
+        token = self.get_jwt_token(data['username'], data['password'])
         self.assertIsNotNone(token)
 
     def test_get_languages(self):
@@ -215,12 +213,12 @@ class APITestCase(BaseTest):
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
     test_contestant = model.User(
-        "testuser@example.org",
+        "testuser",
         "Test User",
         "pass",
         user_roles=[roles['defendant']])
     test_executioner = model.User(
-        "testexec@example.org",
+        "testexec",
         "Test Executioner",
         "epass",
         user_roles=[roles['executioner']])
