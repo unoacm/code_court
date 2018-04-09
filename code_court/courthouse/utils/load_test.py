@@ -197,11 +197,11 @@ class bcolors:
 
 def _log_timing(url, start_time):
     time_taken = millis() - start_time
-    time_taken_str = str(time_taken) + "ms"
-    if time_taken > 100:
-        time_taken_str = bcolors.WARNING + time_taken_str + bcolors.ENDC
-    elif time_taken > 1000:
+    time_taken_str = "{}ms".format(time_taken)
+    if time_taken > 1000:
         time_taken_str = bcolors.FAIL + time_taken_str + bcolors.ENDC
+    elif time_taken > 100:
+        time_taken_str = bcolors.WARNING + time_taken_str + bcolors.ENDC
     logging.info("Request to %-50s took %s", url, time_taken_str)
 
 
