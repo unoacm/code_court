@@ -5,11 +5,11 @@
       <h3 class="title">login</h3>
       <form @submit.prevent="login()">
         <p class="control">
-          <input v-model="loginEmail" type="email" class="input" placeholder="email" name="email" />
+          <input v-model="loginEmail" type="email" class="input" placeholder="email" name="email" required />
         </p>
 
         <p class="control">
-          <input v-model="loginPassword" type="password" class="input" placeholder="password" name="password" />
+          <input v-model="loginPassword" type="password" class="input" placeholder="password" name="password" required />
         </p>
 
         <input type="submit" class="button is-primary" value="login" />
@@ -21,27 +21,27 @@
       <h3 class="title">signup</h3>
       <form @submit.prevent="signup()">
         <p class="control">
-          <input v-model="signupEmail" type="email" class="input" placeholder="email" name="email" />
+          <input v-model="signupEmail" type="email" class="input" placeholder="email" name="email" required />
         </p>
 
         <p class="control">
-          <input v-model="signupUsername" type="text" class="input" placeholder="username" name="username" />
+          <input v-model="signupUsername" type="text" class="input" placeholder="username" name="username" required />
         </p>
 
         <p class="control">
-          <input v-model="signupName" type="text" class="input" placeholder="name" name="name" />
+          <input v-model="signupName" type="text" class="input" placeholder="name" name="name" required />
         </p>
 
         <p class="control">
-          <input v-model="signupPassword" type="password" class="input" placeholder="password" name="password" />
+          <input v-model="signupPassword" type="password" class="input" placeholder="password" name="password" required />
         </p>
 
         <p class="control">
-          <input v-model="signupPassword2" type="password" class="input" placeholder="re-enter password" name="password" />
+          <input v-model="signupPassword2" type="password" class="input" placeholder="re-enter password" name="password" required />
         </p>
 
         <p class="control">
-          <input v-model="signupContest" type="text" class="input" placeholder="contest" name="contest" />
+          <input v-model="signupContest" type="text" class="input" placeholder="contest" name="contest" required />
         </p>
 
         <input type="submit" class="button is-primary" value="signup" />
