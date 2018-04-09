@@ -108,7 +108,7 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_email):
-        return model.User.query.filter_by(email=user_email).one()
+        return model.User.query.filter_by(email=user_email).scalar()
 
     app.register_blueprint(main, url_prefix='')
     app.register_blueprint(api, url_prefix='/api')
