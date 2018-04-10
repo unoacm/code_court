@@ -21,6 +21,10 @@
 import Nav from '@/components/Nav'
 import ContestCountdown from '@/components/ContestCountdown'
 
+const RUN_REFRESH_INTERVAL = 5000
+const SCORE_REFRESH_INTERVAL = 30000
+const MISC_REFRESH_INTERVAL = 120000
+
 export default {
   name: 'app',
   created: function () {
@@ -46,19 +50,21 @@ export default {
       if (this.contest.id) {
         this.$store.dispatch('LOAD_SCORES', this.contest.id)
       }
-    }.bind(this), 30000)
+    }.bind(this), SCORE_REFRESH_INTERVAL)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       }
-    }.bind(this), 5000)
+    }.bind(this), RUN_REFRESH_INTERVAL)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_CONTEST')
+        this.$store.dispatch('LOAD_LANGS')
+        this.$store.dispatch('LOAD_USER')
       }
-    }.bind(this), 120000)
+    }.bind(this), MISC_REFRESH_INTERVAL)
   },
   components: {
     'nav-disp': Nav,
