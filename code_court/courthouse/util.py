@@ -16,7 +16,7 @@ from database import db_session
 
 
 RUN_CACHE_NAME = 'runcache'
-SCORE_CACHE_NAME ='scorecache'
+SCORE_CACHE_NAME = 'scorecache'
 
 
 class ModelMissingException(Exception):
@@ -137,11 +137,22 @@ def paginate(sa_query, page, per_page=20, error_out=True):
 
 
 def invalidate_cache_item(cache_name, key):
+    """Deletes a specific item in the specified cache"""
     try:
         import uwsgi
         uwsgi.cache_del(str(key), cache_name)
     except ImportError:
         pass
+
+
+def invalidate_cache(cache_name):
+    """Deletes everything in the specificed cache"""
+    try:
+        import uwsgi
+        uwsgi.cache_clear(cache_name)
+    except ImportError:
+        pass
+
 
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
@@ -177,6 +188,7 @@ def dt_to_time_str(dt):
     if dt is None:
         return None
     return datetime.datetime.strftime(dt, '%H:%M:%S')
+
 
 def add_versions(run_output):
     versions = json.loads(run_output)

@@ -263,6 +263,8 @@ def add_problem():
 
     db_session.commit()
 
+    util.invalidate_cache(util.RUN_CACHE_NAME)
+
     return redirect(url_for("problems.problems_view"))
 
 
