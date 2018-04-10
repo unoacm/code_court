@@ -121,11 +121,9 @@ def submit_writ(run_id):
         run.is_passed = clean_output_string(
             run.run_output) == clean_output_string(run.correct_output)
 
-        if run.is_passed:
-            util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
-
         if run.state == model.RunState.EXECUTED:
-            if run.started_execing_time > run.contest.end_time:
+            if run.submit_time > run.contest.end_time:
+                run.is_passed = None
                 if run.is_passed:
                     run.state = model.RunState.CONTEST_ENDED_PASSED
                 else:
@@ -136,6 +134,9 @@ def submit_writ(run_id):
                 else:
                     run.state = model.RunState.FAILED
 
+    if run.is_passed:
+        util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
+
     if run.user.email == "exec@example.org":
         util.add_versions(run.run_output)
         db_session.delete(run)
@@ -144,8 +145,8 @@ def submit_writ(run_id):
 
     db_session.commit()
 
-
     util.invalidate_cache_item(util.RUN_CACHE_NAME, run.user_id)
+
     return "Good"
 
 
@@ -393,10 +394,7 @@ def submit_run():
     run.state = model.RunState.JUDGING
 
     resp = None
-    if datetime.datetime.utcnow() > contest.end_time:
-        run.state = model.RunState.CONTEST_ENDED
-        resp = make_response(jsonify({'error': 'Contest has ended'}), 400)
-    elif datetime.datetime.utcnow() < contest.start_time:
+    if datetime.datetime.utcnow() < contest.start_time:
         run.state = model.RunState.CONTEST_HAS_NOT_BEGUN
         run.started_execing_time = datetime.datetime.utcnow()
         run.finished_execing_time = datetime.datetime.utcnow()
