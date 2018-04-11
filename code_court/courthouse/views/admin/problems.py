@@ -263,6 +263,8 @@ def add_problem():
 
     db_session.commit()
 
+    # If a problem is updated, the cached runs will be
+    # inaccurate. Clear the run cache to fix this.
     util.invalidate_cache(util.RUN_CACHE_NAME)
 
     return redirect(url_for("problems.problems_view"))

@@ -94,6 +94,7 @@ class Executor:
             signal.alarm(0)
             if self.container:
                 self.container.remove(force=True)
+                self.container = None
             try:
                 shutil.rmtree(self.writ.shared_data_dir)
             except FileNotFoundError:

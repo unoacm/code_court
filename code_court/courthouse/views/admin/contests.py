@@ -204,6 +204,10 @@ def add_contest():
 
     db_session.commit()
 
+    # If a problem is added to a contest, the cached runs will be
+    # inaccurate. Clear the run cache to fix this.
+    util.invalidate_cache(util.RUN_CACHE_NAME)
+
     return redirect(url_for("contests.contests_view"))
 
 
