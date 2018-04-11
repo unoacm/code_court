@@ -41,6 +41,7 @@ class Executor:
         self.writ = None
         self.conf = conf
         self.client = docker.from_env()
+        self.container = None
 
     def start(self):
         while True:
@@ -68,7 +69,6 @@ class Executor:
         signal.signal(signal.SIGALRM, raise_timeout)
         signal.alarm(self.conf['timeout'])
 
-        container = None
         try:
             if self.conf['insecure']:
                 out = self.insecure_run_program()
@@ -92,8 +92,8 @@ class Executor:
             self.submit_writ(out, RunState.EXECUTED)
         finally:
             signal.alarm(0)
-            if container:
-                container.remove(force=True)
+            if self.container:
+                self.container.remove(force=True)
             try:
                 shutil.rmtree(self.writ.shared_data_dir)
             except FileNotFoundError:
@@ -190,7 +190,6 @@ class Executor:
         except subprocess.CalledProcessError as e:
             out = e.output.decode("utf-8")
 
-
         if len(out) > self.conf['char_output_limit']:
             raise OutputLimitExceeded()
 
@@ -220,22 +219,22 @@ class Executor:
                 "mode": "ro"
             }
         }
-        container = self.client.containers.run(EXECUTOR_IMAGE_NAME,
-                                               "/share/runner",
-                                               detach=True,
-                                               working_dir="/share",
-                                               volumes=shared_volumes,
-                                               user=CONTAINER_USER,
-                                               network_disabled=True,
-                                               read_only=False,
-                                               mem_swappiness=MEM_SWAPPINESS,
-                                               pids_limit=PID_LIMIT,
-                                               cpu_period=CPU_PERIOD,
-                                               mem_limit=MEM_LIMIT)
+        self.container = self.client.containers.run(EXECUTOR_IMAGE_NAME,
+                                                    "/share/runner",
+                                                    detach=True,
+                                                    working_dir="/share",
+                                                    volumes=shared_volumes,
+                                                    user=CONTAINER_USER,
+                                                    network_disabled=True,
+                                                    read_only=False,
+                                                    mem_swappiness=MEM_SWAPPINESS,
+                                                    pids_limit=PID_LIMIT,
+                                                    cpu_period=CPU_PERIOD,
+                                                    mem_limit=MEM_LIMIT)
 
         out = []
         rolling_size = 0
-        for line in container.logs(stream=True):
+        for line in self.container.logs(stream=True):
             chunk = line.decode("utf-8")
             rolling_size += len(chunk)
 
