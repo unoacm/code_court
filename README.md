@@ -1,5 +1,7 @@
 code\_court is a system for running programming competitions.
 
+![screenshot](screenshot.png "Screenshot")
+
 # Overview
 Code\_court is composed of three separate components.
 1. __courthouse__ - The backend api server and admin control panel
