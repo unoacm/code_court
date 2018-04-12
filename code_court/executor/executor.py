@@ -124,7 +124,7 @@ class Executor:
                 auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
             )
         except Exception:
-            logging.exception("Failed to connect to courthouse")
+            logging.warn("Couldn't to courthouse at %s", self.conf['writ_url'])
             return None
 
         if r.status_code != 200:
@@ -149,7 +149,7 @@ class Executor:
             try:
                 self.return_writ_without_output()
             except Exception:
-                logging.exception("Failed to return writ")
+                logging.warn("Failed to return writ: %s", self.writ.run_id)
 
         self.current_writ = None
 
@@ -163,7 +163,7 @@ class Executor:
                 auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
             )
         except requests.exceptions.ConnectionError:
-            logging.exception("Failed to return writ")
+            logging.warn("Failed to return writ: %s", self.writ.run_id)
 
     def insecure_run_program(self):
         container_shared_data_dir = self.writ.shared_data_dir
