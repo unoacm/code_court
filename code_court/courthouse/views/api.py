@@ -62,7 +62,7 @@ def get_writ():
         chosen_run = model.Run.query.filter_by(started_execing_time=None, finished_execing_time=None)\
                                     .order_by(model.Run.submit_time.asc()).limit(1).first()
     if chosen_run is None:
-        return make_response(jsonify({'status': 'unavailable'}), 404)
+        return make_response(jsonify({'status': 'unavailable'}), 200)
 
     # TODO: use a better locking method to prevent dual execution
     chosen_run.started_execing_time = datetime.datetime.utcnow()

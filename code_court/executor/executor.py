@@ -130,6 +130,13 @@ class Executor:
         if r.status_code != 200:
             return None
 
+        try:
+            if r.json().get('status') != "found":
+                return None
+        except ValueError:
+            logging.warn("Received invalid json from while getting writ")
+            return None
+
         return Writ.from_dict(r.json())
 
     def submit_writ(self, out, state):
