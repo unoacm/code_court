@@ -152,11 +152,7 @@ class Executor:
                 logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
         except requests.exceptions.ConnectionError:
-            logging.error("Failed to submit writ")
-            try:
-                self.return_writ_without_output()
-            except Exception:
-                logging.warn("Failed to return writ: %s", self.writ.run_id)
+            logging.error("Failed to submit writ: %s", self.writ.run_id)
 
         self.current_writ = None
 
