@@ -60,7 +60,8 @@ class APITestCase(BaseTest):
         #There is the language version run, so get-writ is called twice
         self.app.get('/api/get-writ', headers=auth_headers)
         rv = self.app.get('/api/get-writ', headers=auth_headers)
-        self.assertEqual(rv.status_code, 404)
+        self.assertEqual(rv.status_code, 200)
+        self.assertEqual(json.loads(rv.data.decode("utf-8"))['status'], "unavailable")
 
         # give back writ
         rv = self.app.post(
@@ -84,13 +85,12 @@ class APITestCase(BaseTest):
 
         # verify no more writs
         rv = self.app.get('/api/get-writ', headers=auth_headers)
-        self.assertEqual(rv.status_code, 404)
+        self.assertEqual(rv.status_code, 200)
+        self.assertEqual(json.loads(rv.data.decode("utf-8"))['status'], "unavailable")
 
     def test_rejudging(self):
         """Tests rejudging endpoint"""
-
-
-        #A version run is being added on db startup
+        # A version run is being added on db startup
         for run in model.Run.query.all():
             db_session.delete(run)
         db_session.commit()

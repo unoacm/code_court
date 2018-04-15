@@ -124,10 +124,17 @@ class Executor:
                 auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
             )
         except Exception:
-            logging.exception("Failed to connect to courthouse")
+            logging.warn("Couldn't to courthouse at %s", self.conf['writ_url'])
             return None
 
         if r.status_code != 200:
+            return None
+
+        try:
+            if r.json().get('status') != "found":
+                return None
+        except ValueError:
+            logging.warn("Received invalid json from while getting writ")
             return None
 
         return Writ.from_dict(r.json())
@@ -145,11 +152,7 @@ class Executor:
                 logging.error("Failed to submit writ, code: %s, response: %s", r.status_code, r.text)
 
         except requests.exceptions.ConnectionError:
-            logging.error("Failed to submit writ")
-            try:
-                self.return_writ_without_output()
-            except Exception:
-                logging.exception("Failed to return writ")
+            logging.error("Failed to submit writ: %s", self.writ.run_id)
 
         self.current_writ = None
 
@@ -163,7 +166,7 @@ class Executor:
                 auth=HTTPBasicAuth(self.conf['email'], self.conf['password'])
             )
         except requests.exceptions.ConnectionError:
-            logging.exception("Failed to return writ")
+            logging.warn("Failed to return writ: %s", self.writ.run_id)
 
     def insecure_run_program(self):
         container_shared_data_dir = self.writ.shared_data_dir
