@@ -89,7 +89,7 @@ class Executor:
             self.return_writ_without_output()
             traceback.print_exc()
         else:
-            self.submit_writ(out, RunState.EXECUTED)
+            self.submit_writ(self.clean_output(out), RunState.EXECUTED)
         finally:
             signal.alarm(0)
             if self.container:
@@ -101,6 +101,14 @@ class Executor:
                 pass
 
             self.writ = None
+
+    def clean_output(self, s):
+        # postgres can't store strings with null characters,
+        # so remove those
+        if "\0" in s:
+            logging.info("Removing null character(s) from run %s output", self.writ.run_id)
+        s = s.replace("\0", "")
+        return s
 
     def create_share_files(self, share_folder, runner_str, input_str, program_str):
         files = {
