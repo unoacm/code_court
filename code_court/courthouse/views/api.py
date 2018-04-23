@@ -35,8 +35,8 @@ executioner_auth = HTTPBasicAuth()
 
 # api auth
 @executioner_auth.verify_password
-def verify_password(email, password):
-    user = model.User.query.filter_by(email=email).scalar()
+def verify_password(username, password):
+    user = model.User.query.filter_by(username=username).scalar()
     if not user or not user.verify_password(password):
         return False
     return True
@@ -137,7 +137,7 @@ def submit_writ(run_id):
     if run.is_passed:
         util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
 
-    if run.user.email == "exec@example.org":
+    if run.user.username == "exec":
         util.add_versions(run.run_output)
         db_session.delete(run)
         version_contest = model.Contest.query.filter_by(name="version_contest").first()
@@ -178,10 +178,10 @@ def login():
     if not request.json:
         return jsonify({"msg": "Bad request"}), 401
 
-    email = request.json.get('email', None)
+    username = request.json.get('username', None)
     password = request.json.get('password', None)
 
-    user = model.User.query.filter_by(email=email).scalar()
+    user = model.User.query.filter_by(username=username).scalar()
 
     if user and user.verify_password(password):
         ret = {'access_token': create_access_token(identity=user.id)}
@@ -196,7 +196,6 @@ def signup():
         return jsonify({"msg": "Bad request"}), 400
 
     is_sucess, fields_or_error = _validate_and_get_required_fields([
-        "email",
         "username",
         "name",
         "password",
@@ -211,18 +210,17 @@ def signup():
     if fields['password'] != fields['password2']:
         return jsonify({"msg": "Passwords don't match"}), 400
 
-    user = model.User.query.filter_by(email=fields['email']).scalar()
+    user = model.User.query.filter_by(username=fields['username']).scalar()
     if user:
-        return jsonify({"msg": "User already exists with that email"}), 400
+        return jsonify({"msg": "User already exists with that username"}), 400
 
     defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(
-        email=fields['email'],
+        username=fields['username'],
         name=fields['name'],
         password=fields['password'],
-        user_roles=[defedant_role],
-        username=fields['username'])
+        user_roles=[defedant_role])
 
     contest = model.Contest.query.filter_by(name=fields['contest_name']).scalar()
 
@@ -489,8 +487,8 @@ def get_contest_info():
 def make_user():
     """
     To test manually:
-    - get auth token: curl -H "Content-Type: application/json" --data '{"email": "admin@example.org", "password": "pass"}' http://localhost:9191/api/login
-    - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "email": "ben@bendoan.me", "password": "pass"}' http://localhost:9191/api/make-defendant-user
+    - get auth token: curl -H "Content-Type: application/json" --data '{"username": "admin", "password": "pass"}' http://localhost:9191/api/login
+    - make request: curl -H "Authorization: Bearer *token_goes_here*" -H "Content-Type: application/json" --data '{"name": "Ben", "username": "bdoan", "password": "pass"}' http://localhost:9191/api/make-defendant-user
     """
     current_user_id = get_jwt_identity()
     curr_user = model.User.query.get(util.i(current_user_id))
@@ -502,19 +500,19 @@ def make_user():
             and "operator" not in curr_user.user_roles):
         return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
-    email = request.json.get('email')
+    username = request.json.get('username')
     name = request.json.get('name')
     password = request.json.get('password')
     username = request.json.get('username')
     contest_name = request.json.get('contest_name')
 
-    if not all([email, name, password, username, contest_name]):
+    if not all([username, name, password, username, contest_name]):
         return make_response(
             jsonify({
                 'error': 'Invalid request, missing fields'
             }), 400)
 
-    existing_user = model.User.query.filter_by(email=email).scalar()
+    existing_user = model.User.query.filter_by(username=username).scalar()
     if existing_user:
         return make_response(
             jsonify({
@@ -524,11 +522,10 @@ def make_user():
     defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(
-        email=email,
+        username=username,
         name=name,
         password=password,
-        user_roles=[defedant_role],
-        username=username)
+        user_roles=[defedant_role])
 
     db_session.add(new_user)
     db_session.commit()
@@ -558,10 +555,10 @@ def update_user_metadata():
             and "operator" not in curr_user.user_roles):
         return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
-    user_email = request.json.get('user_email')
+    user_username = request.json.get('user_username')
     user_misc_metadata = request.json.get('misc_metadata')
 
-    if not all([user_email, user_misc_metadata]):
+    if not all([user_username, user_misc_metadata]):
         return make_response(
             jsonify({
                 'error': 'Invalid request, missing field'
@@ -573,7 +570,7 @@ def update_user_metadata():
                 'error': 'Invalid request, misc_metadata must be a dict'
             }), 400)
 
-    matching_user = model.User.query.filter_by(email=user_email).scalar()
+    matching_user = model.User.query.filter_by(username=user_username).scalar()
 
     if not matching_user:
         return make_response(
@@ -589,7 +586,7 @@ def update_user_metadata():
 
 @api.route("/load-test")
 def load_test():
-    existing_user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+    existing_user = model.User.query.filter_by(username="testuser1").scalar()
 
     contest = model.Contest.query.first()
     defendants = model.User.query\
@@ -641,11 +638,11 @@ def load_test():
     user_points.sort(
         key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
 
-    user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+    user = model.User.query.filter_by(username="testuser1").scalar()
     if not user or not user.verify_password("test"):
         pass
 
-    user = model.User.query.filter_by(email="notauser@example.org").scalar()
+    user = model.User.query.filter_by(username="notauser").scalar()
     if not user or not user.verify_password("password"):
         pass
 
@@ -666,7 +663,7 @@ def load_test():
                                .filter(over_limit_runs_query)\
                                .count()
 
-    matching_user = model.User.query.filter_by(email="testuser1@example.org").scalar()
+    matching_user = model.User.query.filter_by(username="testuser1").scalar()
 
     current_user_id = 5
     user = model.User.query.filter_by(id=util.i(current_user_id)).scalar()
@@ -705,10 +702,10 @@ def load_test():
     return "good"
 
 
-@api.route("/signout/<email>", methods=["GET"])
+@api.route("/signout/<username>", methods=["GET"])
 @util.login_required("operator")
-def signout_user(email):
-    matching_user = model.User.query.filter_by(email=email).scalar()
+def signout_user(username):
+    matching_user = model.User.query.filter_by(username=username).scalar()
 
     if not matching_user:
         return make_response(

@@ -41,7 +41,7 @@ def users_view(page):
     if user_search:
         term = '%' + user_search + '%'
         users_query = users_query.filter(
-            or_(model.User.name.ilike(term), model.User.email.ilike(term)))
+            or_(model.User.name.ilike(term), model.User.username.ilike(term)))
     if user_role and user_role != "all":
         users_query = users_query.join(model.User.user_roles).filter(
             model.UserRole.name == user_role)
@@ -124,7 +124,7 @@ def users_del(user_id):
     try:
         db_session.delete(user)
         db_session.commit()
-        flash("Deleted user \'{}\'".format(user.email), "warning")
+        flash("Deleted user \'{}\'".format(user.username), "warning")
     except IntegrityError:
         db_session.rollback()
         error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(
@@ -146,7 +146,6 @@ def add_user():
         a redirect to the user view page
     """
     user_id = request.form.get("user_id")
-    email = request.form.get("email")
     name = request.form.get("name")
     username = request.form.get("username")
     password = request.form.get("password")
@@ -157,14 +156,13 @@ def add_user():
 
     if password != confirm_password:
         error = "Failed to add/edit \'{}\' due to password mismatch.".format(
-            email)
+            username)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
     if user_id:  # edit
         user = model.User.query.filter_by(id=util.i(user_id)).one()
-        user.email = email
         user.name = name
         user.username = username
         if password != "":
@@ -174,22 +172,21 @@ def add_user():
         user.user_roles = retrieve_by_names(user_role_ids.split(),
                                             model.UserRole)
     else:  # add
-        if is_dup_user_email(email):
+        if is_dup_user_username(username):
             error = "Failed to add user \'{}\' as user already exists.".format(
-                email)
+                username)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("users.users_view"))
 
         user = model.User(
-            email=email,
+            username=username,
             name=name,
             password=password,
             misc_data=misc_data,
             contests=retrieve_by_ids(contest_ids.split(), model.Contest),
             user_roles=retrieve_by_names(user_role_ids.split(),
-                                         model.UserRole),
-            username=username)
+                                         model.UserRole))
         db_session.add(user)
 
     db_session.commit()
@@ -223,21 +220,17 @@ def display_user_add_form(user_id):
 
 
 # Util functions
-def is_dup_user_email(email):
+def is_dup_user_username(username):
     """
-    Checks if an email is a duplicate of another user
+    Checks if a username is a duplicate of another user
 
     Params:
-        email (str): the user name to test
+        username (str): the username to test
 
     Returns:
-        bool: True if the email is a duplicate, False otherwise
+        bool: True if the username is a duplicate, False otherwise
     """
-    dup_user = model.User.query.filter_by(email=email).scalar()
-    if dup_user:
-        return True
-    else:
-        return False
+    return bool(model.User.query.filter_by(username=username).scalar())
 
 
 def retrieve_by_ids(ids, table):

@@ -91,7 +91,7 @@ class ProblemsTestCase(BaseTest):
         init_problem_name = "fibbonaci49495885"
         edit_problem_name = "shortestpath31231137"
 
-        self.login("admin@example.org", "pass")
+        self.login("admin", "pass")
 
         self._problem_add(init_problem_name)
         self._problem_edit(init_problem_name, edit_problem_name)

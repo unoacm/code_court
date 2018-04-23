@@ -17,7 +17,7 @@
 
         <div class="level-right">
           <span v-if="!user"><router-link to="/login">Login</router-link></span>
-          <span v-if="user"><a @click.prevent="logout()" class="logout">Logout {{ user.email }}</a></span>
+          <span v-if="user"><a @click.prevent="logout()" class="logout">Logout {{ user.username }}</a></span>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@
       <h3 class="title">login</h3>
       <form @submit.prevent="login()">
         <p class="control">
-          <input v-model="loginEmail" type="email" class="input" placeholder="email" name="email" required />
+          <input v-model="loginUsername" type="text" class="input" placeholder="username" name="username" />
         </p>
 
         <p class="control">
@@ -56,7 +56,7 @@
 export default {
   data () {
     return {
-      loginEmail: '',
+      loginUsername: '',
       loginPassword: '',
       signupEmail: '',
       signupUsername: '',
@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     login: function () {
-      this.$store.dispatch('LOGIN', {email: this.loginEmail, password: this.loginPassword})
+      this.$store.dispatch('LOGIN', {username: this.loginUsername, password: this.loginPassword})
     },
     signup: function () {
       this.$store.dispatch('SIGNUP', {

@@ -32,16 +32,11 @@ class ModelsTestCase(BaseTest):
     def test_user(self):
         """test the user table"""
         USER_ARGS = {
-            "email":
-            "testuser@example.org",
-            "name":
-            "Test A. B. User",
-            "password":
-            "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-            "creation_time":
-            util.str_to_dt("2017-01-01T12:12:00Z"),
-            "misc_data":
-            '{"teacher": "Cavanaugh"}',
+            "username": "testuser",
+            "name": "Test A. B. User",
+            "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
+            "creation_time": util.str_to_dt("2017-01-01T12:12:00Z"),
+            "misc_data": '{"teacher": "Cavanaugh"}',
         }
 
         # create and add user
@@ -50,7 +45,7 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch user
-        results = model.User.query.filter_by(email=USER_ARGS['email']).all()
+        results = model.User.query.filter_by(username=USER_ARGS['username']).all()
 
         self.assertEqual(len(results), 1)
 
@@ -284,16 +279,11 @@ def get_language():
 def get_user():
     """returns a test user"""
     USER_ARGS = {
-        "email":
-        "testuser@example.org",
-        "name":
-        "Test A. B. User",
-        "password":
-        "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
-        "creation_time":
-        util.str_to_dt("2017-01-01T12:12:00Z"),
-        "misc_data":
-        '{"teacher": "Cavanaugh"}',
+        "username": "testuser",
+        "name": "Test A. B. User",
+        "password": "1231i411das9d8as9ds8as9d8a9da09sd8a0fsdasdasdasdaskjdasdj1j2k31jklj12k312k3j21k",
+        "creation_time": util.str_to_dt("2017-01-01T12:12:00Z"),
+        "misc_data": '{"teacher": "Cavanaugh"}',
     }
 
     # create and add user

@@ -10,7 +10,7 @@ class ContestsTestCase(BaseTest):
     Contains tests for the contests blueprint
     """
 
-    def _contest_add(self, init_contest_name, emails):
+    def _contest_add(self, init_contest_name, usernames):
         rv = self.app.post(
             '/admin/contests/add/',
             data={
@@ -26,7 +26,7 @@ class ContestsTestCase(BaseTest):
                 "deactivate_date": "2017-01-01",
                 "deactivate_time": "16:00:00",
                 "is_public": "on",
-                "users": '\n'.join(emails),
+                "users": '\n'.join(usernames),
                 "problems": model.Problem.query.one().name,
             },
             follow_redirects=True)
@@ -38,7 +38,7 @@ class ContestsTestCase(BaseTest):
         self.assertIn(init_contest_name, page_contest_names,
                       "Contest was not added")
 
-    def _contest_edit(self, old_name, new_name, emails):
+    def _contest_edit(self, old_name, new_name, usernames):
         contest_id = model.Contest.query.filter_by(name=old_name).one().id
 
         rv = self.app.post(
@@ -57,7 +57,7 @@ class ContestsTestCase(BaseTest):
                 "deactivate_date": "2017-01-01",
                 "deactivate_time": "16:00:00",
                 "is_public": "on",
-                "users": '\n'.join(emails),
+                "users": '\n'.join(usernames),
                 "problems": model.Problem.query.one().name,
             },
             follow_redirects=True)
@@ -84,7 +84,7 @@ class ContestsTestCase(BaseTest):
         init_contest_name = "I see pea sea"
         edit_contest_name = "7er0 t1m3 4 s3gf4ult5"
 
-        self.login("admin@example.org", "pass")
+        self.login("admin", "pass")
 
         # Need to have a problem to test a contest:
         self.app.post(
@@ -116,17 +116,17 @@ class ContestsTestCase(BaseTest):
             "Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben",
             "Josiah", "Micah"
         ]
-        emails = ["testuser{}@example.org".format(i) for i in range(1, 11)]
+        usernames = ["testuser{}".format(i) for i in range(1, 11)]
 
         for i in range(1, 11):
             test_contestant = model.User(
-                emails[i - 1],
+                usernames[i - 1],
                 names[i - 1],
                 "pass",
                 user_roles=[roles['defendant']])
             db_session.add(test_contestant)
 
-        self._contest_add(init_contest_name, emails[0:7])
-        self._contest_edit(init_contest_name, edit_contest_name, emails[0:7])
+        self._contest_add(init_contest_name, usernames[0:7])
+        self._contest_edit(init_contest_name, edit_contest_name, usernames[0:7])
         self._contest_del(edit_contest_name)
 

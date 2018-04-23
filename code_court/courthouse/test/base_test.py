@@ -33,17 +33,17 @@ class BaseTest(unittest.TestCase):
         logging.info("Setting up database")
         setup_database(app)
 
-    def login(self, email, password):
+    def login(self, username, password):
         with self.app:
             rv = self.app.post(
                 '/admin/login',
-                data=dict(email=email, password=password),
+                data=dict(username=username, password=password),
                 follow_redirects=True)
 
             self.assertEqual(rv.status_code, 200, "Failed to login")
             self.assertNotEqual(current_user, None, "Failed to login")
             self.assertFalse(current_user.is_anonymous, "Failed to login")
-            self.assertEqual(current_user.email, email, "Failed to login")
+            self.assertEqual(current_user.username, username, "Failed to login")
 
             return rv
 
@@ -55,9 +55,9 @@ class BaseTest(unittest.TestCase):
 
             return rv
 
-    def get_jwt_token(self, email, password):
+    def get_jwt_token(self, username, password):
         rv = self.app.post('/api/login', data=json.dumps({
-            "email": email,
+            "username": username,
             "password": password,
         }), content_type='application/json')
         j = json.loads(rv.data.decode("UTF-8"))

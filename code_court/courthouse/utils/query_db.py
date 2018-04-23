@@ -25,11 +25,11 @@ def _main():
         IPython.embed()
 
 
-def submit_fake_run(email):
+def submit_fake_run(username):
     lang = model.Language.query.filter_by(name="python").scalar()
     problem = model.Problem.query.first()
     contest = model.Contest.query.first()
-    user = model.User.query.filter_by(email=email).scalar()
+    user = model.User.query.filter_by(username=username).scalar()
 
     run_input = problem.secret_input
     run_output = problem.secret_output

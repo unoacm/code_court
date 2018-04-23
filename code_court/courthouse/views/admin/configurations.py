@@ -161,7 +161,7 @@ def is_dup_config_key(key):
         key (str): the config key to test
 
     Returns:
-        bool: True if the email is a duplicate, False otherwise
+        bool: True if the key is a duplicate, False otherwise
     """
     dup_config = model.Configuration.query.filter_by(key=key).scalar()
     if dup_config:

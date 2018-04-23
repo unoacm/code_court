@@ -32,8 +32,8 @@ class FakeUser:
     SUBMIT_RUN_INTERVAL = 240
 
     def __init__(self):
-        self.email, self.password = self.create_user()
-        self.login_token = self.get_login_token(self.email, self.password)
+        self.username, self.password = self.create_user()
+        self.login_token = self.get_login_token(self.username, self.password)
         self.user_info = self.get_user_info()
         self.contest_info = self.get_contest_info()
 
@@ -154,22 +154,22 @@ class FakeUser:
         return self._get_api("current-user")
 
     def create_user(self):
-        admin_login_token = self.get_login_token("admin@example.org", "pass")
+        admin_login_token = self.get_login_token("admin", "pass")
         user_id = random.randint(1000, 1_000_000)
         data = dict(
-            email="{}@example.org".format(user_id),
+            username=str(user_id),
             name=user_id,
             password="pass",
             username=user_id,
             contest_name="test_contest",
         )
         self._post_api("make-defendant-user", data, login_token=admin_login_token)
-        return (data['email'], data['password'])
+        return (data['username'], data['password'])
 
-    def get_login_token(self, email, password):
+    def get_login_token(self, username, password):
         url = urljoin(BASE_URL, "login")
         data = dict(
-            email=email,
+            username=username,
             password=password,
         )
 

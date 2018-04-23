@@ -49,7 +49,7 @@ const store = new Vuex.Store({
     },
     LOGIN: function (context, creds) {
       axios.post('/api/login', {
-        email: creds.email,
+        username: creds.username,
         password: creds.password
       }).then((response) => {
         context.commit('SET_LOGIN_TOKEN', { token: response.data.access_token })
