@@ -63,7 +63,7 @@
             <label for="source_code">Source Code</label>
         </div>
         <div class="row">
-            <textarea readonly id="source_code">{{ run.source_code }}</textarea>
+            <textarea id="source_code">{{ run.source_code }}</textarea>
         </div>
     </div>
 </div>
@@ -89,11 +89,11 @@
 <script>
     var source = CodeMirror.fromTextArea(
         document.getElementById("source_code"),
-        {lineNumbers: true, readOnly: "nocursor"});
+        {lineNumbers: true, readOnly: true});
 
     var input = CodeMirror.fromTextArea(
         document.getElementById("run_input"),
-        {lineNumbers: true, readOnly: "nocursor"});
+        {lineNumbers: true, readOnly: true});
 </script>
 
 <meta id="runs" data-output="{{run.run_output}}" data-expected="{{run.correct_output}}">
@@ -108,7 +108,7 @@
         showDifferences: true,
         connect: null,
         collapseIdentical: false,
-        readOnly: "nocursor",
+        readOnly: true,
         revertButtons: false
         });
     };
