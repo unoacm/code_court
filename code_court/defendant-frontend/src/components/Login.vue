@@ -21,10 +21,6 @@
       <h3 class="title">signup</h3>
       <form @submit.prevent="signup()">
         <p class="control">
-          <input v-model="signupEmail" type="email" class="input" placeholder="email" name="email" required />
-        </p>
-
-        <p class="control">
           <input v-model="signupUsername" type="text" class="input" placeholder="username" name="username" required />
         </p>
 
@@ -44,6 +40,10 @@
           <input v-model="signupContest" type="text" class="input" placeholder="contest" name="contest" required />
         </p>
 
+        <p v-for="extra_signup_field in conf.extra_signup_fields" class="control">
+          <input type="text" :class="['input', 'extra-signup-field-' + extra_signup_field]" :placeholder="extra_signup_field" :name="extra_signup_field" required />
+        </p>
+
         <input type="submit" class="button is-primary" value="signup" />
       </form>
       </div>
@@ -58,7 +58,6 @@ export default {
     return {
       loginUsername: '',
       loginPassword: '',
-      signupEmail: '',
       signupUsername: '',
       signupName: '',
       signupPassword: '',
@@ -67,8 +66,13 @@ export default {
     }
   },
   computed: {
-    problem () {
-      return this.$store.state.problems[this.$route.params.slug]
+    conf () {
+      return this.$store.state.conf
+    }
+  },
+  mounted: function () {
+    for (const extraSignupField of this.conf.extra_signup_fields) {
+      console.log(this.$el.querySelector(`.extra-signup-field-${extraSignupField}`).value)
     }
   },
   methods: {
@@ -76,14 +80,20 @@ export default {
       this.$store.dispatch('LOGIN', {username: this.loginUsername, password: this.loginPassword})
     },
     signup: function () {
-      this.$store.dispatch('SIGNUP', {
-        email: this.signupEmail,
+      let fields = {
         username: this.signupUsername,
         name: this.signupName,
         password: this.signupPassword,
         password2: this.signupPassword2,
         contest_name: this.signupContest
-      })
+      }
+
+      for (const extraSignupField of this.conf.extra_signup_fields) {
+        const selector = `.extra-signup-field-${extraSignupField}`
+        fields[extraSignupField] = this.$el.querySelector(selector).value
+      }
+
+      this.$store.dispatch('SIGNUP', fields)
     }
   }
 }

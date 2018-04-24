@@ -189,7 +189,7 @@ class APITestCase(BaseTest):
             name="Signup Test",
             password="pass",
             password2="pass",
-            contest_name="test_contest",
+            contest_name="test_contest"
         )
 
         rv = self.post_json('/api/signup', data)
@@ -197,6 +197,32 @@ class APITestCase(BaseTest):
 
         token = self.get_jwt_token(data['username'], data['password'])
         self.assertIsNotNone(token)
+
+    def test_signup_with_extra_signup_fields(self):
+        """Tests the /api/signup endpoint with extra signup fields"""
+        setup_contest()
+        util.set_configuration("extra_signup_fields", json.dumps(["example_extra_field"]))
+
+        data = dict(
+            username="signuptest",
+            name="Signup Test",
+            password="pass",
+            password2="pass",
+            contest_name="test_contest",
+            example_extra_field="asdf",
+        )
+
+        rv = self.post_json('/api/signup', data)
+        self.assertEqual(rv.status_code, 200, rv.data)
+
+        token = self.get_jwt_token(data['username'], data['password'])
+        self.assertIsNotNone(token)
+
+        user = model.User.query.filter_by(username=data['username']).scalar()
+        self.assertEqual(
+            user.get_metadata_item("example_extra_field"),
+            data['example_extra_field']
+        )
 
     def test_get_languages(self):
         """Tests the /api/languages endpoint"""

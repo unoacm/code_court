@@ -35,6 +35,12 @@
     {% elif config.valType == "string" %}
         <textarea type="text" class="form-control" id="val" name="val"
             placeholder="Val" rows="4" required>{{ config.val }}</textarea>
+    {% elif config.valType == "json" %}
+        <textarea type="text" class="form-control" id="val" name="val"
+            placeholder="Val" rows="4" required>{{ config.val }}</textarea>
+    {% else %}
+        <textarea type="text" class="form-control" id="val" name="val"
+            placeholder="Val" rows="4" required>{{ config.val }}</textarea>
     {% endif %}
     </div>
     <button type="submit" class="btn btn-default">Submit</button>

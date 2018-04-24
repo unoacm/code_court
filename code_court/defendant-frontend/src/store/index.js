@@ -12,6 +12,12 @@ const store = new Vuex.Store({
   state: {
     problems: {},
     contest: {},
+    conf: {
+      extra_signup_fields: [],
+      run_refresh_interval_millseconds: 5000,
+      score_refresh_interval_millseconds: 30000,
+      misc_refresh_interval_millseconds: 12000
+    },
     scores: [],
     langs: [],
     alerts: [],
@@ -29,6 +35,12 @@ const store = new Vuex.Store({
     LOAD_SCORES: function (context, contestId) {
       axios.get('/api/scores/' + contestId).then((response) => {
         context.commit('SET_SCORES', { scores: response.data })
+      })
+    },
+    LOAD_CONF: function (context, userId) {
+      const url = userId ? '/api/conf/' + userId : '/api/conf'
+      axios.get(url).then((response) => {
+        context.commit('SET_CONF', { conf: response.data })
       })
     },
     LOAD_USER: function (context) {
@@ -111,6 +123,9 @@ const store = new Vuex.Store({
     },
     SET_SCORES: (state, { scores }) => {
       state.scores = scores
+    },
+    SET_CONF: (state, { conf }) => {
+      state.conf = conf
     },
     SET_LANGS: (state, { langs }) => {
       var langObj = {}

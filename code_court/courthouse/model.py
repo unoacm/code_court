@@ -257,6 +257,10 @@ class User(Base, UserMixin):
 
         self.misc_data = json.dumps(old_metadata_dict)
 
+    def get_metadata_item(self, key):
+        metadata = json.loads(self.misc_data)
+        return metadata.get(key, None)
+
     @property
     def is_authenticated(self):
         return True
@@ -382,6 +386,20 @@ class Configuration(Base):
         self.val = val
         self.valType = valType
         self.category = category
+
+    @property
+    def convertedVal(self):
+        """converts val to its valType and returns it"""
+        if self.valType == "string":
+            return self.val
+        elif self.valType == "integer":
+            return int(self.val)
+        elif self.valType == "bool":
+            return bool(self.val)
+        elif self.valType == "json":
+            return json.loads(self.val)
+        else:
+            return self.val
 
     def get_output_dict(self):
         return {"id": self.id}

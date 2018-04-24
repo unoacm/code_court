@@ -21,10 +21,6 @@
 import Nav from '@/components/Nav'
 import ContestCountdown from '@/components/ContestCountdown'
 
-const RUN_REFRESH_INTERVAL = 5000
-const SCORE_REFRESH_INTERVAL = 30000
-const MISC_REFRESH_INTERVAL = 120000
-
 export default {
   name: 'app',
   created: function () {
@@ -35,13 +31,17 @@ export default {
     },
     user () {
       return this.$store.state.user
+    },
+    conf () {
+      return this.$store.state.conf
     }
   },
   mounted: function () {
-    this.$store.dispatch('LOAD_USER')
+    this.$store.dispatch('LOAD_CONF')
     this.$store.dispatch('LOAD_LANGS')
 
     if (this.$store.getters.isLoggedIn) {
+      this.$store.dispatch('LOAD_USER')
       this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       this.$store.dispatch('LOAD_CONTEST')
     }
@@ -50,21 +50,22 @@ export default {
       if (this.contest.id) {
         this.$store.dispatch('LOAD_SCORES', this.contest.id)
       }
-    }.bind(this), SCORE_REFRESH_INTERVAL)
+    }.bind(this), this.conf.score_refresh_interval_millseconds)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       }
-    }.bind(this), RUN_REFRESH_INTERVAL)
+    }.bind(this), this.conf.run_refresh_interval_millseconds)
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_CONTEST')
         this.$store.dispatch('LOAD_LANGS')
         this.$store.dispatch('LOAD_USER')
+        this.$store.dispatch('LOAD_CONF', this.user.id)
       }
-    }.bind(this), MISC_REFRESH_INTERVAL)
+    }.bind(this), this.conf.misc_refresh_interval_millseconds)
   },
   components: {
     'nav-disp': Nav,

@@ -97,17 +97,16 @@ def jwt_identity(payload):
     return model.User.query.filter_by(id=user_id).first()
 
 
-def get_configuration(key):
+def set_configuration(key, val):
     config = model.Configuration.query.filter_by(key=key).scalar()
-    val_type = config.valType
-    if (val_type == "integer"):
-        return int(config.val)
-    elif (val_type == "bool"):
-        return bool(config.val)
-    elif (val_type == "string"):
-        return str(config.val)
-    else:
-        return None
+    if not config:
+        raise Exception("Can't find configuration for key {}".format(key))
+    config.val = str(val)
+    db_session.commit()
+
+
+def get_configuration(key):
+    return model.Configuration.query.filter_by(key=key).scalar().convertedVal
 
 
 def ssl_required(fn):

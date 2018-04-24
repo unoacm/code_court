@@ -195,12 +195,14 @@ def signup():
     if not request.json:
         return jsonify({"msg": "Bad request"}), 400
 
+    extra_signup_fields = util.get_configuration("extra_signup_fields")
     is_sucess, fields_or_error = _validate_and_get_required_fields([
         "username",
         "name",
         "password",
         "password2",
-        "contest_name"
+        "contest_name",
+        *extra_signup_fields
     ])
 
     if not is_sucess:
@@ -221,6 +223,9 @@ def signup():
         name=fields['name'],
         password=fields['password'],
         user_roles=[defedant_role])
+
+    extra_signup_fields_dict = {k: fields[k] for k in extra_signup_fields}
+    new_user.merge_metadata(extra_signup_fields_dict)
 
     contest = model.Contest.query.filter_by(name=fields['contest_name']).scalar()
 
@@ -320,6 +325,18 @@ def get_current_user():
         resp = curr_user.get_output_dict()
 
     return make_response(jsonify(resp), 200)
+
+
+@api.route("/conf/<user_id>", methods=["GET"])
+@api.route("/conf", methods=["GET"])
+def get_conf(user_id=None):
+    configurations = model.Configuration.query.all()
+
+    conf_dict = {}
+    for configuration in configurations:
+        conf_dict[configuration.key] = configuration.convertedVal
+
+    return make_response(jsonify(conf_dict), 200)
 
 
 @api.route("/submit-run", methods=["POST"])

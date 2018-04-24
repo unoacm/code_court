@@ -3,6 +3,7 @@
 The entrypoint to the courthouse application
 """
 import datetime
+import json
 import logging
 import os
 import random
@@ -353,7 +354,15 @@ def populate_db():
         model.Configuration("user_submission_time_limit", "1", "integer",
                             "defendant"),
         model.Configuration("max_output_length",
-                            str(10 * 1024), "integer", "defendant")
+                            str(10 * 1024), "integer", "defendant"),
+        model.Configuration("run_refresh_interval_millseconds",
+                            5000, "integer", "defendant"),
+        model.Configuration("score_refresh_interval_millseconds",
+                            30000, "integer", "defendant"),
+        model.Configuration("misc_refresh_interval_millseconds",
+                            12000, "integer", "defendant"),
+        model.Configuration("extra_signup_fields",
+                            "[]", "json", "defendant")
     ])
 
     db_session.add_all([
@@ -545,6 +554,9 @@ def dev_populate_db():
         test_run.state = model.RunState.JUDGING
 
         db_session.add(test_run)
+
+    util.set_configuration("extra_signup_fields", json.dumps(["email"]))
+
     db_session.commit()
 
 
