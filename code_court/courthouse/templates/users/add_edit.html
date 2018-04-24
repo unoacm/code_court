@@ -34,12 +34,12 @@
         <textarea type="text" class="form-control" id="misc_data" name="misc_data" placeholder="Miscellaneous Data" rows="4">{% if user.misc_data %}{{ user.misc_data }}{% else %}{}{% endif %}</textarea>
     </div>
         <div class="form-group">
-        <label for="contest_ids">Contests</label>
-        <textarea type="text" class="form-control" id="contest_ids" name="contest_ids" placeholder="Contest IDs" rows="4">{% for contest in user.contests %}{{ contest.id }}&#10;{% endfor %}</textarea>
+        <label for="contest_names">Contests</label>
+        <textarea type="text" class="form-control" id="contest_names" name="contest_names" placeholder="Contest Names" rows="4">{% for contest in user.contests %}{{ contest.name }}&#10;{% endfor %}</textarea>
     </div>
     <div class="form-group">
         <label for="user_role">User Roles</label>
-        <textarea type="text" class="form-control" id="user_role_ids" name="user_role_ids" placeholder="User Roles" rows="4">{% for user_role in user.user_roles %}{{ user_role.name }}&#10;{% endfor %}</textarea>
+        <textarea type="text" class="form-control" id="user_roles" name="user_roles" placeholder="User Roles" rows="4">{% for user_role in user.user_roles %}{{ user_role.name }}&#10;{% endfor %}</textarea>
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
 </form>

@@ -19,8 +19,8 @@ class UsersTestCase(BaseTest):
                 "password": "password",
                 "confirm_password": "password",
                 "misc_data": "{}",
-                "contest_ids": "",
-                "user_role_ids": "",
+                "contest_names": "",
+                "user_roles": "",
             },
             follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to add user")
@@ -42,8 +42,8 @@ class UsersTestCase(BaseTest):
                 "password": "",
                 "confirm_password": "",
                 "misc_data": "{}",
-                "contest_ids": "",
-                "user_role_ids": "",
+                "contest_names": "",
+                "user_roles": "",
             },
             follow_redirects=True)
         self.assertEqual(rv.status_code, 200, "Failed to edit user")

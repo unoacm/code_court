@@ -151,8 +151,8 @@ def add_user():
     password = request.form.get("password")
     confirm_password = request.form.get("confirm_password")
     misc_data = request.form.get("misc_data")
-    contest_ids = request.form.get("contest_ids")
-    user_role_ids = request.form.get("user_role_ids")
+    contest_names = request.form.get("contest_names")
+    user_roles = request.form.get("user_roles")
 
     if password != confirm_password:
         error = "Failed to add/edit \'{}\' due to password mismatch.".format(
@@ -168,8 +168,8 @@ def add_user():
         if password != "":
             user.hashed_password = util.hash_password(password)
         user.misc_data = misc_data
-        user.contests = retrieve_by_ids(contest_ids.split(), model.Contest)
-        user.user_roles = retrieve_by_names(user_role_ids.split(),
+        user.contests = retrieve_by_names(contest_names.split(), model.Contest)
+        user.user_roles = retrieve_by_names(user_roles.split(),
                                             model.UserRole)
     else:  # add
         if is_dup_user_username(username):
@@ -184,9 +184,8 @@ def add_user():
             name=name,
             password=password,
             misc_data=misc_data,
-            contests=retrieve_by_ids(contest_ids.split(), model.Contest),
-            user_roles=retrieve_by_names(user_role_ids.split(),
-                                         model.UserRole))
+            contests=retrieve_by_names(contest_names.split(), model.Contest),
+            user_roles=retrieve_by_names(user_roles.split(), model.UserRole))
         db_session.add(user)
 
     db_session.commit()
