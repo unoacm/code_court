@@ -52,7 +52,7 @@
         <tr>
             <td class="user_id">{{ user.id }}</td>
             <td class="user_name">{{ user.name }}</td>
-            <td class="user_username">{{ user.username }}</td>
+            <td class="user_username"><a href="{{ url_for('users.users_profile', username=user.username) }}">{{ user.username }}</a></td>
             <td class="user_role">{% for user_role in user.user_roles %}{{ user_role.name }} {% endfor %}</td>
             <td class="num_runs">{{ metrics[user.id]["num_runs"] }}</td>
             <td class="last_run_time">{{ metrics[user.id]["last_run"].submit_time }}</td>

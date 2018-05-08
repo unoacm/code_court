@@ -20,6 +20,9 @@ from flask import (
 import model
 from database import db_session
 
+import json
+import jinja2
+
 users = Blueprint('users', __name__, template_folder='templates/users')
 
 
@@ -217,6 +220,22 @@ def display_user_add_form(user_id):
         return render_template(
             "users/add_edit.html", action_label="Edit", user=user)
 
+@users.route("profile/<username>", methods=["GET"])
+@util.login_required("operator")
+def users_profile(username):
+    """
+    Displays the profile page
+    
+    Params:
+        username: name of the user to profile
+   
+    Returns: 
+        rendered user profile template
+    """
+
+    user = model.User.query.filter_by(username=username).scalar()
+    runs = model.Run.query.filter_by(user_id=user.id).all()
+    return render_template('users/profile.html', user=user, runs=runs)
 
 # Util functions
 def is_dup_user_username(username):
@@ -260,4 +279,3 @@ def retrieve_by_names(names, table):
         if row:
             rows.append(row)
     return rows
-

@@ -76,7 +76,7 @@ def create_app():
 
     app.config['RUNMODE'] = "PRODUCTION" if os.getenv(CODE_COURT_PRODUCTION_ENV_VAR) else "DEVELOPMENT"
 
-    # Add datetime to string filter to Jinja2
+    # Add custom filters to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
     app.jinja_env.filters['dt_to_str'] = util.dt_to_str
     app.jinja_env.filters['dt_to_date_str'] = util.dt_to_date_str
