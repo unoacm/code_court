@@ -20,9 +20,6 @@ from flask import (
 import model
 from database import db_session
 
-import json
-import jinja2
-
 users = Blueprint('users', __name__, template_folder='templates/users')
 
 

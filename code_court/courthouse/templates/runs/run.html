@@ -22,7 +22,7 @@
     <tbody>
         <tr>
             <td class="run_id">{{ run.id }}</td>
-            <td class="run_user">{{ run.user.name }}</td>
+            <td class="run_user"><a href="{{ url_for('users.users_profile', username=run.user.username) }}">{{ run.user.name }}</a></td>
             <td class="run_name">{{ run.language.name }}</td>
             <td class="run_problem">{{ run.problem.slug }}</td>
             <td class="run_submit_time">{{ run.submit_time }}</td>
