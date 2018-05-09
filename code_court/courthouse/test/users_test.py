@@ -27,7 +27,7 @@ class UsersTestCase(BaseTest):
 
         rv = self.app.get('/admin/users/')
         root = html.fromstring(rv.data)
-        page_user_usernames = [x.text for x in root.cssselect(".user_username")]
+        page_user_usernames = [x.text for x in root.cssselect(".user_username a")]
         self.assertIn(init_user_username, page_user_usernames, "User was not added")
 
     def _user_edit(self, old_username, new_username):
@@ -50,7 +50,7 @@ class UsersTestCase(BaseTest):
 
         rv = self.app.get('/admin/users/')
         root = html.fromstring(rv.data)
-        page_user_usernames = [x.text for x in root.cssselect(".user_username")]
+        page_user_usernames = [x.text for x in root.cssselect(".user_username a")]
         self.assertIn(new_username, page_user_usernames, "User was not edited")
 
     def _user_del(self, username):
@@ -62,7 +62,7 @@ class UsersTestCase(BaseTest):
 
         rv = self.app.get('/admin/users/')
         root = html.fromstring(rv.data)
-        page_user_usernames = [x.text for x in root.cssselect(".user_username")]
+        page_user_usernames = [x.text for x in root.cssselect(".user_username a")]
         self.assertNotIn(username, page_user_usernames, "User was not deleted")
 
     def test_user_crud(self):
