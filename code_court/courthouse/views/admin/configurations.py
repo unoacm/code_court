@@ -8,16 +8,18 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash, )
+    flash,
+)
 
 import model
 from database import db_session
 
 configurations = Blueprint(
-    'configurations', __name__, template_folder='templates/configurations')
+    "configurations", __name__, template_folder="templates/configurations"
+)
 
 
-@configurations.route("/", methods=["GET", "POST"], defaults={'page': 1})
+@configurations.route("/", methods=["GET", "POST"], defaults={"page": 1})
 @configurations.route("/<int:page>", methods=["GET", "POST"])
 @util.login_required("operator")
 def configurations_view(page):
@@ -29,14 +31,14 @@ def configurations_view(page):
     """
     config_query = model.Configuration.query
 
-    configs = util.paginate(config_query.order_by(
-        model.Configuration.category.asc()), page, 30)
+    configs = util.paginate(
+        config_query.order_by(model.Configuration.category.asc()), page, 30
+    )
 
     return render_template("configurations/view.html", configs=configs)
 
 
-@configurations.route(
-    "/add/", methods=["GET", "POST"], defaults={'config_id': None})
+@configurations.route("/add/", methods=["GET", "POST"], defaults={"config_id": None})
 @configurations.route("/edit/<int:config_id>/", methods=["GET"])
 @util.login_required("operator")
 def configurations_add(config_id):
@@ -54,8 +56,7 @@ def configurations_add(config_id):
     elif request.method == "POST":  # process added/edited config
         return add_config()
     else:
-        current_app.logger.info("invalid config add request method: %s",
-                                request.method)
+        current_app.logger.info("invalid config add request method: %s", request.method)
         abort(400)
 
 
@@ -74,8 +75,9 @@ def configurations_del(config_id):
     config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
 
     if config is None:
-        error = "Failed to delete config \'{}\' as config doesn't exist.".format(
-            config_id)
+        error = "Failed to delete config '{}' as config doesn't exist.".format(
+            config_id
+        )
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("configurations.configurations_view"))
@@ -110,14 +112,14 @@ def add_config():
         config.category = category
     else:  # add
         if is_dup_config_key(key):
-            error = "Failed to add config \'{}\' as config already exists.".format(
-                key)
+            error = "Failed to add config '{}' as config already exists.".format(key)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("configurations.configurations_view"))
 
         config = model.Configuration(
-            key=key, val=val, valType=valType, category=category)
+            key=key, val=val, valType=valType, category=category
+        )
         db_session.add(config)
 
     db_session.commit()
@@ -137,19 +139,21 @@ def display_config_add_form(config_id):
     """
     if config_id is None:  # add
         return render_template(
-            "configurations/add_edit.html", action_label="Add", config=None)
+            "configurations/add_edit.html", action_label="Add", config=None
+        )
     else:  # edit
-        config = model.Configuration.query.filter_by(
-            id=int(config_id)).scalar()
+        config = model.Configuration.query.filter_by(id=int(config_id)).scalar()
         if config is None:
-            error = "Failed to edit config \'{}\' as config doesn't exist.".format(
-                config_id)
+            error = "Failed to edit config '{}' as config doesn't exist.".format(
+                config_id
+            )
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("configurations.configurations_view"))
 
         return render_template(
-            "configurations/add_edit.html", action_label="Edit", config=config)
+            "configurations/add_edit.html", action_label="Edit", config=config
+        )
 
 
 # Util functions
@@ -168,4 +172,3 @@ def is_dup_config_key(key):
         return True
     else:
         return False
-

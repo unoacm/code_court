@@ -15,8 +15,8 @@ import json
 from database import db_session
 
 
-RUN_CACHE_NAME = 'runcache'
-SCORE_CACHE_NAME = 'scorecache'
+RUN_CACHE_NAME = "runcache"
+SCORE_CACHE_NAME = "scorecache"
 
 
 class ModelMissingException(Exception):
@@ -36,7 +36,8 @@ def hash_password(plaintext_password):
     num_rounds = 4
 
     hashed_password = bcrypt.hashpw(
-        plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds))
+        plaintext_password.encode("UTF-8"), bcrypt.gensalt(num_rounds)
+    )
     return hashed_password.decode("UTF-8")
 
 
@@ -51,20 +52,22 @@ def is_password_matching(plaintext_password, hashed_password):
     Returns:
         bool: whether or not the passwords match
     """
-    return bcrypt.hashpw(
-        plaintext_password.encode(),
-        hashed_password.encode()).decode("UTF-8") == hashed_password
+    return bcrypt.hashpw(plaintext_password.encode(), hashed_password.encode()).decode(
+        "UTF-8"
+    ) == hashed_password
 
 
 def login_required(role="ANY"):
+
     def wrapper(fn):
+
         @wraps(fn)
         def decorated_view(*args, **kwargs):
             if not current_user.is_authenticated:
                 return current_app.login_manager.unauthorized()
 
             role_ids = [x.name for x in current_user.user_roles]
-            if ((role not in role_ids) and (role != "ANY")):
+            if (role not in role_ids) and (role != "ANY"):
                 return current_app.login_manager.unauthorized()
 
             return fn(*args, **kwargs)
@@ -92,7 +95,7 @@ def checkbox_result_to_bool(res):
 
 
 def jwt_identity(payload):
-    user_id = payload['identity']
+    user_id = payload["identity"]
 
     return model.User.query.filter_by(id=user_id).first()
 
@@ -110,6 +113,7 @@ def get_configuration(key):
 
 
 def ssl_required(fn):
+
     @wraps(fn)
     def decorated_view(*args, **kwargs):
         if current_app.config.get("SSL"):
@@ -139,6 +143,7 @@ def invalidate_cache_item(cache_name, key):
     """Deletes a specific item in the specified cache"""
     try:
         import uwsgi
+
         uwsgi.cache_del(str(key), cache_name)
     except ImportError:
         pass
@@ -148,6 +153,7 @@ def invalidate_cache(cache_name):
     """Deletes everything in the specificed cache"""
     try:
         import uwsgi
+
         uwsgi.cache_clear(cache_name)
     except ImportError:
         pass
@@ -155,7 +161,7 @@ def invalidate_cache(cache_name):
 
 def str_to_dt(s):
     """Converts a string in format 2017-12-30T12:60:10Z to datetime"""
-    return datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ')
+    return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ")
 
 
 def strs_to_dt(date_string, time_string):
@@ -165,28 +171,28 @@ def strs_to_dt(date_string, time_string):
 
 def time_str_to_dt(s):
     """Converts a string in format 12:59:10 to datetime"""
-    return datetime.datetime.strptime(s, '%H:%M:%S')
+    return datetime.datetime.strptime(s, "%H:%M:%S")
 
 
 def dt_to_str(dt):
     """Converts a datetime to a string in format 2017-12-30T12:60Z"""
     if dt is None:
         return None
-    return datetime.datetime.strftime(dt, '%Y-%m-%dT%H:%M:%SZ')
+    return datetime.datetime.strftime(dt, "%Y-%m-%dT%H:%M:%SZ")
 
 
 def dt_to_date_str(dt):
     """Converts a datetime to a string in format 2017-12-30"""
     if dt is None:
         return None
-    return datetime.datetime.strftime(dt, '%Y-%m-%d')
+    return datetime.datetime.strftime(dt, "%Y-%m-%d")
 
 
 def dt_to_time_str(dt):
     """Converts a datetime to a string in format 12:59:10"""
     if dt is None:
         return None
-    return datetime.datetime.strftime(dt, '%H:%M:%S')
+    return datetime.datetime.strftime(dt, "%H:%M:%S")
 
 
 def add_versions(run_output):

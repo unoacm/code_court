@@ -25,7 +25,7 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch lang
-        results = model.Language.query.filter_by(name=LANG_ARGS['name']).all()
+        results = model.Language.query.filter_by(name=LANG_ARGS["name"]).all()
 
         self.assertEqual(len(results), 1)
 
@@ -45,7 +45,7 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch user
-        results = model.User.query.filter_by(username=USER_ARGS['username']).all()
+        results = model.User.query.filter_by(username=USER_ARGS["username"]).all()
 
         self.assertEqual(len(results), 1)
 
@@ -53,11 +53,11 @@ class ModelsTestCase(BaseTest):
         """test the contest table"""
         CONTEST_ARGS = {
             "name": "1620 bracket",
-            "activate_time": util.str_to_dt('2017-01-25T10:45:00Z'),
-            "start_time": util.str_to_dt('2017-01-25T11:00:00Z'),
-            "freeze_time": util.str_to_dt('2017-01-25T16:00:00Z'),
-            "end_time": util.str_to_dt('2017-01-25T16:45:00Z'),
-            "deactivate_time": util.str_to_dt('2017-01-26T10:45:00Z'),
+            "activate_time": util.str_to_dt("2017-01-25T10:45:00Z"),
+            "start_time": util.str_to_dt("2017-01-25T11:00:00Z"),
+            "freeze_time": util.str_to_dt("2017-01-25T16:00:00Z"),
+            "end_time": util.str_to_dt("2017-01-25T16:45:00Z"),
+            "deactivate_time": util.str_to_dt("2017-01-26T10:45:00Z"),
             "is_public": True,
         }
         user_args, user = get_user()
@@ -72,8 +72,7 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch contest
-        results = model.Contest.query.filter_by(
-            name=CONTEST_ARGS['name']).all()
+        results = model.Contest.query.filter_by(name=CONTEST_ARGS["name"]).all()
 
         self.assertEqual(len(results), 1)
 
@@ -92,16 +91,14 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch contest
-        results = model.Configuration.query.filter_by(
-            key=CONF_ARGS['key']).all()
+        results = model.Configuration.query.filter_by(key=CONF_ARGS["key"]).all()
 
         self.assertEqual(len(results), 1)
 
     def test_problem_type(self):
         """test the problem_type table"""
         PROBLEM_TYPE_ARGS = {
-            "name": "input/output",
-            "eval_script": "#!/bin/bash\nexit 0",
+            "name": "input/output", "eval_script": "#!/bin/bash\nexit 0"
         }
 
         # create and add contest
@@ -111,7 +108,8 @@ class ModelsTestCase(BaseTest):
 
         # fetch contest
         results = model.ProblemType.query.filter_by(
-            name=PROBLEM_TYPE_ARGS['name']).all()
+            name=PROBLEM_TYPE_ARGS["name"]
+        ).all()
 
         self.assertEqual(len(results), 1)
 
@@ -119,30 +117,21 @@ class ModelsTestCase(BaseTest):
         """test the problem table"""
         # add problem type
         PROBLEM_TYPE_ARGS = {
-            "name": "input/output",
-            "eval_script": "#!/bin/bash\nexit 0",
+            "name": "input/output", "eval_script": "#!/bin/bash\nexit 0"
         }
         problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
         db_session.add(problem_type)
         db_session.commit()
 
         PROBLEM_ARGS = {
-            "problem_type":
-            problem_type,
-            "slug":
-            "ioprob",
-            "name":
-            "The Input/Output Problem",
-            "problem_statement":
-            "Print the string 'Hello, World!' n times",
-            "sample_input":
-            "3",
-            "sample_output":
-            "Hello, World!Hello, World!Hello, World!",
-            "secret_input":
-            "4",
-            "secret_output":
-            "Hello, World!Hello, World!Hello, World!Hello, World!",
+            "problem_type": problem_type,
+            "slug": "ioprob",
+            "name": "The Input/Output Problem",
+            "problem_statement": "Print the string 'Hello, World!' n times",
+            "sample_input": "3",
+            "sample_output": "Hello, World!Hello, World!Hello, World!",
+            "secret_input": "4",
+            "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
         }
 
         # create and add contest
@@ -151,8 +140,7 @@ class ModelsTestCase(BaseTest):
         db_session.commit()
 
         # fetch contest
-        results = model.Problem.query.filter_by(
-            name=PROBLEM_ARGS['name']).all()
+        results = model.Problem.query.filter_by(name=PROBLEM_ARGS["name"]).all()
 
         self.assertEqual(len(results), 1)
 
@@ -169,7 +157,7 @@ class ModelsTestCase(BaseTest):
             "user": user,
             "language": language,
             "source_code": "print('hello')",
-            "last_updated_time": util.str_to_dt('2017-01-26T10:45:00Z'),
+            "last_updated_time": util.str_to_dt("2017-01-26T10:45:00Z"),
         }
         saved_code = model.SavedCode(**SAVED_CODE_ARGS)
         db_session.add(saved_code)
@@ -187,7 +175,7 @@ class ModelsTestCase(BaseTest):
             "contest": contest,
             "language": language,
             "problem": problem,
-            "submit_time": util.str_to_dt('2017-01-26T10:45:00Z'),
+            "submit_time": util.str_to_dt("2017-01-26T10:45:00Z"),
             "source_code": "print('hello'*input())",
             "run_input": "5",
             "correct_output": "hellohellohellohellohello",
@@ -216,9 +204,7 @@ class ModelsTestCase(BaseTest):
 
     def test_user_role(self):
         """test the user_role table"""
-        USER_ROLE_ARGS = {
-            "name": "admin",
-        }
+        USER_ROLE_ARGS = {"name": "admin"}
         user_role = model.UserRole(**USER_ROLE_ARGS)
         db_session.add(user_role)
         db_session.commit()
@@ -226,10 +212,7 @@ class ModelsTestCase(BaseTest):
 
 def get_problem_type():
     """returns a test ProblemType"""
-    PROBLEM_TYPE_ARGS = {
-        "name": "input/output",
-        "eval_script": "#!/bin/bash\nexit 0",
-    }
+    PROBLEM_TYPE_ARGS = {"name": "input/output", "eval_script": "#!/bin/bash\nexit 0"}
     problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
     db_session.add(problem_type)
     db_session.commit()
@@ -248,8 +231,7 @@ def get_problem():
         "sample_input": "3",
         "sample_output": "Hello, World!Hello, World!Hello, World!",
         "secret_input": "4",
-        "secret_output":
-        "Hello, World!Hello, World!Hello, World!Hello, World!",
+        "secret_output": "Hello, World!Hello, World!Hello, World!Hello, World!",
     }
 
     problem = model.Problem(**PROBLEM_ARGS)
@@ -298,11 +280,11 @@ def get_contest():
     """returns a test contest"""
     CONTEST_ARGS = {
         "name": "1620 bracket",
-        "activate_time": util.str_to_dt('2017-01-25T10:45:00Z'),
-        "start_time": util.str_to_dt('2017-01-25T11:00:00Z'),
-        "freeze_time": util.str_to_dt('2017-01-25T16:00:00Z'),
-        "end_time": util.str_to_dt('2017-01-25T16:45:00Z'),
-        "deactivate_time": util.str_to_dt('2017-01-26T10:45:00Z'),
+        "activate_time": util.str_to_dt("2017-01-25T10:45:00Z"),
+        "start_time": util.str_to_dt("2017-01-25T11:00:00Z"),
+        "freeze_time": util.str_to_dt("2017-01-25T16:00:00Z"),
+        "end_time": util.str_to_dt("2017-01-25T16:45:00Z"),
+        "deactivate_time": util.str_to_dt("2017-01-26T10:45:00Z"),
         "is_public": True,
     }
 
@@ -312,4 +294,3 @@ def get_contest():
     db_session.commit()
 
     return CONTEST_ARGS, contest
-

@@ -1,25 +1,19 @@
 import util
 
 
-from flask import (
-    Blueprint,
-    current_app,
-    redirect,
-    render_template,
-    request,
-    url_for, )
+from flask import Blueprint, current_app, redirect, render_template, request, url_for
 
 import model
 from database import db_session
 
-runs = Blueprint('runs', __name__, template_folder='templates/runs')
+runs = Blueprint("runs", __name__, template_folder="templates/runs")
 
 
 class ModelMissingException(Exception):
     pass
 
 
-@runs.route("/", methods=["GET"], defaults={'page': 1})
+@runs.route("/", methods=["GET"], defaults={"page": 1})
 @runs.route("/<int:page>/", methods=["GET"])
 @util.login_required("operator")
 def runs_view(page):
@@ -53,7 +47,8 @@ def runs_view(page):
         runs=runs,
         run_type=run_type,
         run_status=run_status,
-        num_pending=num_pending)
+        num_pending=num_pending,
+    )
 
 
 @runs.route("/run/<int:run_id>/", methods=["GET"])
@@ -82,6 +77,7 @@ def priority(run_id):
     db_session.commit()
 
     return redirect(url_for("runs.runs_run", run_id=run_id))
+
 
 @runs.route("/<int:run_id>/rejudge", methods=["GET"])
 def rejudge(run_id):
