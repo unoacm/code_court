@@ -20,13 +20,15 @@ from flask import (
     render_template,
     request,
     url_for,
-    flash, )
+    flash,
+)
 
 import model
 from database import db_session
 
 clarifications = Blueprint(
-    'clarifications', __name__, template_folder='templates/clarifications')
+    "clarifications", __name__, template_folder="templates/clarifications"
+)
 
 
 class ModelMissingException(Exception):
@@ -44,8 +46,7 @@ def clarifications_view():
     """
     clarifications = model.Clarification.query.all()
 
-    return render_template(
-        "clarifications/view.html", clarifications=clarifications)
+    return render_template("clarifications/view.html", clarifications=clarifications)
 
 
 @clarifications.route("/add/", methods=["GET", "POST"])
@@ -63,12 +64,11 @@ def clarifications_add():
     if request.method == "GET":  # display add form
         return render_template("clarifications/add.html", action_label="Add")
 
-#    elif request.method == "POST": # process added/edited lang
+    #    elif request.method == "POST": # process added/edited lang
     elif request.method == "POST":
         return add_clar()
     else:
-        current_app.logger.info("invalid clar add request method: %s",
-                                request.method)
+        current_app.logger.info("invalid clar add request method: %s", request.method)
         abort(400)
 
 
@@ -86,8 +86,9 @@ def clarifications_del(clar_id):
     """
     clar = model.Clarification.query.filter_by(id=clar_id).scalar()
     if clar is None:
-        error = "Failed to delete clarification \'{}\' as it doesn't exist.".format(
-            clar_id)
+        error = "Failed to delete clarification '{}' as it doesn't exist.".format(
+            clar_id
+        )
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("clarifications.clarifications_view"))
@@ -95,11 +96,12 @@ def clarifications_del(clar_id):
     try:
         db_session.delete(clar)
         db_session.commit()
-        flash("Deleted clarification \'{}\'".format(clar_id), "warning")
+        flash("Deleted clarification '{}'".format(clar_id), "warning")
     except IntegrityError:
         db_session.rollback()
-        error = "Failed to delete clarification \'{}\' as it's referenced in another DB element".format(
-            clar_id)
+        error = "Failed to delete clarification '{}' as it's referenced in another DB element".format(
+            clar_id
+        )
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -133,10 +135,8 @@ def add_clar():
 
     thread = str(uuid.uuid4())
     is_public = True  # This is a general clarification, which are always public
-    clar = model.Clarification(current_user, subject, contents, thread,
-                               is_public)
+    clar = model.Clarification(current_user, subject, contents, thread, is_public)
     db_session.add(clar)
     db_session.commit()
 
     return redirect(url_for("clarifications.clarifications_view"))
-

@@ -24,12 +24,13 @@ from flask import (
     jsonify,
     make_response,
     request,
-    url_for, )
+    url_for,
+)
 
 from database import db_session
 import model
 
-api = Blueprint('api', __name__, template_folder='templates')
+api = Blueprint("api", __name__, template_folder="templates")
 executioner_auth = HTTPBasicAuth()
 
 
@@ -44,7 +45,7 @@ def verify_password(username, password):
 
 @executioner_auth.error_handler
 def unauthorized():
-    return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+    return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
 
 # api routes
@@ -54,15 +55,25 @@ def get_writ():
     """endpoint for executioners to get runs to execute"""
 
     # choose oldest priority run
-    chosen_run = model.Run.query.filter_by(is_priority=True, started_execing_time=None, finished_execing_time=None)\
-                                .order_by(model.Run.submit_time.asc()).limit(1).first()
+    chosen_run = model.Run.query.filter_by(
+        is_priority=True, started_execing_time=None, finished_execing_time=None
+    ).order_by(
+        model.Run.submit_time.asc()
+    ).limit(
+        1
+    ).first()
 
     # if no priority runs, choose oldest non-priority run
     if chosen_run is None:
-        chosen_run = model.Run.query.filter_by(started_execing_time=None, finished_execing_time=None)\
-                                    .order_by(model.Run.submit_time.asc()).limit(1).first()
+        chosen_run = model.Run.query.filter_by(
+            started_execing_time=None, finished_execing_time=None
+        ).order_by(
+            model.Run.submit_time.asc()
+        ).limit(
+            1
+        ).first()
     if chosen_run is None:
-        return make_response(jsonify({'status': 'unavailable'}), 200)
+        return make_response(jsonify({"status": "unavailable"}), 200)
 
     # TODO: use a better locking method to prevent dual execution
     chosen_run.started_execing_time = datetime.datetime.utcnow()
@@ -75,7 +86,7 @@ def get_writ():
         "run_script": chosen_run.language.run_script,
         "input": chosen_run.run_input,
         "run_id": chosen_run.id,
-        "return_url": url_for("api.submit_writ", run_id=chosen_run.id, _external=True)
+        "return_url": url_for("api.submit_writ", run_id=chosen_run.id, _external=True),
     }
 
     return make_response(jsonify(resp), 200)
@@ -94,32 +105,34 @@ def submit_writ(run_id):
     run = model.Run.query.get(util.i(run_id))
 
     if not run:
-        current_app.logger.debug("Received writ without valid run, id: %s",
-                                 run_id)
+        current_app.logger.debug("Received writ without valid run, id: %s", run_id)
         abort(404)
 
     if run.finished_execing_time:
         current_app.logger.warning(
-            "Received writ submission for already submitted run, id: %s",
-            run_id)
+            "Received writ submission for already submitted run, id: %s", run_id
+        )
         abort(400)
 
     if not request.json:
         current_app.logger.debug("Received writ without json")
         abort(400)
 
-    if 'output' not in request.json or not isinstance(request.json['output'],
-                                                      six.string_types):
+    if (
+        "output" not in request.json
+        or not isinstance(request.json["output"], six.string_types)
+    ):
         current_app.logger.debug("Received writ without the output field")
         abort(400)
 
-    run.run_output = request.json.get('output')
-    run.state = request.json.get('state') or run.state
+    run.run_output = request.json.get("output")
+    run.state = request.json.get("state") or run.state
     run.finished_execing_time = datetime.datetime.utcnow()
 
     if run.is_submission:
-        run.is_passed = clean_output_string(
-            run.run_output) == clean_output_string(run.correct_output)
+        run.is_passed = clean_output_string(run.run_output) == clean_output_string(
+            run.correct_output
+        )
 
         if run.state == model.RunState.EXECUTED:
             if run.submit_time > run.contest.end_time:
@@ -158,13 +171,13 @@ def return_without_run(run_id):
     """
     run = model.Run.query.get(util.i(run_id))
     if not run:
-        current_app.logger.debug("Received writ without valid run, id: %s",
-                                 run_id)
+        current_app.logger.debug("Received writ without valid run, id: %s", run_id)
         abort(404)
 
     if run.finished_execing_time:
         current_app.logger.warning(
-            "Received return for already returned writ, id: %s", run_id)
+            "Received return for already returned writ, id: %s", run_id
+        )
         abort(400)
 
     run.started_execing_time = None
@@ -173,71 +186,74 @@ def return_without_run(run_id):
     return "Good"
 
 
-@api.route('/login', methods=['POST'])
+@api.route("/login", methods=["POST"])
 def login():
     if not request.json:
         return jsonify({"msg": "Bad request"}), 401
 
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
 
     user = model.User.query.filter_by(username=username).scalar()
 
     if user and user.verify_password(password):
-        ret = {'access_token': create_access_token(identity=user.id)}
+        ret = {"access_token": create_access_token(identity=user.id)}
         return jsonify(ret), 200
     else:
         return jsonify({"msg": "Bad username or password"}), 401
 
 
-@api.route('/signup', methods=['POST'])
+@api.route("/signup", methods=["POST"])
 def signup():
     if not request.json:
         return jsonify({"msg": "Bad request"}), 400
 
     extra_signup_fields = util.get_configuration("extra_signup_fields")
-    is_sucess, fields_or_error = _validate_and_get_required_fields([
-        "username",
-        "name",
-        "password",
-        "password2",
-        "contest_name",
-        *extra_signup_fields
-    ])
+    is_sucess, fields_or_error = _validate_and_get_required_fields(
+        [
+            "username",
+            "name",
+            "password",
+            "password2",
+            "contest_name",
+            *extra_signup_fields,
+        ]
+    )
 
     if not is_sucess:
         return fields_or_error
     fields = fields_or_error
 
-    if fields['password'] != fields['password2']:
+    if fields["password"] != fields["password2"]:
         return jsonify({"msg": "Passwords don't match"}), 400
 
-    user = model.User.query.filter_by(username=fields['username']).scalar()
+    user = model.User.query.filter_by(username=fields["username"]).scalar()
     if user:
         return jsonify({"msg": "User already exists with that username"}), 400
 
     defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(
-        username=fields['username'],
-        name=fields['name'],
-        password=fields['password'],
-        user_roles=[defedant_role])
+        username=fields["username"],
+        name=fields["name"],
+        password=fields["password"],
+        user_roles=[defedant_role],
+    )
 
     extra_signup_fields_dict = {k: fields[k] for k in extra_signup_fields}
     new_user.merge_metadata(extra_signup_fields_dict)
 
-    contest = model.Contest.query.filter_by(name=fields['contest_name']).scalar()
+    contest = model.Contest.query.filter_by(name=fields["contest_name"]).scalar()
 
     if not contest:
-        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+        return make_response(jsonify({"error": "Invalid contest name"}), 400)
 
     new_user.contests.append(contest)
 
     db_session.add(new_user)
     db_session.commit()
 
-    ret = {'access_token': create_access_token(identity=new_user.id)}
+    ret = {"access_token": create_access_token(identity=new_user.id)}
     return jsonify(ret), 200
 
 
@@ -259,10 +275,7 @@ def get_all_problems(user_id=None):
     runs = model.Run.query.filter_by(user=curr_user).all()
 
     if len(curr_user.contests) == 0:
-        return make_response(
-            jsonify({
-                'error': 'User has no contests'
-            }), 400)
+        return make_response(jsonify({"error": "User has no contests"}), 400)
 
     problems = (p for p in problems if curr_user.contests[0] in p.contests)
 
@@ -271,7 +284,7 @@ def get_all_problems(user_id=None):
         problem_run_dicts = [x.get_output_dict() for x in runs if x.problem == problem]
 
         problem_dict = problem.get_output_dict()
-        problem_dict['runs'] = problem_run_dicts
+        problem_dict["runs"] = problem_run_dicts
 
         resp[problem.slug] = problem_dict
 
@@ -281,10 +294,10 @@ def get_all_problems(user_id=None):
 @api.route("/submit_clarification", methods=["POST"])
 @jwt_required
 def submit_clarification():
-    subject = request.json.get('subject', None)
-    contents = request.json.get('contents', None)
-    problem_slug = request.json.get('problem_slug', None)
-    parent_id = request.json.get('parent_id', None)
+    subject = request.json.get("subject", None)
+    contents = request.json.get("contents", None)
+    problem_slug = request.json.get("problem_slug", None)
+    parent_id = request.json.get("parent_id", None)
 
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
 
@@ -292,12 +305,10 @@ def submit_clarification():
     if parent_id is None:
         thread = str(uuid.uuid4())
     else:
-        thread = model.Clarification.query.filter_by(
-            id=parent_id).scalar().thread
+        thread = model.Clarification.query.filter_by(id=parent_id).scalar().thread
 
     is_public = False  # user submitted clarifications are always false
-    clar = model.Clarification(current_user, subject, contents, thread,
-                               is_public)
+    clar = model.Clarification(current_user, subject, contents, thread, is_public)
     clar.problem = problem
 
     db_session.add(clar)
@@ -348,48 +359,36 @@ def submit_run():
     MAX_RUNS = util.get_configuration("max_user_submissions")
     TIME_LIMIT = util.get_configuration("user_submission_time_limit")
 
-    over_limit_runs_query = model.Run.submit_time >\
-                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))
-    run_count = model.Run.query.filter_by(user_id=user.id)\
-                               .filter(over_limit_runs_query)\
-                               .count()
+    over_limit_runs_query = model.Run.submit_time > (
+        datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT)
+    )
+    run_count = model.Run.query.filter_by(user_id=user.id).filter(
+        over_limit_runs_query
+    ).count()
 
     if run_count > MAX_RUNS:
-        return make_response(
-            jsonify({
-                'error': 'Submission rate limit exceeded'
-            }), 400)
+        return make_response(jsonify({"error": "Submission rate limit exceeded"}), 400)
 
     contest = user.contests[0]
 
-    lang_name = request.json.get('lang', None)
-    problem_slug = request.json.get('problem_slug', None)
-    source_code = request.json.get('source_code', None)
-    is_submission = request.json.get('is_submission', False)
-    user_test_input = request.json.get('user_test_input', None)
+    lang_name = request.json.get("lang", None)
+    problem_slug = request.json.get("problem_slug", None)
+    source_code = request.json.get("source_code", None)
+    is_submission = request.json.get("is_submission", False)
+    user_test_input = request.json.get("user_test_input", None)
 
-    if (lang_name is None or
-        problem_slug is None or
-        source_code is None):
+    if lang_name is None or problem_slug is None or source_code is None:
         return make_response(
-            jsonify({
-                'error': 'Invalid submission, missing input'
-            }), 400)
+            jsonify({"error": "Invalid submission, missing input"}), 400
+        )
 
     lang = model.Language.query.filter_by(name=lang_name).scalar()
     if not lang:
-        return make_response(
-            jsonify({
-                'error': 'Invalid language'
-            }), 400)
+        return make_response(jsonify({"error": "Invalid language"}), 400)
 
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
     if not problem:
-        return make_response(
-            jsonify({
-                'error': 'Invalid problem slug'
-            }), 400)
-
+        return make_response(jsonify({"error": "Invalid problem slug"}), 400)
 
     run_input = None
     correct_output = None
@@ -403,9 +402,18 @@ def submit_run():
             run_input = problem.sample_input
         correct_output = problem.sample_output
 
-    run = model.Run(user, contest, lang, problem,
-                    datetime.datetime.utcnow(), source_code, run_input,
-                    correct_output, is_submission, local_submit_time=datetime.datetime.now())
+    run = model.Run(
+        user,
+        contest,
+        lang,
+        problem,
+        datetime.datetime.utcnow(),
+        source_code,
+        run_input,
+        correct_output,
+        is_submission,
+        local_submit_time=datetime.datetime.now(),
+    )
     run.state = model.RunState.JUDGING
 
     resp = None
@@ -413,9 +421,9 @@ def submit_run():
         run.state = model.RunState.CONTEST_HAS_NOT_BEGUN
         run.started_execing_time = datetime.datetime.utcnow()
         run.finished_execing_time = datetime.datetime.utcnow()
-        resp = make_response(jsonify({'error': 'Contest has not begun'}), 400)
+        resp = make_response(jsonify({"error": "Contest has not begun"}), 400)
     else:
-        resp = make_response(jsonify({'status': 'good'}), 200)
+        resp = make_response(jsonify({"status": "good"}), 200)
 
     db_session.add(run)
     db_session.commit()
@@ -430,46 +438,63 @@ def get_scoreboard(contest_id):
     contest = model.Contest.query.get(contest_id)
 
     if not contest:
-        return make_response(jsonify({'error': 'Could not find contest'}), 404)
+        return make_response(jsonify({"error": "Could not find contest"}), 404)
 
-    defendants = model.User.query\
-                      .filter(model.User.user_roles.any(name="defendant"))\
-                      .filter(model.User.contests.any(id=contest.id))\
-                      .all()
+    defendants = model.User.query.filter(
+        model.User.user_roles.any(name="defendant")
+    ).filter(
+        model.User.contests.any(id=contest.id)
+    ).all()
 
-    problems = model.Problem.query\
-                    .filter(model.Problem.contests.any(id=contest.id))\
-                    .filter(model.Problem.is_enabled)\
-                    .all()
+    problems = model.Problem.query.filter(
+        model.Problem.contests.any(id=contest.id)
+    ).filter(
+        model.Problem.is_enabled
+    ).all()
 
-    runs = model.Run.query.filter_by(
-            is_submission=True,
-            contest=contest).options(joinedload(model.Run.user), joinedload(model.Run.problem)).all()
+    runs = model.Run.query.filter_by(is_submission=True, contest=contest).options(
+        joinedload(model.Run.user), joinedload(model.Run.problem)
+    ).all()
     key = lambda x: (x.user.id, x.problem.id, x.is_passed)
 
-    runs = {k: list(v) for k, v in itertools.groupby(sorted(filter(lambda x: x.user.id is not None and x.problem.id is not None and x.is_passed is not None, runs), key=key), key=key)}
+    runs = {
+        k: list(v)
+        for k, v in itertools.groupby(
+            sorted(
+                filter(
+                    lambda x: x.user.id is not None
+                    and x.problem.id is not None
+                    and x.is_passed is not None,
+                    runs,
+                ),
+                key=key,
+            ),
+            key=key,
+        )
+    }
 
     user_points = []
     for user in defendants:
         problem_states = {}
         penalty = 0
         for problem in problems:
-            problem_states[problem.slug] = len(runs.get((user.id, problem.id, True), [])) > 0
-            penalty += len(runs.get((user.id, problem.id, False), [])) if (user.id, problem.id, True) in runs else 0
+            problem_states[problem.slug] = len(
+                runs.get((user.id, problem.id, True), [])
+            ) > 0
+            penalty += len(runs.get((user.id, problem.id, False), [])) if (
+                user.id, problem.id, True
+            ) in runs else 0
 
-        user_points.append({
-            "user":
-            user.get_output_dict(),
-            "num_solved":
-            len([x for x in problem_states.values() if x]),
-            "penalty":
-            penalty,
-            "problem_states":
-            problem_states
-        })
+        user_points.append(
+            {
+                "user": user.get_output_dict(),
+                "num_solved": len([x for x in problem_states.values() if x]),
+                "penalty": penalty,
+                "problem_states": problem_states,
+            }
+        )
 
-    user_points.sort(
-        key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
+    user_points.sort(key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
 
     return make_response(jsonify(user_points))
 
@@ -481,18 +506,15 @@ def get_contest_info():
     curr_user = model.User.query.get(util.i(current_user_id))
 
     if not curr_user:
-        return make_response(jsonify({'error': 'Not logged in'}), 400)
+        return make_response(jsonify({"error": "Not logged in"}), 400)
 
     contests = curr_user.contests
 
     if len(contests) > 1:
-        return make_response(
-            jsonify({
-                'error': 'User has multiple contests'
-            }), 500)
+        return make_response(jsonify({"error": "User has multiple contests"}), 500)
 
     if len(contests) < 1:
-        return make_response(jsonify({'error': 'User has no contests'}), 400)
+        return make_response(jsonify({"error": "User has no contests"}), 400)
 
     contest = contests[0]
 
@@ -511,38 +533,31 @@ def make_user():
     curr_user = model.User.query.get(util.i(current_user_id))
 
     if not curr_user:
-        return make_response(jsonify({'error': 'Not logged in'}), 400)
+        return make_response(jsonify({"error": "Not logged in"}), 400)
 
-    if ("judge" not in curr_user.user_roles
-            and "operator" not in curr_user.user_roles):
-        return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+    if "judge" not in curr_user.user_roles and "operator" not in curr_user.user_roles:
+        return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
-    username = request.json.get('username')
-    name = request.json.get('name')
-    password = request.json.get('password')
-    username = request.json.get('username')
-    contest_name = request.json.get('contest_name')
+    username = request.json.get("username")
+    name = request.json.get("name")
+    password = request.json.get("password")
+    username = request.json.get("username")
+    contest_name = request.json.get("contest_name")
 
     if not all([username, name, password, username, contest_name]):
-        return make_response(
-            jsonify({
-                'error': 'Invalid request, missing fields'
-            }), 400)
+        return make_response(jsonify({"error": "Invalid request, missing fields"}), 400)
 
     existing_user = model.User.query.filter_by(username=username).scalar()
     if existing_user:
         return make_response(
-            jsonify({
-                'error': 'Invalid request, user already exists'
-            }), 400)
+            jsonify({"error": "Invalid request, user already exists"}), 400
+        )
 
     defedant_role = model.UserRole.query.filter_by(name="defendant").scalar()
 
     new_user = model.User(
-        username=username,
-        name=name,
-        password=password,
-        user_roles=[defedant_role])
+        username=username, name=name, password=password, user_roles=[defedant_role]
+    )
 
     db_session.add(new_user)
     db_session.commit()
@@ -550,13 +565,13 @@ def make_user():
     contest = model.Contest.query.filter_by(name=contest_name).scalar()
 
     if not contest:
-        return make_response(jsonify({'error': 'Invalid contest name'}), 400)
+        return make_response(jsonify({"error": "Invalid contest name"}), 400)
 
     new_user.contests.append(contest)
 
     db_session.commit()
 
-    return make_response(jsonify({'status': 'Success'}), 200)
+    return make_response(jsonify({"status": "Success"}), 200)
 
 
 @api.route("/update-user-metadata", methods=["POST"])
@@ -566,39 +581,33 @@ def update_user_metadata():
     curr_user = model.User.query.get(util.i(current_user_id))
 
     if not curr_user:
-        return make_response(jsonify({'error': 'Not logged in'}), 400)
+        return make_response(jsonify({"error": "Not logged in"}), 400)
 
-    if ("judge" not in curr_user.user_roles
-            and "operator" not in curr_user.user_roles):
-        return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+    if "judge" not in curr_user.user_roles and "operator" not in curr_user.user_roles:
+        return make_response(jsonify({"error": "Unauthorized access"}), 401)
 
-    user_username = request.json.get('user_username')
-    user_misc_metadata = request.json.get('misc_metadata')
+    user_username = request.json.get("user_username")
+    user_misc_metadata = request.json.get("misc_metadata")
 
     if not all([user_username, user_misc_metadata]):
-        return make_response(
-            jsonify({
-                'error': 'Invalid request, missing field'
-            }), 400)
+        return make_response(jsonify({"error": "Invalid request, missing field"}), 400)
 
     if not isinstance(user_misc_metadata, dict):
         return make_response(
-            jsonify({
-                'error': 'Invalid request, misc_metadata must be a dict'
-            }), 400)
+            jsonify({"error": "Invalid request, misc_metadata must be a dict"}), 400
+        )
 
     matching_user = model.User.query.filter_by(username=user_username).scalar()
 
     if not matching_user:
         return make_response(
-            jsonify({
-                'error': "Invalid request, Couldn't find user"
-            }), 400)
+            jsonify({"error": "Invalid request, Couldn't find user"}), 400
+        )
 
     matching_user.merge_metadata(user_misc_metadata)
     db_session.commit()
 
-    return make_response(jsonify({'status': 'Success'}), 200)
+    return make_response(jsonify({"status": "Success"}), 200)
 
 
 @api.route("/load-test")
@@ -606,15 +615,17 @@ def load_test():
     existing_user = model.User.query.filter_by(username="testuser1").scalar()
 
     contest = model.Contest.query.first()
-    defendants = model.User.query\
-                      .filter(model.User.user_roles.any(name="defendant"))\
-                      .filter(model.User.contests.any(id=contest.id))\
-                      .all()
+    defendants = model.User.query.filter(
+        model.User.user_roles.any(name="defendant")
+    ).filter(
+        model.User.contests.any(id=contest.id)
+    ).all()
 
-    problems = model.Problem.query\
-                    .filter(model.Problem.contests.any(id=contest.id))\
-                    .filter(model.Problem.is_enabled)\
-                    .all()
+    problems = model.Problem.query.filter(
+        model.Problem.contests.any(id=contest.id)
+    ).filter(
+        model.Problem.is_enabled
+    ).all()
 
     user_points = []
     for user in defendants:
@@ -627,7 +638,9 @@ def load_test():
                     is_passed=True,
                     user=user,
                     contest=contest,
-                    problem=problem).all())
+                    problem=problem,
+                ).all()
+            )
             problem_states[problem.slug] = is_passed
 
             failed_subs = model.Run.query.filter_by(
@@ -635,25 +648,23 @@ def load_test():
                 is_passed=False,
                 user=user,
                 contest=contest,
-                problem=problem).all()
+                problem=problem,
+            ).all()
 
             for sub in failed_subs:
                 penalty += 1  # TODO we may want to use the time submitted instead of 1
                 #      to match ICPC scoring
 
-        user_points.append({
-            "user":
-            user.get_output_dict(),
-            "num_solved":
-            len([x for x in problem_states.values() if x]),
-            "penalty":
-            penalty,
-            "problem_states":
-            problem_states
-        })
+        user_points.append(
+            {
+                "user": user.get_output_dict(),
+                "num_solved": len([x for x in problem_states.values() if x]),
+                "penalty": penalty,
+                "problem_states": problem_states,
+            }
+        )
 
-    user_points.sort(
-        key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
+    user_points.sort(key=lambda x: (x["num_solved"], -x["penalty"]), reverse=True)
 
     user = model.User.query.filter_by(username="testuser1").scalar()
     if not user or not user.verify_password("test"):
@@ -666,19 +677,19 @@ def load_test():
     langs = model.Language.query.all()
     filter_langs = [x.get_output_dict() for x in langs if x.is_enabled]
 
-    curr_user = model.User.query.filter_by(
-        id=util.i(5)).scalar()
+    curr_user = model.User.query.filter_by(id=util.i(5)).scalar()
     contests = curr_user.contests
 
     resp = None
     if curr_user:
         resp = curr_user.get_output_dict()
 
-    over_limit_runs_query = model.Run.submit_time >\
-                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=5))
-    run_count = model.Run.query.filter_by(user_id=curr_user.id)\
-                               .filter(over_limit_runs_query)\
-                               .count()
+    over_limit_runs_query = model.Run.submit_time > (
+        datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+    )
+    run_count = model.Run.query.filter_by(user_id=curr_user.id).filter(
+        over_limit_runs_query
+    ).count()
 
     matching_user = model.User.query.filter_by(username="testuser1").scalar()
 
@@ -688,19 +699,20 @@ def load_test():
     MAX_RUNS = util.get_configuration("max_user_submissions")
     TIME_LIMIT = util.get_configuration("user_submission_time_limit")
 
-    over_limit_runs_query = model.Run.submit_time >\
-                            (datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT))
-    run_count = model.Run.query.filter_by(user_id=user.id)\
-                               .filter(over_limit_runs_query)\
-                               .count()
+    over_limit_runs_query = model.Run.submit_time > (
+        datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT)
+    )
+    run_count = model.Run.query.filter_by(user_id=user.id).filter(
+        over_limit_runs_query
+    ).count()
 
     contest = user.contests[0]
 
     lang_name = "python"
     problem_slug = "fizzbuzz"
-    source_code = "asjdnsadjkasd"*10000
+    source_code = "asjdnsadjkasd" * 10000
     is_submission = False
-    user_test_input = "asdkamdlkamdklas"*10000
+    user_test_input = "asdkamdlkamdklas" * 10000
 
     lang = model.Language.query.filter_by(name=lang_name).one()
     problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
@@ -726,14 +738,13 @@ def signout_user(username):
 
     if not matching_user:
         return make_response(
-            jsonify({
-                'error': "Invalid request, couldn't find user"
-            }), 400)
+            jsonify({"error": "Invalid request, couldn't find user"}), 400
+        )
 
     matching_user.merge_metadata({"signout": util.i(time.time())})
     db_session.commit()
 
-    return make_response(jsonify({'status': 'Success'}), 200)
+    return make_response(jsonify({"status": "Success"}), 200)
 
 
 def _validate_and_get_required_fields(fields):

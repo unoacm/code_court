@@ -8,40 +8,35 @@ from database import Base
 
 from sqlalchemy.orm import relationship, backref
 
-from sqlalchemy import (
-    Column,
-    Table,
-    ForeignKey,
-    Integer,
-    String,
-    Boolean,
-    DateTime,
-)
+from sqlalchemy import Column, Table, ForeignKey, Integer, String, Boolean, DateTime
 
 MAX_RUN_OUTPUT_LENGTH = 2000
 
-contest_problem = Table('contest_problem', Base.metadata,
-                           Column('contest_id', Integer,
-                                     ForeignKey('contest.id')),
-                           Column('problem_id', Integer,
-                                     ForeignKey('problem.id')))
+contest_problem = Table(
+    "contest_problem",
+    Base.metadata,
+    Column("contest_id", Integer, ForeignKey("contest.id")),
+    Column("problem_id", Integer, ForeignKey("problem.id")),
+)
 
-contest_user = Table('contest_user', Base.metadata,
-                        Column('contest_id', Integer,
-                                  ForeignKey('contest.id')),
-                        Column('user_id', Integer,
-                                  ForeignKey('user.id')))
+contest_user = Table(
+    "contest_user",
+    Base.metadata,
+    Column("contest_id", Integer, ForeignKey("contest.id")),
+    Column("user_id", Integer, ForeignKey("user.id")),
+)
 
-user_user_role = Table('user_user_role', Base.metadata,
-                          Column('user_id', Integer,
-                                    ForeignKey('user.id')),
-                          Column('user_role_id', Integer,
-                                    ForeignKey('user_role.id')))
+user_user_role = Table(
+    "user_user_role",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("user.id")),
+    Column("user_role_id", Integer, ForeignKey("user_role.id")),
+)
 
 
 class Language(Base):
     """Stores the configuration for a programming language"""
-    __tablename__ = 'language'
+    __tablename__ = "language"
 
     id = Column(Integer, primary_key=True)
 
@@ -63,12 +58,9 @@ class Language(Base):
     version = Column(String)
     """str: the version of the language"""
 
-    def __init__(self,
-                 name,
-                 syntax_mode,
-                 is_enabled,
-                 run_script,
-                 default_template=None):
+    def __init__(
+        self, name, syntax_mode, is_enabled, run_script, default_template=None
+    ):
         self.name = name
         self.syntax_mode = syntax_mode
         self.is_enabled = is_enabled
@@ -82,7 +74,7 @@ class Language(Base):
             "is_enabled": self.is_enabled,
             "run_script": self.run_script,
             "default_template": self.default_template,
-            "version": self.version
+            "version": self.version,
         }
 
     def __str__(self):
@@ -94,7 +86,7 @@ class Language(Base):
 
 class ProblemType(Base):
     """Stores information about a problem type"""
-    __tablename__ = 'problem_type'
+    __tablename__ = "problem_type"
 
     id = Column(Integer, primary_key=True)
 
@@ -109,11 +101,7 @@ class ProblemType(Base):
         self.eval_script = eval_script
 
     def get_output_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "eval_script": self.eval_script,
-        }
+        return {"id": self.id, "name": self.name, "eval_script": self.eval_script}
 
     def __repr__(self):
         return "ProblemType({})".format(self.name)
@@ -123,14 +111,14 @@ class ProblemType(Base):
 
 
 class Problem(Base):
-    __tablename__ = 'problem'
+    __tablename__ = "problem"
 
     id = Column(Integer, primary_key=True)
 
     problem_type = relationship(
-        'ProblemType', backref=backref('Problem', lazy='dynamic'))
-    problem_type_id = Column(
-        Integer, ForeignKey('problem_type.id'), nullable=False)
+        "ProblemType", backref=backref("Problem", lazy="dynamic")
+    )
+    problem_type_id = Column(Integer, ForeignKey("problem_type.id"), nullable=False)
     """int: a foreignkey to the problem's problem type"""
 
     slug = Column(String(200), unique=True, nullable=False)
@@ -159,10 +147,20 @@ class Problem(Base):
     """bool: whether or not the problem is enabled"""
 
     contests = relationship(
-        "Contest", secondary=contest_problem, back_populates="problems")
+        "Contest", secondary=contest_problem, back_populates="problems"
+    )
 
-    def __init__(self, problem_type, slug, name, problem_statement,
-                 sample_input, sample_output, secret_input, secret_output):
+    def __init__(
+        self,
+        problem_type,
+        slug,
+        name,
+        problem_statement,
+        sample_input,
+        sample_output,
+        secret_input,
+        secret_output,
+    ):
         self.problem_type = problem_type
         self.slug = slug
         self.name = name
@@ -192,7 +190,7 @@ class Problem(Base):
 
 class User(Base, UserMixin):
     """Stores information about a user"""
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
 
@@ -205,26 +203,27 @@ class User(Base, UserMixin):
     hashed_password = Column(String, nullable=False)
     """str: a bcrypt hash of the user's password"""
 
-    creation_time = Column(
-        DateTime, nullable=False, default=datetime.datetime.utcnow())
+    creation_time = Column(DateTime, nullable=False, default=datetime.datetime.utcnow())
     """str: the creation time of the user"""
 
     misc_data = Column(String, nullable=False)
     """str: misc data about a user, stored as a json object"""
 
-    contests = relationship(
-        "Contest", secondary=contest_user, back_populates="users")
+    contests = relationship("Contest", secondary=contest_user, back_populates="users")
     user_roles = relationship(
-        "UserRole", secondary=user_user_role, back_populates="users")
+        "UserRole", secondary=user_user_role, back_populates="users"
+    )
 
-    def __init__(self,
-                 username,
-                 name,
-                 password,
-                 creation_time=None,
-                 misc_data=None,
-                 contests=None,
-                 user_roles=None):
+    def __init__(
+        self,
+        username,
+        name,
+        password,
+        creation_time=None,
+        misc_data=None,
+        contests=None,
+        user_roles=None,
+    ):
         if misc_data is None:
             misc_data = json.dumps({})
 
@@ -247,8 +246,7 @@ class User(Base, UserMixin):
         return json.loads(self.misc_data)
 
     def verify_password(self, plainext_password):
-        return util.is_password_matching(plainext_password,
-                                         self.hashed_password)
+        return util.is_password_matching(plainext_password, self.hashed_password)
 
     def merge_metadata(self, new_metadata_dict):
         old_metadata_dict = json.loads(self.misc_data)
@@ -277,11 +275,7 @@ class User(Base, UserMixin):
         return self.username
 
     def get_output_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "username": self.username,
-        }
+        return {"id": self.id, "name": self.name, "username": self.username}
 
     def __repr__(self):
         return "User({})".format(self.username)
@@ -292,7 +286,7 @@ class User(Base, UserMixin):
 
 class Contest(Base):
     """Stores information about a contest"""
-    __tablename__ = 'contest'
+    __tablename__ = "contest"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
@@ -319,21 +313,23 @@ class Contest(Base):
     """bool: whether or not the contest can be joined/viewed by anyone"""
 
     # users = relationship("ContestUser", back_populates="contest")
-    users = relationship(
-        "User", secondary=contest_user, back_populates="contests")
+    users = relationship("User", secondary=contest_user, back_populates="contests")
     problems = relationship(
-        "Problem", secondary=contest_problem, back_populates="contests")
+        "Problem", secondary=contest_problem, back_populates="contests"
+    )
 
-    def __init__(self,
-                 name,
-                 start_time,
-                 end_time,
-                 is_public,
-                 activate_time=None,
-                 freeze_time=None,
-                 deactivate_time=None,
-                 users=None,
-                 problems=None):
+    def __init__(
+        self,
+        name,
+        start_time,
+        end_time,
+        is_public,
+        activate_time=None,
+        freeze_time=None,
+        deactivate_time=None,
+        users=None,
+        problems=None,
+    ):
         self.name = name
         self.start_time = start_time
         self.end_time = end_time
@@ -365,7 +361,7 @@ class Contest(Base):
 
 class Configuration(Base):
     """Stores general configuration information"""
-    __tablename__ = 'configuration'
+    __tablename__ = "configuration"
 
     id = Column(Integer, primary_key=True)
 
@@ -413,31 +409,24 @@ class Configuration(Base):
 
 class SavedCode(Base):
     """Stores general configuration information"""
-    __tablename__ = 'saved_code'
+    __tablename__ = "saved_code"
 
     id = Column(Integer, primary_key=True)
 
-    contest = relationship(
-        'Contest', backref=backref('SavedCode', lazy='dynamic'))
-    contest_id = Column(
-        Integer, ForeignKey('contest.id'), nullable=False)
+    contest = relationship("Contest", backref=backref("SavedCode", lazy="dynamic"))
+    contest_id = Column(Integer, ForeignKey("contest.id"), nullable=False)
     """int: a foreignkey to the saved_code's contest"""
 
-    problem = relationship(
-        'Problem', backref=backref('SavedCode', lazy='dynamic'))
-    problem_id = Column(
-        Integer, ForeignKey('problem.id'), nullable=False)
+    problem = relationship("Problem", backref=backref("SavedCode", lazy="dynamic"))
+    problem_id = Column(Integer, ForeignKey("problem.id"), nullable=False)
     """int: a foreignkey to the saved_code's problem"""
 
-    user = relationship(
-        'User', backref=backref('SavedCode', lazy='dynamic'))
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user = relationship("User", backref=backref("SavedCode", lazy="dynamic"))
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     """int: a foreignkey to the saved_code's user"""
 
-    language = relationship(
-        'Language', backref=backref('SavedCode', lazy='dynamic'))
-    language_id = Column(
-        Integer, ForeignKey('language.id'), nullable=False)
+    language = relationship("Language", backref=backref("SavedCode", lazy="dynamic"))
+    language_id = Column(Integer, ForeignKey("language.id"), nullable=False)
     """int: a foreignkey to the saved_code's language"""
 
     source_code = Column(String, unique=True, nullable=False)
@@ -446,8 +435,9 @@ class SavedCode(Base):
     last_updated_time = Column(DateTime)
     """DateTime: the time the code was last updated at"""
 
-    def __init__(self, contest, problem, user, language, source_code,
-                 last_updated_time):
+    def __init__(
+        self, contest, problem, user, language, source_code, last_updated_time
+    ):
         self.contest = contest
         self.problem = problem
         self.user = user
@@ -468,29 +458,23 @@ class SavedCode(Base):
 class Run(Base):
     """Stores information about a specific run. This might be a
     submission, or just a test run"""
-    __tablename__ = 'run'
+    __tablename__ = "run"
     id = Column(Integer, primary_key=True)
 
-    user = relationship('User', backref=backref('Run', lazy='dynamic'))
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user = relationship("User", backref=backref("Run", lazy="dynamic"))
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     """int: a foreignkey to the run's user"""
 
-    contest = relationship(
-        'Contest', backref=backref('Run', lazy='dynamic'))
-    contest_id = Column(
-        Integer, ForeignKey('contest.id'), nullable=True)
+    contest = relationship("Contest", backref=backref("Run", lazy="dynamic"))
+    contest_id = Column(Integer, ForeignKey("contest.id"), nullable=True)
     """int: a foreignkey to the run's contest"""
 
-    language = relationship(
-        'Language', backref=backref('Run', lazy='dynamic'))
-    language_id = Column(
-        Integer, ForeignKey('language.id'), nullable=False)
+    language = relationship("Language", backref=backref("Run", lazy="dynamic"))
+    language_id = Column(Integer, ForeignKey("language.id"), nullable=False)
     """int: a foreignkey to the run's language"""
 
-    problem = relationship(
-        'Problem', backref=backref('Run', lazy='dynamic'))
-    problem_id = Column(
-        Integer, ForeignKey('problem.id'), nullable=True)
+    problem = relationship("Problem", backref=backref("Run", lazy="dynamic"))
+    problem_id = Column(Integer, ForeignKey("problem.id"), nullable=True)
     """int: a foreignkey to the run's problem"""
 
     source_code = Column(String, nullable=False)
@@ -531,15 +515,27 @@ class Run(Base):
 
     @property
     def is_judging(self):
-        return (self.started_execing_time is not None
-                and self.finished_execing_time is None)
+        return (
+            self.started_execing_time is not None and self.finished_execing_time is None
+        )
 
     @property
     def is_judged(self):
         return self.finished_execing_time is not None
 
-    def __init__(self, user, contest, language, problem, submit_time,
-                 source_code, run_input, correct_output, is_submission, local_submit_time =None):
+    def __init__(
+        self,
+        user,
+        contest,
+        language,
+        problem,
+        submit_time,
+        source_code,
+        run_input,
+        correct_output,
+        is_submission,
+        local_submit_time=None,
+    ):
         self.user = user
         self.contest = contest
         self.language = language
@@ -563,7 +559,7 @@ class Run(Base):
             "is_submission": self.is_submission,
             "is_passed": self.is_passed,
             "is_priority": self.is_priority,
-            "state": self.state
+            "state": self.state,
         }
 
         if self.local_submit_time:
@@ -590,8 +586,9 @@ class Run(Base):
 
     @staticmethod
     def get_judging_runs():
-        return Run.query.filter(Run.started_execing_time is not None).\
-                         filter(Run.finished_execing_time is None).all()
+        return Run.query.filter(Run.started_execing_time is not None).filter(
+            Run.finished_execing_time is None
+        ).all()
 
     @staticmethod
     def get_unjudged_runs():
@@ -600,26 +597,23 @@ class Run(Base):
 
 class Clarification(Base):
     """Stores information about a user or judge clarification"""
-    __tablename__ = 'clarification'
+    __tablename__ = "clarification"
 
     id = Column(Integer, primary_key=True)
 
-    problem = relationship(
-        'Problem', backref=backref('Clarification', lazy='dynamic'))
-    problem_id = Column(
-        Integer, ForeignKey('problem.id'), nullable=True)
+    problem = relationship("Problem", backref=backref("Clarification", lazy="dynamic"))
+    problem_id = Column(Integer, ForeignKey("problem.id"), nullable=True)
     """int: a foreignkey to the clarification's problem, if it is null, the
         the clarification is general"""
 
     initiating_user = relationship(
-        'User', backref=backref('Clarification', lazy='dynamic'))
-    initiating_user_id = Column(
-        Integer, ForeignKey('user.id'), nullable=False)
+        "User", backref=backref("Clarification", lazy="dynamic")
+    )
+    initiating_user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     """int: a foreignkey to the user that initiated the clarification"""
 
     parent = relationship("Clarification", remote_side=[id])
-    parent_id = Column(
-        Integer, ForeignKey('clarification.id'), nullable=True)
+    parent_id = Column(Integer, ForeignKey("clarification.id"), nullable=True)
     """int: a foreignkey to the a parent clarification"""
 
     thread = Column(String, nullable=False)
@@ -631,8 +625,7 @@ class Clarification(Base):
     contents = Column(String, nullable=False)
     """str: the contents of the clarification"""
 
-    creation_time = Column(
-        DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    creation_time = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     """DateTime: the time the clarification was created at"""
 
     is_public = Column(Boolean, nullable=False)
@@ -652,7 +645,7 @@ class Clarification(Base):
             "contents": self.contents,
             "thread": self.contents,
             "is_public": self.is_public,
-            "initiating_user": self.initiating_user
+            "initiating_user": self.initiating_user,
         }
 
     def __repr__(self):
@@ -664,13 +657,12 @@ class Clarification(Base):
 
 class UserRole(Base):
     """Stores system user roles"""
-    __tablename__ = 'user_role'
+    __tablename__ = "user_role"
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
 
-    users = relationship(
-        "User", secondary=user_user_role, back_populates="user_roles")
+    users = relationship("User", secondary=user_user_role, back_populates="user_roles")
 
     def __init__(self, name):
         self.name = name
@@ -699,7 +691,6 @@ class UserRole(Base):
 
     def __str__(self):
         return self.__repr__()
-
 
 
 class RunState:

@@ -3,6 +3,7 @@
 import json
 import subprocess
 
+
 def main():
     version_commands = {
         "python": ["python3", "-V"],
@@ -16,26 +17,47 @@ def main():
         "c++": ["gcc", "-dumpversion"],
         "java": ["java", "-version"],
         "ruby": ["ruby", "-v"],
-        "rust": ["rustc", "-V"]
+        "rust": ["rustc", "-V"],
     }
 
     versions = {}
 
     for lang, command in version_commands.items():
-        if lang == "lua" or lang == "guile" or lang == "java" or lang == "rust" or lang == "ruby":
-            versions[lang] = get_version(subprocess.check_output(command, stderr=subprocess.STDOUT).decode("utf-8").strip())
+        if (
+            lang == "lua"
+            or lang == "guile"
+            or lang == "java"
+            or lang == "rust"
+            or lang == "ruby"
+        ):
+            versions[lang] = get_version(
+                subprocess.check_output(command, stderr=subprocess.STDOUT).decode(
+                    "utf-8"
+                ).strip()
+            )
         else:
-            versions[lang] = subprocess.check_output(command, stderr=subprocess.STDOUT).decode("utf-8").strip()
+            versions[lang] = subprocess.check_output(
+                command, stderr=subprocess.STDOUT
+            ).decode(
+                "utf-8"
+            ).strip()
 
     print(json.dumps(versions))
+
 
 def get_version(string):
     i = 0
     while string[i].isdigit() == False:
         i += 1
     for j in range(i, len(string)):
-        if(string[j] == " " or string[j] == "\'" or string[j] == "\"" or string[j] == '\n'):
+        if (
+            string[j] == " "
+            or string[j] == "'"
+            or string[j] == '"'
+            or string[j] == "\n"
+        ):
             break
     return string[i:j].strip()
+
 
 main()

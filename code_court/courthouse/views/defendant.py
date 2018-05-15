@@ -11,10 +11,9 @@ import model
 from database import db_session
 
 from flask_login import current_user
-from flask import (abort, Blueprint, current_app, render_template,
-                   request, Markup)
+from flask import abort, Blueprint, current_app, render_template, request, Markup
 
-defendant = Blueprint('defendant', __name__, template_folder='templates')
+defendant = Blueprint("defendant", __name__, template_folder="templates")
 
 
 @defendant.route("/", methods=["GET"])
@@ -31,6 +30,7 @@ def index():
 
 
 RunState = Enum("RunState", "judging passed failed")
+
 
 @defendant.route("/problem/<problem_id>/", methods=["GET"])
 @defendant.route("/problem/<problem_id>/", methods=["POST"])
@@ -51,17 +51,19 @@ def problem(problem_id):
         "defendant/problem.html",
         problem=problem,
         markdown_statement=markdown_statement,
-        source_code=source_code)
+        source_code=source_code,
+    )
 
 
 @defendant.route("/submissions", methods=["GET"])
 def submissions():
-    submissions = model.Run.query.filter_by(user=current_user, is_submission=True)\
-                                 .order_by(model.Run.submit_time.desc())\
-                                 .all()
+    submissions = model.Run.query.filter_by(
+        user=current_user, is_submission=True
+    ).order_by(
+        model.Run.submit_time.desc()
+    ).all()
 
-    return render_template(
-        "defendant/submissions.html", submissions=submissions)
+    return render_template("defendant/submissions.html", submissions=submissions)
 
 
 def submit_code(problem):
@@ -90,12 +92,19 @@ def submit_code(problem):
     button_action = request.form.get("action")
     is_submission = button_action == "submit" and not button_action == "run"
 
-    run = model.Run(test_user, test_contest, python, problem, current_time,
-                    source_code, problem.secret_input, problem.secret_output,
-                    is_submission)
+    run = model.Run(
+        test_user,
+        test_contest,
+        python,
+        problem,
+        current_time,
+        source_code,
+        problem.secret_input,
+        problem.secret_output,
+        is_submission,
+    )
 
     db_session.add(run)
     db_session.commit()
 
     return source_code
-

@@ -15,15 +15,16 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash, )
+    flash,
+)
 
 import model
 from database import db_session
 
-users = Blueprint('users', __name__, template_folder='templates/users')
+users = Blueprint("users", __name__, template_folder="templates/users")
 
 
-@users.route("/", methods=["GET"], defaults={'page': 1})
+@users.route("/", methods=["GET"], defaults={"page": 1})
 @users.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
 def users_view(page):
@@ -39,12 +40,14 @@ def users_view(page):
     users_query = model.User.query
 
     if user_search:
-        term = '%' + user_search + '%'
+        term = "%" + user_search + "%"
         users_query = users_query.filter(
-            or_(model.User.name.ilike(term), model.User.username.ilike(term)))
+            or_(model.User.name.ilike(term), model.User.username.ilike(term))
+        )
     if user_role and user_role != "all":
         users_query = users_query.join(model.User.user_roles).filter(
-            model.UserRole.name == user_role)
+            model.UserRole.name == user_role
+        )
 
     users_pagination = util.paginate(users_query, page, 30)
     users = users_pagination.items
@@ -57,7 +60,10 @@ def users_view(page):
 
         user_metrics["num_runs"] = run_query.count()
         user_metrics["last_run"] = run_query.order_by(
-            model.Run.submit_time.desc()).limit(1).first()
+            model.Run.submit_time.desc()
+        ).limit(
+            1
+        ).first()
 
         metrics[user.id] = user_metrics
 
@@ -67,10 +73,11 @@ def users_view(page):
         users=users,
         metrics=metrics,
         user_role=user_role,
-        search=user_search)
+        search=user_search,
+    )
 
 
-@users.route("/add/", methods=["GET", "POST"], defaults={'user_id': None})
+@users.route("/add/", methods=["GET", "POST"], defaults={"user_id": None})
 @users.route("/edit/<int:user_id>/", methods=["GET"])
 @util.login_required("operator")
 def users_add(user_id):
@@ -88,8 +95,7 @@ def users_add(user_id):
     elif request.method == "POST":  # process added/edited user
         return add_user()
     else:
-        current_app.logger.info("invalid user add request method: %s",
-                                request.method)
+        current_app.logger.info("invalid user add request method: %s", request.method)
         abort(400)
 
 
@@ -108,15 +114,15 @@ def users_del(user_id):
     user = model.User.query.filter_by(id=util.i(user_id)).scalar()
 
     if user is None:
-        error = "Failed to delete user \'{}\' as it does not exist.".format(
-            user_id)
+        error = "Failed to delete user '{}' as it does not exist.".format(user_id)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
 
     if current_user.id == user.id:
-        error = "Failed to delete user \'{}\' because user cannot delete itself.".format(
-            user_id)
+        error = "Failed to delete user '{}' because user cannot delete itself.".format(
+            user_id
+        )
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
@@ -124,11 +130,12 @@ def users_del(user_id):
     try:
         db_session.delete(user)
         db_session.commit()
-        flash("Deleted user \'{}\'".format(user.username), "warning")
+        flash("Deleted user '{}'".format(user.username), "warning")
     except IntegrityError:
         db_session.rollback()
-        error = "Failed to delete user \'{}\' as it's referenced in another DB element".format(
-            user_id)
+        error = "Failed to delete user '{}' as it's referenced in another DB element".format(
+            user_id
+        )
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -155,8 +162,7 @@ def add_user():
     user_roles = request.form.get("user_roles")
 
     if password != confirm_password:
-        error = "Failed to add/edit \'{}\' due to password mismatch.".format(
-            username)
+        error = "Failed to add/edit '{}' due to password mismatch.".format(username)
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("users.users_view"))
@@ -169,12 +175,10 @@ def add_user():
             user.hashed_password = util.hash_password(password)
         user.misc_data = misc_data
         user.contests = retrieve_by_names(contest_names.split(), model.Contest)
-        user.user_roles = retrieve_by_names(user_roles.split(),
-                                            model.UserRole)
+        user.user_roles = retrieve_by_names(user_roles.split(), model.UserRole)
     else:  # add
         if is_dup_user_username(username):
-            error = "Failed to add user \'{}\' as user already exists.".format(
-                username)
+            error = "Failed to add user '{}' as user already exists.".format(username)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("users.users_view"))
@@ -185,7 +189,8 @@ def add_user():
             password=password,
             misc_data=misc_data,
             contests=retrieve_by_names(contest_names.split(), model.Contest),
-            user_roles=retrieve_by_names(user_roles.split(), model.UserRole))
+            user_roles=retrieve_by_names(user_roles.split(), model.UserRole),
+        )
         db_session.add(user)
 
     db_session.commit()
@@ -204,18 +209,15 @@ def display_user_add_form(user_id):
         a rendered user add/edit template
     """
     if user_id is None:  # add
-        return render_template(
-            "users/add_edit.html", action_label="Add", user=None)
+        return render_template("users/add_edit.html", action_label="Add", user=None)
     else:  # edit
         user = model.User.query.filter_by(id=util.i(user_id)).scalar()
         if user is None:
-            error = "Failed to edit user \'{}\' as user doesn't exist.".format(
-                user_id)
+            error = "Failed to edit user '{}' as user doesn't exist.".format(user_id)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("users.users_view"))
-        return render_template(
-            "users/add_edit.html", action_label="Edit", user=user)
+        return render_template("users/add_edit.html", action_label="Edit", user=user)
 
 @users.route("profile/<username>", methods=["GET"])
 @util.login_required("operator")
