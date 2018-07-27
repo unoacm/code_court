@@ -13,16 +13,16 @@ from flask import (
     redirect,
     request,
     url_for,
-    flash, )
+    flash,
+)
 
 import model
 from database import db_session
 
-problems = Blueprint(
-    'problems', __name__, template_folder='templates/problems')
+problems = Blueprint("problems", __name__, template_folder="templates/problems")
 
 
-@problems.route("/", methods=["GET"], defaults={'page': 1})
+@problems.route("/", methods=["GET"], defaults={"page": 1})
 @problems.route("/<int:page>", methods=["GET"])
 @util.login_required("operator")
 def problems_view(page):
@@ -45,7 +45,7 @@ def ini_to_dict(raw_ini):
 
         keyval = re.match('\s*(\w+)\s*=\s*"(.*)"\s*', line)
         if keyval is None:
-            keyval = re.match('\s*(\w+)\s*=\s*(.*)\s*', line)
+            keyval = re.match("\s*(\w+)\s*=\s*(.*)\s*", line)
 
         key, val = keyval.groups()
 
@@ -55,23 +55,16 @@ def ini_to_dict(raw_ini):
 
 def extract_problem_data(problem_zip_file):
     problem_zip_file = zipfile.ZipFile(problem_zip_file)
-    raw_ini = problem_zip_file.read("problem.ini").decode('utf-8')
+    raw_ini = problem_zip_file.read("problem.ini").decode("utf-8")
     ini = ini_to_dict(raw_ini)
     data = {
-        "slug":
-        ini['short_name'],
-        "name":
-        ini['name'],
-        "problem_statement":
-        problem_zip_file.read("problem.md").decode('utf-8'),
-        "sample_input":
-        problem_zip_file.read("sample-input.txt").decode('utf-8'),
-        "sample_output":
-        problem_zip_file.read("sample-output.txt").decode('utf-8'),
-        "secret_input":
-        problem_zip_file.read("secret-input.txt").decode('utf-8'),
-        "secret_output":
-        problem_zip_file.read("secret-output.txt").decode('utf-8'),
+        "slug": ini["short_name"],
+        "name": ini["name"],
+        "problem_statement": problem_zip_file.read("problem.md").decode("utf-8"),
+        "sample_input": problem_zip_file.read("sample-input.txt").decode("utf-8"),
+        "sample_output": problem_zip_file.read("sample-output.txt").decode("utf-8"),
+        "secret_input": problem_zip_file.read("secret-input.txt").decode("utf-8"),
+        "secret_output": problem_zip_file.read("secret-output.txt").decode("utf-8"),
     }
     return data
 
@@ -89,34 +82,33 @@ def problems_batch_upload():
         a redirect to the problem view page
     """
     if request.method == "POST":  # process added/edited problem
-        input_output = model.ProblemType.query.filter_by(
-            name="input-output").one()
+        input_output = model.ProblemType.query.filter_by(name="input-output").one()
 
         problem_zip_files = request.files.getlist("problems")
 
         for problem_zip_file in problem_zip_files:
             data = extract_problem_data(problem_zip_file)
 
-            if is_dup_problem_slug(data['slug']):  # update
-                problem = model.Problem.query.filter_by(
-                    slug=data['slug']).one()
+            if is_dup_problem_slug(data["slug"]):  # update
+                problem = model.Problem.query.filter_by(slug=data["slug"]).one()
                 problem.problem_type = input_output
-                problem.name = data['name']
-                problem.problem_statement = data['problem_statement']
-                problem.sample_input = data['sample_input']
-                problem.sample_output = data['sample_output']
-                problem.secret_input = data['secret_input']
-                problem.secret_output = data['secret_output']
+                problem.name = data["name"]
+                problem.problem_statement = data["problem_statement"]
+                problem.sample_input = data["sample_input"]
+                problem.sample_output = data["sample_output"]
+                problem.secret_input = data["secret_input"]
+                problem.secret_output = data["secret_output"]
             else:  # add
                 problem = model.Problem(
                     problem_type=input_output,
-                    slug=data['slug'],
-                    name=data['name'],
-                    problem_statement=data['problem_statement'],
-                    sample_input=data['sample_input'],
-                    sample_output=data['sample_output'],
-                    secret_input=data['secret_input'],
-                    secret_output=data['secret_output'])
+                    slug=data["slug"],
+                    name=data["name"],
+                    problem_statement=data["problem_statement"],
+                    sample_input=data["sample_input"],
+                    sample_output=data["sample_output"],
+                    secret_input=data["secret_input"],
+                    secret_output=data["secret_output"],
+                )
                 db_session.add(problem)
 
         db_session.commit()
@@ -124,12 +116,12 @@ def problems_batch_upload():
         return redirect(url_for("problems.problems_view"))
     else:
         current_app.logger.info(
-            "invalid problem batch upload request method: %s", request.method)
+            "invalid problem batch upload request method: %s", request.method
+        )
         abort(400)
 
 
-@problems.route(
-    "/add/", methods=["GET", "POST"], defaults={'problem_id': None})
+@problems.route("/add/", methods=["GET", "POST"], defaults={"problem_id": None})
 @problems.route("/edit/<int:problem_id>/", methods=["GET"])
 @util.login_required("operator")
 def problems_add(problem_id):
@@ -147,8 +139,9 @@ def problems_add(problem_id):
     elif request.method == "POST":  # process added/edited problem
         return add_problem()
     else:
-        current_app.logger.info("invalid problem add request method: %s",
-                                request.method)
+        current_app.logger.info(
+            "invalid problem add request method: %s", request.method
+        )
         abort(400)
 
 
@@ -166,8 +159,9 @@ def problems_del(problem_id):
     """
     problem = model.Problem.query.filter_by(id=int(problem_id)).scalar()
     if problem is None:
-        error = "Failed to delete problem \'{}\' as it doesn't exist.".format(
-            problem.slug)
+        error = "Failed to delete problem '{}' as it doesn't exist.".format(
+            problem.slug
+        )
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("problems.problems_view"))
@@ -175,11 +169,12 @@ def problems_del(problem_id):
     try:
         db_session.delete(problem)
         db_session.commit()
-        flash("Deleted problem \'{}\'".format(problem.slug), "warning")
+        flash("Deleted problem '{}'".format(problem.slug), "warning")
     except IntegrityError:
         db_session.rollback()
-        error = "Failed to delete problem \'{}\' as it's referenced in another DB element".format(
-            problem.slug)
+        error = "Failed to delete problem '{}' as it's referenced in another DB element".format(
+            problem.slug
+        )
         current_app.logger.info(error)
         flash(error, "danger")
 
@@ -197,8 +192,7 @@ def add_problem():
         a redirect to the problem view page
     """
     problem_type_id = request.form.get("problem_type_id")
-    problem_type = model.ProblemType.query.filter_by(
-        id=int(problem_type_id)).one()
+    problem_type = model.ProblemType.query.filter_by(id=int(problem_type_id)).one()
     slug = request.form.get("slug")
     name = request.form.get("name")
     is_enabled = request.form.get("is_enabled")
@@ -222,8 +216,9 @@ def add_problem():
 
     is_enabled_bool = util.checkbox_result_to_bool(is_enabled)
     if is_enabled_bool is None:
-        error = "Failed to add problem \'{}\' due to invalid is_enabled check.".format(
-            name)
+        error = "Failed to add problem '{}' due to invalid is_enabled check.".format(
+            name
+        )
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("problems.problems_view"))
@@ -234,7 +229,7 @@ def add_problem():
         flash(error, "danger")
         return redirect(url_for("problems.problems_view"))
 
-    problem_id = request.form.get('problem_id')
+    problem_id = request.form.get("problem_id")
     if problem_id:  # edit
         problem = model.Problem.query.filter_by(id=int(problem_id)).one()
         problem.problem_type = problem_type
@@ -249,15 +244,21 @@ def add_problem():
     else:  # add
         # check if is duplicate
         if is_dup_problem_slug(slug):
-            error = "Failed to add problem \'{}\' as problem already exists.".format(
-                slug)
+            error = "Failed to add problem '{}' as problem already exists.".format(slug)
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("problems.problems_view"))
 
-        problem = model.Problem(problem_type, slug, name, problem_statement,
-                                sample_input, sample_output, secret_input,
-                                secret_output)
+        problem = model.Problem(
+            problem_type,
+            slug,
+            name,
+            problem_statement,
+            sample_input,
+            sample_output,
+            secret_input,
+            secret_output,
+        )
         problem.is_enabled = is_enabled_bool
         db_session.add(problem)
 
@@ -287,12 +288,14 @@ def display_problem_add_form(problem_id):
             "problems/add_edit.html",
             action_label="Add",
             problem=None,
-            problemtypes=problemtypes)
+            problemtypes=problemtypes,
+        )
     else:  # edit
         problem = model.Problem.query.filter_by(id=int(problem_id)).scalar()
         if problem is None:
-            error = "Failed to edit problem \'{}\' as problem doesn't exist.".format(
-                problem_id)
+            error = "Failed to edit problem '{}' as problem doesn't exist.".format(
+                problem_id
+            )
             current_app.logger.info(error)
             flash(error, "danger")
             return redirect(url_for("problems.problems_view"))
@@ -301,7 +304,8 @@ def display_problem_add_form(problem_id):
             "problems/add_edit.html",
             action_label="Edit",
             problem=problem,
-            problemtypes=problemtypes)
+            problemtypes=problemtypes,
+        )
 
 
 # Util functions
@@ -320,4 +324,3 @@ def is_dup_problem_slug(slug):
         return True
     else:
         return False
-

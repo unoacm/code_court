@@ -43,9 +43,9 @@ from views.defendant import defendant
 from views.auth import auth
 
 # turn down log level for werkzeug
-logging.getLogger('werkzeug').setLevel(logging.INFO)
+logging.getLogger("werkzeug").setLevel(logging.INFO)
 
-log_location = 'logs/code_court.log'
+log_location = "logs/code_court.log"
 
 app = Flask(__name__)
 
@@ -61,37 +61,41 @@ def create_app():
     """
     app = Flask(__name__)
 
-    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # 1 day
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400  # 1 day
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_ECHO'] = False
-    app.config['SQLALCHEMY_RECORD_QUERIES'] = False
-    app.config['model'] = model
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_ECHO"] = False
+    app.config["SQLALCHEMY_RECORD_QUERIES"] = False
+    app.config["model"] = model
     app.config[
-        'SECRET_KEY'] = '2jrlkfjoi1j3kljekdlasjdklasjdk139999d9d'  #TODO: put this in config
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
+        "SECRET_KEY"
+    ] = "2jrlkfjoi1j3kljekdlasjdklasjdk139999d9d"  # TODO: put this in config
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(days=30)
 
     if app.config.get("SSL"):
-        app.config.update(dict(PREFERRED_URL_SCHEME='https'))
+        app.config.update(dict(PREFERRED_URL_SCHEME="https"))
 
-    app.config['RUNMODE'] = "PRODUCTION" if os.getenv(CODE_COURT_PRODUCTION_ENV_VAR) else "DEVELOPMENT"
+    app.config["RUNMODE"] = "PRODUCTION" if os.getenv(
+        CODE_COURT_PRODUCTION_ENV_VAR
+    ) else "DEVELOPMENT"
 
     # Add custom filters to Jinja2
     # http://flask.pocoo.org/docs/0.12/templating/
-    app.jinja_env.filters['dt_to_str'] = util.dt_to_str
-    app.jinja_env.filters['dt_to_date_str'] = util.dt_to_date_str
-    app.jinja_env.filters['dt_to_time_str'] = util.dt_to_time_str
+    app.jinja_env.filters["dt_to_str"] = util.dt_to_str
+    app.jinja_env.filters["dt_to_date_str"] = util.dt_to_date_str
+    app.jinja_env.filters["dt_to_time_str"] = util.dt_to_time_str
 
     setup_logging(app)
     app.logger.setLevel(logging.DEBUG)
 
     init_db()
-    if not app.config['TESTING']:
+    if not app.config["TESTING"]:
         setup_database(app)
 
     with app.app_context():
-        app.config['MAX_CONTENT_LENGTH'] = util.get_configuration(
-            "max_output_length") * 1024  # kilobytes
+        app.config["MAX_CONTENT_LENGTH"] = util.get_configuration(
+            "max_output_length"
+        ) * 1024  # kilobytes
 
     CORS(app, supports_credentials=True)
 
@@ -110,45 +114,44 @@ def create_app():
     def load_user(username):
         return model.User.query.filter_by(username=username).scalar()
 
-    app.register_blueprint(main, url_prefix='')
-    app.register_blueprint(api, url_prefix='/api')
-    app.register_blueprint(admin, url_prefix='/admin')
-    app.register_blueprint(configurations, url_prefix='/admin/configurations')
-    app.register_blueprint(clarifications, url_prefix='/admin/clarifications')
-    app.register_blueprint(languages, url_prefix='/admin/languages')
-    app.register_blueprint(problems, url_prefix='/admin/problems')
-    app.register_blueprint(users, url_prefix='/admin/users')
-    app.register_blueprint(runs, url_prefix='/admin/runs')
-    app.register_blueprint(contests, url_prefix='/admin/contests')
-    app.register_blueprint(defendant, url_prefix='/defendant')
-    app.register_blueprint(auth, url_prefix='/admin')
+    app.register_blueprint(main, url_prefix="")
+    app.register_blueprint(api, url_prefix="/api")
+    app.register_blueprint(admin, url_prefix="/admin")
+    app.register_blueprint(configurations, url_prefix="/admin/configurations")
+    app.register_blueprint(clarifications, url_prefix="/admin/clarifications")
+    app.register_blueprint(languages, url_prefix="/admin/languages")
+    app.register_blueprint(problems, url_prefix="/admin/problems")
+    app.register_blueprint(users, url_prefix="/admin/users")
+    app.register_blueprint(runs, url_prefix="/admin/runs")
+    app.register_blueprint(contests, url_prefix="/admin/contests")
+    app.register_blueprint(defendant, url_prefix="/defendant")
+    app.register_blueprint(auth, url_prefix="/admin")
 
     @app.context_processor
     def inject_user():
         return {}
 
-    @app.route('/')
+    @app.route("/")
     def defendant_index():
-        return send_from_directory('static/defendant-frontend', "index.html")
+        return send_from_directory("static/defendant-frontend", "index.html")
 
-    @app.route('/<path:path>')
+    @app.route("/<path:path>")
     def all(path):
         try:
-            return send_from_directory('static/defendant-frontend', path)
+            return send_from_directory("static/defendant-frontend", path)
         except werkzeug.exceptions.NotFound as e:
-            return send_from_directory('static/defendant-frontend',
-                                       "index.html")
+            return send_from_directory("static/defendant-frontend", "index.html")
 
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template('404.html'), 404
+        return render_template("404.html"), 404
 
     @app.errorhandler(401)
     @login_manager.unauthorized_handler
     def unauthorized(callback=None):
         if not current_user.is_authenticated:
-            return render_template('auth/login.html'), 401
-        return render_template('401.html'), 401
+            return render_template("auth/login.html"), 401
+        return render_template("401.html"), 401
 
     @app.teardown_appcontext
     def teardown(exception=None):
@@ -156,7 +159,7 @@ def create_app():
 
     @app.after_request
     def after_request(resp):
-        if app.config.get('SQLALCHEMY_RECORD_QUERIES'):
+        if app.config.get("SQLALCHEMY_RECORD_QUERIES"):
             with open("/home/ben/sql", "a+") as f:
                 f.write("=========\n{}:\n\n".format(request.url))
                 for q in get_debug_queries():
@@ -172,7 +175,7 @@ def setup_database(app):
     with app.app_context():
         if not is_db_inited():
             populate_db()
-            if not app.config['TESTING'] and app.config['RUNMODE'] == "DEVELOPMENT":
+            if not app.config["TESTING"] and app.config["RUNMODE"] == "DEVELOPMENT":
                 dev_populate_db()
 
 
@@ -195,48 +198,91 @@ def populate_db():
     """
     current_app.logger.info("Initializing db tables")
 
-    db_session.add_all([
-        model.UserRole("defendant"),
-        model.UserRole("operator"),
-        model.UserRole("judge"),
-        model.UserRole("executioner"),
-        model.UserRole("observer")
-    ])
+    db_session.add_all(
+        [
+            model.UserRole("defendant"),
+            model.UserRole("operator"),
+            model.UserRole("judge"),
+            model.UserRole("executioner"),
+            model.UserRole("observer"),
+        ]
+    )
 
     # TODO: extract these out into a folder
-    db_session.add_all([
-        model.Language("python", "python", True,
-                       textwrap.dedent('''
+    db_session.add_all(
+        [
+            model.Language(
+                "python",
+                "python",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | python3 $program_file
-                                    exit $?''').strip()),
-        model.Language("python2", "python", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "python2",
+                "python",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | python2 $program_file
-                                    exit $?''').strip()),
-        model.Language("perl", "perl", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "perl",
+                "perl",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | perl $program_file
-                                    exit $?''').strip()),
-        model.Language("lua", "lua", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "lua",
+                "lua",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | lua $program_file
-                                    exit $?''').strip()),
-        model.Language("nodejs", "javascript", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "nodejs",
+                "javascript",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | node $program_file
-                                    exit $?''').strip()),
-        model.Language("guile", "scheme", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "guile",
+                "scheme",
+                True,
+                textwrap.dedent(
+                    """
                                     #!/bin/bash
                                     cat $input_file | guile --no-auto-compile $program_file
-                                    exit $?''').strip()),
-        model.Language("fortran", "fortran", True,
-                       textwrap.dedent('''
+                                    exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "fortran",
+                "fortran",
+                True,
+                textwrap.dedent(
+                    """
                                 #!/bin/bash
                                 cp /share/program $scratch_dir/program.f
 
@@ -250,9 +296,15 @@ def populate_db():
 
                                 cat $input_file | ./program
 
-                                exit $?''').strip()),
-        model.Language("c", "clike", True,
-                       textwrap.dedent('''
+                                exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "c",
+                "clike",
+                True,
+                textwrap.dedent(
+                    """
                                 #!/bin/bash
                                 cp $program_file $scratch_dir/program.c
 
@@ -266,14 +318,22 @@ def populate_db():
 
                                 cat $input_file | ./program
 
-                                exit $?''').strip(),
-                       textwrap.dedent('''
+                                exit $?"""
+                ).strip(),
+                textwrap.dedent(
+                    """
                                 #include <stdio.h>
 
                                 int main(int argc, const char* argv[]) {
-                                }''')),
-        model.Language("c++", "clike", True,
-                       textwrap.dedent('''
+                                }"""
+                ),
+            ),
+            model.Language(
+                "c++",
+                "clike",
+                True,
+                textwrap.dedent(
+                    """
                                 #!/bin/bash
                                 cp $program_file $scratch_dir/program.cpp
 
@@ -287,15 +347,23 @@ def populate_db():
 
                                 cat $input_file | ./program
 
-                                exit $?''').strip(),
-                       textwrap.dedent('''
+                                exit $?"""
+                ).strip(),
+                textwrap.dedent(
+                    """
                                 #include <iostream>
 
                                 int main() {
                                   std::cout << "Hello World!";
-                                }''')),
-        model.Language("java", "clike", True,
-                       textwrap.dedent('''
+                                }"""
+                ),
+            ),
+            model.Language(
+                "java",
+                "clike",
+                True,
+                textwrap.dedent(
+                    """
                                 #!/bin/bash
                                 export PATH=$PATH:/usr/lib/jvm/java-1.8-openjdk/bin
 
@@ -311,20 +379,34 @@ def populate_db():
 
                                 cat $input_file | java Main
 
-                                exit $?''').strip(),
-                       textwrap.dedent('''
+                                exit $?"""
+                ).strip(),
+                textwrap.dedent(
+                    """
                                 public class Main {
                                     public static void main(String[] args) {
 
                                     }
-                                }''')),
-        model.Language("ruby", "ruby", True,
-                       textwrap.dedent('''
+                                }"""
+                ),
+            ),
+            model.Language(
+                "ruby",
+                "ruby",
+                True,
+                textwrap.dedent(
+                    """
                                         #!/bin/bash
                                         cat $input_file | ruby $program_file
-                                        exit $?''').strip()),
-        model.Language("rust", "rust", True,
-                       textwrap.dedent('''
+                                        exit $?"""
+                ).strip(),
+            ),
+            model.Language(
+                "rust",
+                "rust",
+                True,
+                textwrap.dedent(
+                    """
                                         #!/bin/bash
                                         cp /share/program $scratch_dir/main.rs
 
@@ -337,56 +419,62 @@ def populate_db():
                                         fi
 
                                         cat $input_file | ./main
-                                        exit $?''').strip(),
-                        textwrap.dedent('''
+                                        exit $?"""
+                ).strip(),
+                textwrap.dedent(
+                    """
                                         fn main() {
                                         }
-                        ''').strip())
-    ])
+                        """
+                ).strip(),
+            ),
+        ]
+    )
 
-    db_session.add_all([
-        model.Configuration("strict_whitespace_diffing", "False", "bool",
-                            "admin"),
-        model.Configuration("contestants_see_sample_output", "True",
-                            "bool", "defendant"),
-        model.Configuration("max_user_submissions", "5", "integer",
-                            "defendant"),
-        model.Configuration("user_submission_time_limit", "1", "integer",
-                            "defendant"),
-        model.Configuration("max_output_length",
-                            str(10 * 1024), "integer", "defendant"),
-        model.Configuration("run_refresh_interval_millseconds",
-                            5000, "integer", "defendant"),
-        model.Configuration("score_refresh_interval_millseconds",
-                            30000, "integer", "defendant"),
-        model.Configuration("misc_refresh_interval_millseconds",
-                            12000, "integer", "defendant"),
-        model.Configuration("extra_signup_fields",
-                            "[]", "json", "defendant")
-    ])
+    db_session.add_all(
+        [
+            model.Configuration("strict_whitespace_diffing", "False", "bool", "admin"),
+            model.Configuration(
+                "contestants_see_sample_output", "True", "bool", "defendant"
+            ),
+            model.Configuration("max_user_submissions", "5", "integer", "defendant"),
+            model.Configuration(
+                "user_submission_time_limit", "1", "integer", "defendant"
+            ),
+            model.Configuration(
+                "max_output_length", str(10 * 1024), "integer", "defendant"
+            ),
+            model.Configuration(
+                "run_refresh_interval_millseconds", 5000, "integer", "defendant"
+            ),
+            model.Configuration(
+                "score_refresh_interval_millseconds", 30000, "integer", "defendant"
+            ),
+            model.Configuration(
+                "misc_refresh_interval_millseconds", 12000, "integer", "defendant"
+            ),
+            model.Configuration("extra_signup_fields", "[]", "json", "defendant"),
+        ]
+    )
 
-    db_session.add_all([
-        model.ProblemType("input-output", '#!/bin/bash\ntest "$1" = "$2"')
-    ])
+    db_session.add_all(
+        [model.ProblemType("input-output", '#!/bin/bash\ntest "$1" = "$2"')]
+    )
     db_session.commit()
 
     roles = {x.name: x for x in model.UserRole.query.all()}
-    db_session.add_all([
-        model.User(
-            "admin",
-            "Admin",
-            "pass",
-            user_roles=[roles['operator']]),
-        model.User(
-            "exec",
-            "Executioner",
-            "epass",
-            user_roles=[roles['executioner']])
-    ])
+    db_session.add_all(
+        [
+            model.User("admin", "Admin", "pass", user_roles=[roles["operator"]]),
+            model.User(
+                "exec", "Executioner", "epass", user_roles=[roles["executioner"]]
+            ),
+        ]
+    )
 
     db_session.commit()
 
-    #Version scraper run
+    # Version scraper run
 
     with open("init_data/printver.py", "r") as f:
         src_code = "\n".join(f.readlines())
@@ -403,14 +491,24 @@ def populate_db():
         is_public=True,
         activate_time=datetime.datetime.utcnow(),
         freeze_time=None,
-        deactivate_time=None)
+        deactivate_time=None,
+    )
 
     db_session.add(version_contest)
     db_session.commit()
 
-    verscrape_run = model.Run(executioner_user, version_contest, python, None,
-        datetime.datetime.utcnow(), src_code,
-        empty_input, empty_input, True, None)
+    verscrape_run = model.Run(
+        executioner_user,
+        version_contest,
+        python,
+        None,
+        datetime.datetime.utcnow(),
+        src_code,
+        empty_input,
+        empty_input,
+        True,
+        None,
+    )
 
     db_session.add(verscrape_run)
 
@@ -423,30 +521,28 @@ def dev_populate_db():
     current_app.logger.info("Initializing tables with dev data")
     roles = {x.name: x for x in model.UserRole.query.all()}
 
-    db_session.add_all([
-        model.User(
-            "superuser",
-            "SuperUser",
-            "pass",
-            user_roles=list(roles.values())),
-        model.User(
-            "observer",
-            "ObserverUser",
-            "pass",
-            user_roles=[roles['observer']])
-    ])
+    db_session.add_all(
+        [
+            model.User(
+                "superuser", "SuperUser", "pass", user_roles=list(roles.values())
+            ),
+            model.User(
+                "observer", "ObserverUser", "pass", user_roles=[roles["observer"]]
+            ),
+        ]
+    )
 
     contestants = []
     names = [
-        "Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben",
-        "Josiah", "Micah"
+        "Fred", "George", "Jenny", "Sam", "Jo", "Joe", "Sarah", "Ben", "Josiah", "Micah"
     ]
     for i in range(1, 5):
         test_contestant = model.User(
             "testuser{}".format(i),
             names[i - 1],
             "pass",
-            user_roles=[roles['defendant']])
+            user_roles=[roles["defendant"]],
+        )
         db_session.add(test_contestant)
         contestants.append(test_contestant)
 
@@ -459,55 +555,81 @@ def dev_populate_db():
         is_public=True,
         activate_time=now,
         freeze_time=None,
-        deactivate_time=None)
+        deactivate_time=None,
+    )
     test_contest.users += contestants
     db_session.add(test_contest)
 
-    io_problem_type = model.ProblemType.query.filter_by(
-        name="input-output").one()
+    io_problem_type = model.ProblemType.query.filter_by(name="input-output").one()
     problems = []
 
-    hello_world = model.Problem(io_problem_type, "hello-world",
-                                "Hello, World!",
-                                'Print the string "Hello, World!"', "",
-                                "Hello, World!", "", "Hello, World!")
+    hello_world = model.Problem(
+        io_problem_type,
+        "hello-world",
+        "Hello, World!",
+        'Print the string "Hello, World!"',
+        "",
+        "Hello, World!",
+        "",
+        "Hello, World!",
+    )
     problems.append(hello_world)
     test_contest.problems.append(hello_world)
     db_session.add(hello_world)
 
     n = 5000
     hello_worlds = model.Problem(
-        io_problem_type, "hello-worlds", "Hello, Worlds!",
-        'Print the string "Hello, World!" n times', "2",
-        "Hello, World!\nHello, World!", str(n),
-        "Hello, World!\n"*n
+        io_problem_type,
+        "hello-worlds",
+        "Hello, Worlds!",
+        'Print the string "Hello, World!" n times',
+        "2",
+        "Hello, World!\nHello, World!",
+        str(n),
+        "Hello, World!\n" * n,
     )
     problems.append(hello_worlds)
     test_contest.problems.append(hello_worlds)
     db_session.add(hello_worlds)
 
     fizzbuzz = model.Problem(
-        io_problem_type, "fizzbuzz", "FizzBuzz",
+        io_problem_type,
+        "fizzbuzz",
+        "FizzBuzz",
         "Perform fizzbuzz up to the given number\n\nMore info can be found [here](https://en.wikipedia.org/wiki/Fizz_buzz)",
-        "3", "1\n2\nFizz", "15",
-        "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n"
+        "3",
+        "1\n2\nFizz",
+        "15",
+        "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n",
     )
     problems.append(fizzbuzz)
     test_contest.problems.append(fizzbuzz)
     db_session.add(fizzbuzz)
 
     fibonacci = model.Problem(
-        io_problem_type, "fibonoacci", "Fibonacci",
-        "Give the nth number in the Fibonacci sequence", "4", "3", "5",
-        "5")
+        io_problem_type,
+        "fibonoacci",
+        "Fibonacci",
+        "Give the nth number in the Fibonacci sequence",
+        "4",
+        "3",
+        "5",
+        "5",
+    )
     problems.append(fibonacci)
     test_contest.problems.append(fibonacci)
     db_session.add(fibonacci)
 
     ext_fibonacci = model.Problem(
-        io_problem_type, "ext-fib", "Extended Fibonacci",
+        io_problem_type,
+        "ext-fib",
+        "Extended Fibonacci",
         "Give the the numbers of the Fibonacci sequence between 0 and n, inclusive.\nIf n is positive, the range is [0,n].\nIf n is negative, the range is [n,0].",
-        "-3", "2\n-1\n1\n0", "-5", "5\n-3\n2\n-1\n1\n0")
+        "-3",
+        "2\n-1\n1\n0",
+        "-5",
+        "5\n-3\n2\n-1\n1\n0",
+    )
     problems.append(ext_fibonacci)
     test_contest.problems.append(ext_fibonacci)
     db_session.add(ext_fibonacci)
@@ -516,16 +638,11 @@ def dev_populate_db():
     python = model.Language.query.filter_by(name="python").one()
 
     solutions = {
-        "Hello, World!":
-        "print('Hello, World!')",
-        "Hello, Worlds!":
-        "for i in range(int(input())):\n\tprint('Hello, World!')",
-        "FizzBuzz":
-        'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
-        "Fibonacci":
-        "fib = lambda n: n if n < 2 else fib(n-1) + fib(n-2)\nprint(fib(int(input())))",
-        "Extended Fibonacci":
-        "print('5\\n-3\\n2\\n-1\\n1\\n0')"
+        "Hello, World!": "print('Hello, World!')",
+        "Hello, Worlds!": "for i in range(int(input())):\n\tprint('Hello, World!')",
+        "FizzBuzz": 'print("\\n".join("Fizz"*(i%3==0)+"Buzz"*(i%5==0) or str(i) for i in range(1,int(input())+1)))',
+        "Fibonacci": "fib = lambda n: n if n < 2 else fib(n-1) + fib(n-2)\nprint(fib(int(input())))",
+        "Extended Fibonacci": "print('5\\n-3\\n2\\n-1\\n1\\n0')",
     }
 
     problem_subs = []
@@ -545,10 +662,17 @@ def dev_populate_db():
         if not is_correct:
             src_code = src_code + "\nprint('Wait this isn\\'t correct')"
 
-        test_run = model.Run(user, test_contest, python, problem,
-                             datetime.datetime.utcnow(), src_code,
-                             problem.secret_input, problem.secret_output,
-                             is_submission)
+        test_run = model.Run(
+            user,
+            test_contest,
+            python,
+            problem,
+            datetime.datetime.utcnow(),
+            src_code,
+            problem.secret_input,
+            problem.secret_output,
+            is_submission,
+        )
         test_run.is_correct = is_correct
         test_run.is_priority = is_priority
         test_run.state = model.RunState.JUDGING
@@ -563,7 +687,8 @@ def dev_populate_db():
 def setup_logging(app):
     """Sets up the flask app loggers"""
     formatter = logging.Formatter(
-        '%(asctime)s - %(filename)s - %(levelname)s - %(message)s')
+        "%(asctime)s - %(filename)s - %(levelname)s - %(message)s"
+    )
 
     # remove existing handlers
     handlers = app.logger.handlers
@@ -572,8 +697,7 @@ def setup_logging(app):
 
     if not path.isdir(path.dirname(log_location)):
         os.makedirs(path.dirname(log_location))
-    file_handler = RotatingFileHandler(
-        log_location, maxBytes=10000, backupCount=2)
+    file_handler = RotatingFileHandler(log_location, maxBytes=10000, backupCount=2)
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(formatter)
     app.logger.addHandler(file_handler)

@@ -11,6 +11,7 @@ from web import app, setup_database
 import model
 from database import db_session, engine, Base
 
+
 class BaseTest(unittest.TestCase):
     """
     Contains tests for the problems blueprint
@@ -19,7 +20,7 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         logging.disable(logging.CRITICAL)
 
-        app.config['TESTING'] = True
+        app.config["TESTING"] = True
         app.app_context().push()
         self.app = app.test_client()
 
@@ -29,16 +30,16 @@ class BaseTest(unittest.TestCase):
         Base.metadata.create_all(engine)
         db_session.commit()
 
-
         logging.info("Setting up database")
         setup_database(app)
 
     def login(self, username, password):
         with self.app:
             rv = self.app.post(
-                '/admin/login',
+                "/admin/login",
                 data=dict(username=username, password=password),
-                follow_redirects=True)
+                follow_redirects=True,
+            )
 
             self.assertEqual(rv.status_code, 200, "Failed to login")
             self.assertNotEqual(current_user, None, "Failed to login")
@@ -49,19 +50,20 @@ class BaseTest(unittest.TestCase):
 
     def logout(self):
         with self.app:
-            rv = self.app.get('/admin/logout', follow_redirects=True)
+            rv = self.app.get("/admin/logout", follow_redirects=True)
             self.assertNotEqual(current_user, None, "Failed to logout")
             self.assertTrue(current_user.is_anonymous, "Failed to logout")
 
             return rv
 
     def get_jwt_token(self, username, password):
-        rv = self.app.post('/api/login', data=json.dumps({
-            "username": username,
-            "password": password,
-        }), content_type='application/json')
+        rv = self.app.post(
+            "/api/login",
+            data=json.dumps({"username": username, "password": password}),
+            content_type="application/json",
+        )
         j = json.loads(rv.data.decode("UTF-8"))
-        return j['access_token']
+        return j["access_token"]
 
     def jwt_get(self, url, auth_token=None, headers=None):
         if not headers:
@@ -70,10 +72,9 @@ class BaseTest(unittest.TestCase):
         if auth_token:
             h["Authorization"] = "Bearer " + auth_token
 
-        return self.app.get(url,
-            headers=h,
-            content_type='application/json',
-            follow_redirects=True)
+        return self.app.get(
+            url, headers=h, content_type="application/json", follow_redirects=True
+        )
 
     def post_json(self, url, data, auth_token=None, headers=None):
         if not headers:
@@ -82,11 +83,13 @@ class BaseTest(unittest.TestCase):
         if auth_token:
             h["Authorization"] = "Bearer " + auth_token
 
-        return self.app.post(url,
+        return self.app.post(
+            url,
             data=json.dumps(data),
             headers=h,
-            content_type='application/json',
-            follow_redirects=True)
+            content_type="application/json",
+            follow_redirects=True,
+        )
 
     def tearDown(self):
         try:
@@ -99,4 +102,3 @@ class BaseTest(unittest.TestCase):
             db_session.commit()
             Base.metadata.create_all(engine)
             db_session.commit()
-

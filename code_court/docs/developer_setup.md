@@ -104,3 +104,8 @@ cd code_court/code_court/courthouse
 # make sure virtualenv is sourced
 nosetests
 ```
+
+## Commit checklist
+### Courthouse
+- [ ] make sure tests pass by running `nosetests`
+- [ ] make sure code is correctly formatted by running `black` (`pip install black` to install)

@@ -6,8 +6,10 @@ install:
   - pip install six
   - pip install -r code_court/courthouse/requirements.txt
   - pip install -r code_court/executor/requirements.txt
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then pip install black; fi
 script:
   - cd code_court/courthouse/
   - nosetests
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then black --check; fi
   - cd ../executor
   - nosetests

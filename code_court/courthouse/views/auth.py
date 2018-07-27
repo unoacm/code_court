@@ -8,15 +8,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 import model
 
-from flask import (
-    abort,
-    Blueprint,
-    redirect,
-    render_template,
-    request,
-    flash, )
+from flask import abort, Blueprint, redirect, render_template, request, flash
 
-auth = Blueprint('auth', __name__, template_folder='templates')
+auth = Blueprint("auth", __name__, template_folder="templates")
 
 
 @auth.route("/login", methods=["GET"])
@@ -67,4 +61,3 @@ def logout_submit():
     """processes logout requests"""
     logout_user()
     return redirect("/admin")
-
