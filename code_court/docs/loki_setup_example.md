@@ -43,7 +43,7 @@ source env/bin/activate
 ssh -L 9191:loki:9191 loki
 
 # Then go to localhost:9191/admin in a browser
-# (Admin login is admin@example.org:pass)
+# (Admin login is admin:pass)
 ```
 
 ## Setup for executor
