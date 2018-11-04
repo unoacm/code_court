@@ -12,15 +12,16 @@ NOTE: Currently untested for WSL. Docker only runs on Windows 10 Professional or
 1. Start courthouse
    1. Setup a virtualenv for the courthouse python dependencies: `virtualenv -p /usr/bin/python3 ~/courthoue_env`
    1. Install pip dependencies: `. ~/courthouse_env/bin/activate && pip install -r ~/code_court/code_court/courthouse/requirements.txt`
-   1. Start the courthouse
-      1. Either with postgres `cd ~/code_court/code_court/courthouse && ./start_with_postgres.sh`
-      1. or with sqlite `cd ~/code_court/code_court/courthouse && ./start.sh`
+   1. Un-comment the lines for privilege droppping in `uwsgi.ini`
+   1. Login to root with `sudo -s` and re-source the env with `source /home/ben/courthouse_env/bin/activate`
+   1. Start the courthouse: `cd /home/ben/code_court/code_court/courthouse && ./start_with_postgres.sh`
 
 ## Executor
 1. Install dependencies (ubuntu example): `sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
 1. Clone the code\_court repository: `git clone http://github.com/unoacm/code_court`
 1. Setup docker: `sudo systemctl start docker; sudo systemctl enable docker; sudo gpasswd -a $USER docker` (re-login to activate group)
 1. Build the executor docker image: `cd ~/code_court/code_court/executor/executor/executor_container && ./build.sh`
+1. Start the executor: `cd ~/code_court/code_court/executor && ./executor.py --url http://localhost`
 
 # Debugging
 ## Misc
