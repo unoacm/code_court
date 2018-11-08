@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 import requests
 
 BASE_URL = "http://localhost:9191/api/"
+ADMIN_PASSWORD = "pass"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,7 +30,7 @@ class FakeUser:
     PROBLEMS_INTERVAL = 5
     SCORES_INTERVAL = 30
     CONTEST_INTERVAL = 120
-    SUBMIT_RUN_INTERVAL = 240
+    SUBMIT_RUN_INTERVAL = 120
 
     def __init__(self):
         self.username, self.password = self.create_user()
@@ -128,13 +129,18 @@ class FakeUser:
             time.sleep(1)
 
     def submit_run(self):
-        correct_solution = "print('Hello, World!')"
-        incorrect_solution = "for x in range(10000):\n\tprint(x)"
+        programs = [
+            "print('Hello, World!')",
+            "for x in range(17500):\n\tprint(x)",
+            # "import time\ntime.sleep(1000)",
+            # "while True: print('hello'*1024)",
+            "",
+        ]
         data = dict(
             lang="python",
             problem_slug="hello-world",
-            source_code=random.choice([correct_solution, incorrect_solution]),
-            is_submission=False,
+            source_code=random.choice(programs),
+            is_submission=True,
             user_test_input="",
         )
         self._post_api("submit-run", data)
@@ -154,13 +160,12 @@ class FakeUser:
         return self._get_api("current-user")
 
     def create_user(self):
-        admin_login_token = self.get_login_token("admin", "pass")
+        admin_login_token = self.get_login_token("admin", ADMIN_PASSWORD)
         user_id = random.randint(1000, 1_000_000)
         data = dict(
             username=str(user_id),
             name=user_id,
             password="pass",
-            username=user_id,
             contest_name="test_contest",
         )
         self._post_api("make-defendant-user", data, login_token=admin_login_token)
