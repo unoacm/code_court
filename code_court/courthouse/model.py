@@ -602,6 +602,7 @@ class Clarification(Base):
     id = Column(Integer, primary_key=True)
 
     problem = relationship("Problem", backref=backref("Clarification", lazy="dynamic"))
+
     problem_id = Column(Integer, ForeignKey("problem.id"), nullable=True)
     """int: a foreignkey to the clarification's problem, if it is null, the
         the clarification is general"""
@@ -612,40 +613,40 @@ class Clarification(Base):
     initiating_user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     """int: a foreignkey to the user that initiated the clarification"""
 
-    parent = relationship("Clarification", remote_side=[id])
-    parent_id = Column(Integer, ForeignKey("clarification.id"), nullable=True)
-    """int: a foreignkey to the a parent clarification"""
-
-    thread = Column(String, nullable=False)
-    """str: this is a uuid that indicates which thread this clarification belongs to"""
-
     subject = Column(String, nullable=False)
     """str: the title of the clairification, gives brief idea of contents"""
 
     contents = Column(String, nullable=False)
     """str: the contents of the clarification"""
 
+    answer = Column(String, nullable=True)
+    """str: the answer to the clarification"""
+
     creation_time = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     """DateTime: the time the clarification was created at"""
 
-    is_public = Column(Boolean, nullable=False)
+    answer_time = Column(DateTime, nullable=True)
+    """DateTIme: the time the clarification was answered"""
+
+    is_public = Column(Boolean, default=True, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
-    def __init__(self, initiating_user, subject, contents, thread, is_public):
+    def __init__(self, problem, initiating_user, subject, contents, is_public):
+        self.problem = problem
         self.initiating_user = initiating_user
         self.subject = subject
         self.contents = contents
-        self.thread = thread
         self.is_public = is_public
 
     def get_output_dict(self):
         return {
             "id": self.id,
+            "problem": self.problem.name,
             "subject": self.subject,
             "contents": self.contents,
-            "thread": self.contents,
+            "answer": self.answer,
             "is_public": self.is_public,
-            "initiating_user": self.initiating_user,
+            "initiating_user": self.initiating_user.username
         }
 
     def __repr__(self):

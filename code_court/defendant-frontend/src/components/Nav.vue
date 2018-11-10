@@ -5,6 +5,7 @@
         <div class="level-left">
           <span v-if="is_active"><router-link to="/" exact>Info</router-link></span>
           <span v-if="is_active"><router-link to="/scoreboard">Scoreboard</router-link></span>
+          <span v-if="is_active"><router-link to="/clarifications">Clarification</router-link></span>
         </div>
 
         <div>

@@ -4,6 +4,7 @@ import Scoreboard from '@/components/Scoreboard'
 import Problem from '@/components/Problem'
 import Login from '@/components/Login'
 import Info from '@/components/Info'
+import Clarification from '@/components/Clarification'
 
 Vue.use(Router)
 
@@ -29,6 +30,11 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {
+      path: '/clarifications',
+      name: 'clarifications',
+      component: Clarification
     }
   ]
 })

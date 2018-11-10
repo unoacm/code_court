@@ -5,10 +5,13 @@
     <thead>
         <tr>
             <th>id</th>
+            <th>problem</th>
             <th>subject</th>
             <th>contents</th>
-            <th>initiating_user</th>
-            <th>is_public</th>
+            <th>submitted</th>
+	    <th>answered</th>
+	    <th>is_public</th>
+	    <th>Submitted By</th>
             <th></th>
             <th></th>
         </tr>
@@ -16,11 +19,14 @@
     <tbody>
         {% for clarification in clarifications %}
         <tr>
-            <td class="clar_id">{{ clarification.id }}</td>
+	    <td class="clar_id"><a href="{{ url_for('clarifications.clarifications_answer', clar_id=clarification.id) }}">{{ clarification.id }}</a></td>
+            <td class="clar_problem">{{ clarification.problem.name }}</td>
             <td class="clar_subject">{{ clarification.subject }}</td>
             <td class="clar_contents">{{ clarification.contents }}</td>
-            <td class="clar_initiating_user">{{ clarification.initiating_user }}</td>
-            <td class="clar_is_public">{{ clarification.is_public }}</td>
+            <td class="clar_submitted">{{ clarification.creation_time }}</td>
+	    <td class="clar_answered">{{ clarification.answer_time }}</td>
+	    <td class="clar_is_public">{{ clarification.is_public }}</td>
+	    <td class="clar_submitted_by">{{  clarification.initiating_user.username  }}</td>
             <td></td>
             <td>
                 <form action="{{ url_for('clarifications.clarifications_del', clar_id=clarification.id) }}" method="GET">

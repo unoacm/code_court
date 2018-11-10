@@ -64,6 +64,7 @@ export default {
         this.$store.dispatch('LOAD_LANGS')
         this.$store.dispatch('LOAD_USER')
         this.$store.dispatch('LOAD_CONF', this.user.id)
+        this.$store.dispatch('LOAD_CLARS')
       }
     }.bind(this), this.conf.misc_refresh_interval_millseconds)
   },

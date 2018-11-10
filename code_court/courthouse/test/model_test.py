@@ -192,10 +192,10 @@ class ModelsTestCase(BaseTest):
         user_args, user = get_user()
 
         CLARIFICATION_ARGS = {
+            "problem": problem,
             "initiating_user": user,
             "subject": "Test subject",
             "contents": "What is this thing?",
-            "thread": "",
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)

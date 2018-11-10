@@ -238,6 +238,52 @@ class APITestCase(BaseTest):
         langs = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(len(langs), num_langs)
 
+    def test_get_clarifications(self):
+        setup_contest()
+        
+        num_clars = model.Clarification.query.count()
+
+        rv = self.jwt_get("/api/clarifications")
+        self.assertEqual(rv.status_code, 200)
+
+        clars = json.loads(rv.data.decode("utf-8"))
+        self.assertEqual(len(clars), num_clars)
+
+    def test_submit_clarification(self):
+        """Tests the /api/submit_clarification endpoint"""
+        setup_contest()
+        token = self.get_jwt_token("testuser", "pass")
+
+        data = dict(
+            problem="fizzbuzz",
+            initiating_user="testuser",
+            subject="test",
+            contents="halp",
+            is_public=False
+        )
+
+        rv = self.post_json("/api/submit_clarification", data, auth_token=token)
+        self.assertEqual(rv.status_code, 200, rv.data)
+
+        clarification = model.Clarification.query.filter_by(subject="test").first()
+        self.assertIsNotNone(clarification)
+
+    def test_answer_clarification(self):
+        """Tests the /api/answer_clarification endpoint"""
+        setup_contest()
+
+        data = dict(
+            subject="test",
+            problem="FizzBuzz",
+            answer="solve"
+        )
+
+        rv = self.post_json("/api/answer_clarification", data)
+        self.assertEqual(rv.status_code, 200, rv.data)
+
+        clarification = model.Clarification.query.filter_by(subject="test").first()
+        self.assertEqual("solve", clarification.answer)
+
 
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
@@ -280,7 +326,15 @@ def setup_contest():
         True,
     )
 
+    test_clarification = model.Clarification(
+            test_problem,
+            test_contestant,
+            "test",
+            "help",
+            False
+    )
+
     db_session.add_all(
-        [test_executioner, test_contestant, test_contest, test_problem, test_run]
+        [test_executioner, test_contestant, test_contest, test_problem, test_run, test_clarification]
     )
     db_session.commit()

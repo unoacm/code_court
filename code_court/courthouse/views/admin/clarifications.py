@@ -53,18 +53,16 @@ def clarifications_view():
 @util.login_required("operator")
 def clarifications_add():
     """
-    Displays the clarification adding and updating page and accepts form submits from those pages.
-
-    Params:
-        clar_id (int): the clarification to edit, if this is None a new lang will be made
+    Displays the clarification adding and updating page and accepts form submits from those pages
 
     Returns:
-        a rendered add/edit template or a redirect to the clarification view page
+        a rendered add template or a redirect to the clarification view page
     """
     if request.method == "GET":  # display add form
-        return render_template("clarifications/add.html", action_label="Add")
+        problems = model.Problem.query.all()
+        return render_template("clarifications/add.html", action_label="Add", problems=problems)
 
-    #    elif request.method == "POST": # process added/edited lang
+    #    elif request.method == "POST": # process added lang
     elif request.method == "POST":
         return add_clar()
     else:
@@ -107,10 +105,32 @@ def clarifications_del(clar_id):
 
     return redirect(url_for("clarifications.clarifications_view"))
 
+@clarifications.route("/answer/<clar_id>", methods=["GET", "POST"])
+@util.login_required("operator")
+def clarifications_answer(clar_id):
+    """Displays the clarification answering page
 
-def add_clar():
+    Params:
+       clar_id (int): the clarification to view/answer
+
+    Returns:
+        a rendered answer page or a redirect to the clarification view page
     """
-    Adds or edits a clarification
+
+    if request.method == "GET":  # display answer form
+        clarification = model.Clarification.query.filter_by(id=clar_id).first()
+        return render_template("clarifications/answer.html", clarification=clarification)
+
+    elif request.method == "POST": #clarification answered
+        return answer_clar()
+    else:
+        current_app.logger.info("invalid clar add request method: %s", request.method)
+        abort(400)
+
+
+def answer_clar():
+    """
+    Answers the clarification
 
     Note:
         must be called from within a request context
@@ -120,23 +140,75 @@ def add_clar():
     """
     subject = request.form.get("subject")
     contents = request.form.get("contents")
+    problem_name = request.form.get("problem")
+    problem = model.Problem.query.filter_by(name=problem_name).first()
+    answer = request.form.get("answer")
+    is_public = request.form.get("is_public")
+
+    if subject is None:
+        error = "Failed to answer clarification due to undefined subject."
+        current_app.logger.info(error)
+        flash(error, "danger")
+    elif contents is None:
+        error = "Failed to answer clarification due to undefined contents."
+        current_app.logger.info(error)
+        flash(error, "danger")
+    elif problem is None:
+        error = "Failed to answer clarification due to undefined problem."
+        current_app.logger.info(error)
+        flash(error, "danger")
+    elif answer is None:
+        error = "Failed to answer clarification due to undefined answer."
+        current_app.logger.info(error)
+        flash(error, "danger")
+    else:
+        is_public_bool = util.checkbox_result_to_bool(is_public)
+        clarification = model.Clarification.query.filter(problem==problem).filter(subject==subject).first()
+        clarification.answer = answer
+        clarification.answer_time = datetime.datetime.utcnow()
+        clarification.is_public = is_public_bool
+        db_session.commit()
+
+    return redirect(url_for("clarifications.clarifications_view"))
+
+def add_clar():
+    """Adds a new clarification
+
+    Note:
+        must be called from within a request context
+
+    Returns:
+        a redicrect to the clarification view page
+    """
+
+    subject = request.form.get("subject")
+    contents = request.form.get("contents")
+    problem_name = request.form.get("problem")
+    problem = model.Problem.query.filter_by(name=problem_name).first()
 
     if subject is None:
         error = "Failed to add clarification due to undefined subject."
         current_app.logger.info(error)
         flash(error, "danger")
-        return redirect(url_for("clarifications.clarifications_view"))
-
-    if contents is None:
+    elif contents is None:
         error = "Failed to add clarification due to undefined contents."
         current_app.logger.info(error)
         flash(error, "danger")
-        return redirect(url_for("clarifications.clarifications_view"))
+    elif problem is None:
+        error = "Failed to add clarification due to undefined problem."
+        current_app.logger.info(error)
+        flash(error, "danger")
+    else:
+        clarification = model.Clarification(
+                problem,
+                current_user,
+                subject,
+                contents,
+                False
+        )
 
-    thread = str(uuid.uuid4())
-    is_public = True  # This is a general clarification, which are always public
-    clar = model.Clarification(current_user, subject, contents, thread, is_public)
-    db_session.add(clar)
-    db_session.commit()
+        db_session.add(clarification)
+        db_session.commit()
 
     return redirect(url_for("clarifications.clarifications_view"))
+

@@ -21,6 +21,7 @@ const store = new Vuex.Store({
     scores: [],
     langs: [],
     alerts: [],
+    clars: [],
     user: null,
     sourceCodes: {},
     loginToken: ''
@@ -59,6 +60,11 @@ const store = new Vuex.Store({
         context.commit('SET_LANGS', { langs: response.data })
       })
     },
+    LOAD_CLARS: function (context) {
+      axios.get('/api/clarifications').then((response) => {
+        context.commit('SET_CLARS', { clars: response.data })
+      })
+    },
     LOGIN: function (context, creds) {
       axios.post('/api/login', {
         username: creds.username,
@@ -71,6 +77,7 @@ const store = new Vuex.Store({
         context.dispatch('LOAD_USER')
         context.dispatch('LOAD_PROBLEMS')
         context.dispatch('LOAD_CONTEST')
+        context.dispatch('LOAD_CLARS')
 
         context.commit('DELETE_ALERTS')
 
@@ -91,6 +98,7 @@ const store = new Vuex.Store({
         context.dispatch('LOAD_USER')
         context.dispatch('LOAD_PROBLEMS')
         context.dispatch('LOAD_CONTEST')
+        context.dispatch('LOAD_CLARS')
 
         context.commit('DELETE_ALERTS')
 
@@ -136,6 +144,13 @@ const store = new Vuex.Store({
     },
     SET_CONTEST: (state, { contest }) => {
       state.contest = contest
+    },
+    SET_CLARS: (state, { clars }) => {
+      var clarObj = {}
+      for (var clar of clars) {
+        clarObj[clar.subject] = clar
+      }
+      state.clars = clarObj
     },
     PUSH_ALERT: (state, { text, severity }) => {
       state.alerts.push({

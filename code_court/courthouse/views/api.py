@@ -291,30 +291,50 @@ def get_all_problems(user_id=None):
     return make_response(jsonify(resp), 200)
 
 
+@api.route("/clarifications", methods=["GET"])
+def get_clarifications():
+    clars = model.Clarification.query.all()
+    filter_clars = [x.get_output_dict() for x in clars]
+
+    return make_response(jsonify(filter_clars), 200)
+
+
 @api.route("/submit_clarification", methods=["POST"])
 @jwt_required
 def submit_clarification():
+    problem_name = request.json.get("problem", None)
+    problem = model.Problem.query.filter_by(name=problem_name).first()
+    current_user_id = get_jwt_identity()
+    current_user = model.User.query.get(util.i(current_user_id))
     subject = request.json.get("subject", None)
     contents = request.json.get("contents", None)
-    problem_slug = request.json.get("problem_slug", None)
-    parent_id = request.json.get("parent_id", None)
 
-    problem = model.Problem.query.filter_by(slug=problem_slug).scalar()
+    clarification = model.Clarification(
+            problem,
+            current_user,
+            subject,
+            contents,
+            False)
 
-    thread = ""
-    if parent_id is None:
-        thread = str(uuid.uuid4())
-    else:
-        thread = model.Clarification.query.filter_by(id=parent_id).scalar().thread
-
-    is_public = False  # user submitted clarifications are always false
-    clar = model.Clarification(current_user, subject, contents, thread, is_public)
-    clar.problem = problem
-
-    db_session.add(clar)
+    db_session.add(clarification)
     db_session.commit()
 
-    return "{}"
+    return make_response(jsonify({"status": "good"}, 200))
+
+
+@api.route("/answer_clarification", methods=["POST"])
+def answer_clarification():
+    subject = request.json.get("subject", None)
+    problem_name = request.json.get("problem", None)
+    problem = model.Problem.query.filter_by(name=problem_name).first()
+    answer = request.json.get("answer", None)
+
+    clarification = model.Clarification.query.filter(problem==problem).filter(subject==subject).first()
+    clarification.answer = answer
+    clarification.answer_time = datetime.datetime.utcnow()
+    db_session.commit()
+
+    return make_response(jsonify({"status": "good"}, 200))
 
 
 @api.route("/languages", methods=["GET"])
@@ -769,3 +789,13 @@ def clean_output_string(s):
 @api.route("/", methods=["GET"])
 def index():
     return abort(404)
+"""
+Contains api endpoints for the defendant frontend
+and external services
+"""
+import datetime
+import itertools
+import time
+import uuid
+
+import util
