@@ -43,7 +43,7 @@ pip install -r requirements.txt
 
 # You can access the webapp by going to localhost:9191/admin
 # in a browser
-# (Admin login is admin@example.org:pass)
+# (Admin login is admin:pass)
 ```
 
 ## Setup for executor
