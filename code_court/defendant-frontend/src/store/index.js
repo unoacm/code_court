@@ -14,9 +14,9 @@ const store = new Vuex.Store({
     contest: {},
     conf: {
       extra_signup_fields: [],
-      run_refresh_interval_millseconds: 5000,
-      score_refresh_interval_millseconds: 30000,
-      misc_refresh_interval_millseconds: 12000
+      run_refresh_interval_millseconds: 30 * 1000,
+      score_refresh_interval_millseconds: 60 * 1000,
+      misc_refresh_interval_millseconds: 120 * 1000
     },
     scores: [],
     langs: [],
