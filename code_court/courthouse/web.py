@@ -711,6 +711,9 @@ def setup_logging(app):
 app = create_app()
 
 if __name__ == "__main__":
+    # SSL cert file locations, comment this out if you don't want encryption
+    context = ("certificate.crt", "private.key")
+
     PORT = 9191
     app.logger.info("Running on port %s", PORT)
-    app.run(host="0.0.0.0", port=PORT, debug=True)
+    app.run(host="0.0.0.0", port=PORT, debug=True, ssl_context=context)

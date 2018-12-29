@@ -88,3 +88,7 @@ ENV/
 .ropeproject
 
 .mypy_cache
+
+# ssl files
+*.crt
+*.key
