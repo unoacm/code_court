@@ -55,23 +55,25 @@ def get_writ():
     """endpoint for executioners to get runs to execute"""
 
     # choose oldest priority run
-    chosen_run = model.Run.query.filter_by(
-        is_priority=True, started_execing_time=None, finished_execing_time=None
-    ).order_by(
-        model.Run.submit_time.asc()
-    ).limit(
-        1
-    ).first()
+    chosen_run = (
+        model.Run.query.filter_by(
+            is_priority=True, started_execing_time=None, finished_execing_time=None
+        )
+        .order_by(model.Run.submit_time.asc())
+        .limit(1)
+        .first()
+    )
 
     # if no priority runs, choose oldest non-priority run
     if chosen_run is None:
-        chosen_run = model.Run.query.filter_by(
-            started_execing_time=None, finished_execing_time=None
-        ).order_by(
-            model.Run.submit_time.asc()
-        ).limit(
-            1
-        ).first()
+        chosen_run = (
+            model.Run.query.filter_by(
+                started_execing_time=None, finished_execing_time=None
+            )
+            .order_by(model.Run.submit_time.asc())
+            .limit(1)
+            .first()
+        )
     if chosen_run is None:
         return make_response(jsonify({"status": "unavailable"}), 200)
 
@@ -118,9 +120,8 @@ def submit_writ(run_id):
         current_app.logger.debug("Received writ without json")
         abort(400)
 
-    if (
-        "output" not in request.json
-        or not isinstance(request.json["output"], six.string_types)
+    if "output" not in request.json or not isinstance(
+        request.json["output"], six.string_types
     ):
         current_app.logger.debug("Received writ without the output field")
         abort(400)
@@ -317,6 +318,14 @@ def submit_clarification():
     return "{}"
 
 
+@api.route("/clarifications", methods=["GET"])
+def get_clarifications():
+    clars = model.Clarification.query.all()
+    filter_clars = [x.get_output_dict() for x in clars]
+
+    return make_response(jsonify(filter_clars), 200)
+
+
 @api.route("/languages", methods=["GET"])
 def get_languages():
     langs = model.Language.query.all()
@@ -362,9 +371,9 @@ def submit_run():
     over_limit_runs_query = model.Run.submit_time > (
         datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT)
     )
-    run_count = model.Run.query.filter_by(user_id=user.id).filter(
-        over_limit_runs_query
-    ).count()
+    run_count = (
+        model.Run.query.filter_by(user_id=user.id).filter(over_limit_runs_query).count()
+    )
 
     if run_count > MAX_RUNS:
         return make_response(jsonify({"error": "Submission rate limit exceeded"}), 400)
@@ -440,21 +449,23 @@ def get_scoreboard(contest_id):
     if not contest:
         return make_response(jsonify({"error": "Could not find contest"}), 404)
 
-    defendants = model.User.query.filter(
-        model.User.user_roles.any(name="defendant")
-    ).filter(
-        model.User.contests.any(id=contest.id)
-    ).all()
+    defendants = (
+        model.User.query.filter(model.User.user_roles.any(name="defendant"))
+        .filter(model.User.contests.any(id=contest.id))
+        .all()
+    )
 
-    problems = model.Problem.query.filter(
-        model.Problem.contests.any(id=contest.id)
-    ).filter(
-        model.Problem.is_enabled
-    ).all()
+    problems = (
+        model.Problem.query.filter(model.Problem.contests.any(id=contest.id))
+        .filter(model.Problem.is_enabled)
+        .all()
+    )
 
-    runs = model.Run.query.filter_by(is_submission=True, contest=contest).options(
-        joinedload(model.Run.user), joinedload(model.Run.problem)
-    ).all()
+    runs = (
+        model.Run.query.filter_by(is_submission=True, contest=contest)
+        .options(joinedload(model.Run.user), joinedload(model.Run.problem))
+        .all()
+    )
     key = lambda x: (x.user.id, x.problem.id, x.is_passed)
 
     runs = {
@@ -478,12 +489,14 @@ def get_scoreboard(contest_id):
         problem_states = {}
         penalty = 0
         for problem in problems:
-            problem_states[problem.slug] = len(
-                runs.get((user.id, problem.id, True), [])
-            ) > 0
-            penalty += len(runs.get((user.id, problem.id, False), [])) if (
-                user.id, problem.id, True
-            ) in runs else 0
+            problem_states[problem.slug] = (
+                len(runs.get((user.id, problem.id, True), [])) > 0
+            )
+            penalty += (
+                len(runs.get((user.id, problem.id, False), []))
+                if (user.id, problem.id, True) in runs
+                else 0
+            )
 
         user_points.append(
             {
@@ -615,17 +628,17 @@ def load_test():
     existing_user = model.User.query.filter_by(username="testuser1").scalar()
 
     contest = model.Contest.query.first()
-    defendants = model.User.query.filter(
-        model.User.user_roles.any(name="defendant")
-    ).filter(
-        model.User.contests.any(id=contest.id)
-    ).all()
+    defendants = (
+        model.User.query.filter(model.User.user_roles.any(name="defendant"))
+        .filter(model.User.contests.any(id=contest.id))
+        .all()
+    )
 
-    problems = model.Problem.query.filter(
-        model.Problem.contests.any(id=contest.id)
-    ).filter(
-        model.Problem.is_enabled
-    ).all()
+    problems = (
+        model.Problem.query.filter(model.Problem.contests.any(id=contest.id))
+        .filter(model.Problem.is_enabled)
+        .all()
+    )
 
     user_points = []
     for user in defendants:
@@ -687,9 +700,11 @@ def load_test():
     over_limit_runs_query = model.Run.submit_time > (
         datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
     )
-    run_count = model.Run.query.filter_by(user_id=curr_user.id).filter(
-        over_limit_runs_query
-    ).count()
+    run_count = (
+        model.Run.query.filter_by(user_id=curr_user.id)
+        .filter(over_limit_runs_query)
+        .count()
+    )
 
     matching_user = model.User.query.filter_by(username="testuser1").scalar()
 
@@ -702,9 +717,9 @@ def load_test():
     over_limit_runs_query = model.Run.submit_time > (
         datetime.datetime.utcnow() - datetime.timedelta(minutes=TIME_LIMIT)
     )
-    run_count = model.Run.query.filter_by(user_id=user.id).filter(
-        over_limit_runs_query
-    ).count()
+    run_count = (
+        model.Run.query.filter_by(user_id=user.id).filter(over_limit_runs_query).count()
+    )
 
     contest = user.contests[0]
 

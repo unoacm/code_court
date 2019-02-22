@@ -98,7 +98,8 @@ class ModelsTestCase(BaseTest):
     def test_problem_type(self):
         """test the problem_type table"""
         PROBLEM_TYPE_ARGS = {
-            "name": "input/output", "eval_script": "#!/bin/bash\nexit 0"
+            "name": "input/output",
+            "eval_script": "#!/bin/bash\nexit 0",
         }
 
         # create and add contest
@@ -117,7 +118,8 @@ class ModelsTestCase(BaseTest):
         """test the problem table"""
         # add problem type
         PROBLEM_TYPE_ARGS = {
-            "name": "input/output", "eval_script": "#!/bin/bash\nexit 0"
+            "name": "input/output",
+            "eval_script": "#!/bin/bash\nexit 0",
         }
         problem_type = model.ProblemType(**PROBLEM_TYPE_ARGS)
         db_session.add(problem_type)
@@ -192,15 +194,21 @@ class ModelsTestCase(BaseTest):
         user_args, user = get_user()
 
         CLARIFICATION_ARGS = {
+            "problem": problem,
             "initiating_user": user,
             "subject": "Test subject",
             "contents": "What is this thing?",
-            "thread": "",
             "is_public": False,
         }
         clarification = model.Clarification(**CLARIFICATION_ARGS)
         db_session.add(clarification)
         db_session.commit()
+
+        results = model.Clarification.query.filter_by(
+            subject=CLARIFICATION_ARGS["subject"]
+        ).all()
+
+        self.assertEqual(len(results), 1)
 
     def test_user_role(self):
         """test the user_role table"""

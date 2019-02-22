@@ -238,6 +238,18 @@ class APITestCase(BaseTest):
         langs = json.loads(rv.data.decode("utf-8"))
         self.assertEqual(len(langs), num_langs)
 
+    def test_get_clarifications(self):
+        """Tests the /api/clarifications endpoint"""
+        setup_contest()
+
+        num_clars = model.Clarification.query.count()
+
+        rv = self.jwt_get("/api/clarifications")
+        self.assertEqual(rv.status_code, 200)
+
+        clars = json.loads(rv.data.decode("utf-8"))
+        self.assertEqual(len(clars), num_clars)
+
 
 def setup_contest():
     roles = {x.name: x for x in model.UserRole.query.all()}
