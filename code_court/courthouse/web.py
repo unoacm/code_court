@@ -489,9 +489,6 @@ def populate_db():
         start_time=datetime.datetime.utcnow(),
         end_time=datetime.datetime.utcnow() + datetime.timedelta(hours=1),
         is_public=True,
-        activate_time=datetime.datetime.utcnow(),
-        freeze_time=None,
-        deactivate_time=None,
     )
 
     db_session.add(version_contest)
@@ -553,9 +550,6 @@ def dev_populate_db():
         start_time=now,
         end_time=now + datetime.timedelta(hours=2),
         is_public=True,
-        activate_time=now,
-        freeze_time=None,
-        deactivate_time=None,
     )
     test_contest.users += contestants
     db_session.add(test_contest)

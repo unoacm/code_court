@@ -53,11 +53,8 @@ class ModelsTestCase(BaseTest):
         """test the contest table"""
         CONTEST_ARGS = {
             "name": "1620 bracket",
-            "activate_time": util.str_to_dt("2017-01-25T10:45:00Z"),
             "start_time": util.str_to_dt("2017-01-25T11:00:00Z"),
-            "freeze_time": util.str_to_dt("2017-01-25T16:00:00Z"),
             "end_time": util.str_to_dt("2017-01-25T16:45:00Z"),
-            "deactivate_time": util.str_to_dt("2017-01-26T10:45:00Z"),
             "is_public": True,
         }
         user_args, user = get_user()
@@ -288,11 +285,8 @@ def get_contest():
     """returns a test contest"""
     CONTEST_ARGS = {
         "name": "1620 bracket",
-        "activate_time": util.str_to_dt("2017-01-25T10:45:00Z"),
         "start_time": util.str_to_dt("2017-01-25T11:00:00Z"),
-        "freeze_time": util.str_to_dt("2017-01-25T16:00:00Z"),
         "end_time": util.str_to_dt("2017-01-25T16:45:00Z"),
-        "deactivate_time": util.str_to_dt("2017-01-26T10:45:00Z"),
         "is_public": True,
     }
 
