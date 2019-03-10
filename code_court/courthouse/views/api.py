@@ -148,7 +148,7 @@ def submit_writ(run_id):
                 else:
                     run.state = model.RunState.FAILED
 
-    if run.is_passed:
+    if run.is_submission:
         util.invalidate_cache_item(util.SCORE_CACHE_NAME, run.contest.id)
 
     if run.user.username == "exec":
