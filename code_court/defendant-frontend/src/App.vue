@@ -21,6 +21,8 @@
 import Nav from '@/components/Nav'
 import ContestCountdown from '@/components/ContestCountdown'
 
+const MIN_POLL_RATE = 5000
+
 export default {
   name: 'app',
   created: function () {
@@ -50,13 +52,13 @@ export default {
       if (this.contest.id) {
         this.$store.dispatch('LOAD_SCORES', this.contest.id)
       }
-    }.bind(this), this.conf.score_refresh_interval_millseconds)
+    }.bind(this), Math.max(MIN_POLL_RATE, this.conf.score_refresh_interval_millseconds))
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
         this.$store.dispatch('LOAD_PROBLEMS', this.user.id)
       }
-    }.bind(this), this.conf.run_refresh_interval_millseconds)
+    }.bind(this), Math.max(MIN_POLL_RATE, this.conf.run_refresh_interval_millseconds))
 
     setInterval(function () {
       if (this.$store.getters.isLoggedIn) {
@@ -65,7 +67,7 @@ export default {
         this.$store.dispatch('LOAD_USER')
         this.$store.dispatch('LOAD_CONF', this.user.id)
       }
-    }.bind(this), this.conf.misc_refresh_interval_millseconds)
+    }.bind(this), Math.max(MIN_POLL_RATE, this.conf.misc_refresh_interval_millseconds))
   },
   components: {
     'nav-disp': Nav,
