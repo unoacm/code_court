@@ -1,0 +1,13 @@
+{% extends "viewbase.html" %}
+{% block view %}
+<h1>Random Contestants</h1>
+<ol>
+  {% for contestant in contestants %}
+    <li>
+      <a href="{{ url_for('users.users_profile', username=contestant.username) }}">
+        {{ contestant.username }}
+      </a> | {{ contestant.name }}
+    </li>
+  {% endfor %}
+</ol>
+{% endblock %}

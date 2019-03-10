@@ -41,6 +41,7 @@ from views.admin.runs import runs
 from views.admin.contests import contests
 from views.defendant import defendant
 from views.auth import auth
+from views.admin.utils import utils
 
 # turn down log level for werkzeug
 logging.getLogger("werkzeug").setLevel(logging.INFO)
@@ -126,6 +127,7 @@ def create_app():
     app.register_blueprint(contests, url_prefix="/admin/contests")
     app.register_blueprint(defendant, url_prefix="/defendant")
     app.register_blueprint(auth, url_prefix="/admin")
+    app.register_blueprint(utils, url_prefix="/admin/utils")
 
     @app.context_processor
     def inject_user():
