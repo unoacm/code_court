@@ -143,7 +143,6 @@ def add_clar():
     """
 
     problem_input = request.form.get("problem")
-    problem = model.Problem.query.filter_by(name=problem_input).first()
     subject = request.form.get("subject")
     contents = request.form.get("contents")
 
@@ -159,12 +158,15 @@ def add_clar():
         flash(error, "danger")
         return redirect(url_for("clarifications.clarifications_view"))
 
-    if problem is None:
+    if (
+        problem_input is None
+    ):  # We check the problem input here because we can have a general clarification that would be a null problem in the database
         error = "Failed to add clarification due to undefined problem."
         current_app.logger.info(error)
         flash(error, "danger")
         return redirect(url_for("clarifications.clarifications_view"))
 
+    problem = model.Problem.query.filter_by(name=problem_input).first()
     clar = model.Clarification(problem, current_user, subject, contents, False)
     db_session.add(clar)
     db_session.commit()
