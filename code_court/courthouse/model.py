@@ -36,6 +36,7 @@ user_user_role = Table(
 
 class Language(Base):
     """Stores the configuration for a programming language"""
+
     __tablename__ = "language"
 
     id = Column(Integer, primary_key=True)
@@ -86,6 +87,7 @@ class Language(Base):
 
 class ProblemType(Base):
     """Stores information about a problem type"""
+
     __tablename__ = "problem_type"
 
     id = Column(Integer, primary_key=True)
@@ -190,6 +192,7 @@ class Problem(Base):
 
 class User(Base, UserMixin):
     """Stores information about a user"""
+
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
@@ -286,6 +289,7 @@ class User(Base, UserMixin):
 
 class Contest(Base):
     """Stores information about a contest"""
+
     __tablename__ = "contest"
 
     id = Column(Integer, primary_key=True)
@@ -361,6 +365,7 @@ class Contest(Base):
 
 class Configuration(Base):
     """Stores general configuration information"""
+
     __tablename__ = "configuration"
 
     id = Column(Integer, primary_key=True)
@@ -409,6 +414,7 @@ class Configuration(Base):
 
 class SavedCode(Base):
     """Stores general configuration information"""
+
     __tablename__ = "saved_code"
 
     id = Column(Integer, primary_key=True)
@@ -458,6 +464,7 @@ class SavedCode(Base):
 class Run(Base):
     """Stores information about a specific run. This might be a
     submission, or just a test run"""
+
     __tablename__ = "run"
     id = Column(Integer, primary_key=True)
 
@@ -586,9 +593,11 @@ class Run(Base):
 
     @staticmethod
     def get_judging_runs():
-        return Run.query.filter(Run.started_execing_time is not None).filter(
-            Run.finished_execing_time is None
-        ).all()
+        return (
+            Run.query.filter(Run.started_execing_time is not None)
+            .filter(Run.finished_execing_time is None)
+            .all()
+        )
 
     @staticmethod
     def get_unjudged_runs():
@@ -597,11 +606,13 @@ class Run(Base):
 
 class Clarification(Base):
     """Stores information about a user or judge clarification"""
+
     __tablename__ = "clarification"
 
     id = Column(Integer, primary_key=True)
 
     problem = relationship("Problem", backref=backref("Clarification", lazy="dynamic"))
+
     problem_id = Column(Integer, ForeignKey("problem.id"), nullable=True)
     """int: a foreignkey to the clarification's problem, if it is null, the
         the clarification is general"""
@@ -612,18 +623,14 @@ class Clarification(Base):
     initiating_user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     """int: a foreignkey to the user that initiated the clarification"""
 
-    parent = relationship("Clarification", remote_side=[id])
-    parent_id = Column(Integer, ForeignKey("clarification.id"), nullable=True)
-    """int: a foreignkey to the a parent clarification"""
-
-    thread = Column(String, nullable=False)
-    """str: this is a uuid that indicates which thread this clarification belongs to"""
-
     subject = Column(String, nullable=False)
     """str: the title of the clairification, gives brief idea of contents"""
 
     contents = Column(String, nullable=False)
     """str: the contents of the clarification"""
+
+    answer = Column(String, nullable=True)
+    """str: the answer to the contents of the clarification"""
 
     creation_time = Column(DateTime, default=datetime.datetime.utcnow(), nullable=False)
     """DateTime: the time the clarification was created at"""
@@ -631,25 +638,27 @@ class Clarification(Base):
     is_public = Column(Boolean, nullable=False)
     """bool: whether or not the clarification is shown to everyone, or just the intiator"""
 
-    def __init__(self, initiating_user, subject, contents, thread, is_public):
+    def __init__(self, problem, initiating_user, subject, contents, is_public):
+        self.problem = problem
         self.initiating_user = initiating_user
         self.subject = subject
         self.contents = contents
-        self.thread = thread
         self.is_public = is_public
 
     def get_output_dict(self):
         return {
             "id": self.id,
+            "problem": self.problem,
             "subject": self.subject,
             "contents": self.contents,
-            "thread": self.contents,
             "is_public": self.is_public,
             "initiating_user": self.initiating_user,
         }
 
     def __repr__(self):
-        return "Clarification(id={})".format(self.id)
+        return "Clarification(id={}, subject={}, contents={}, answer={}, public={}, user={})".format(
+            self.id, self.subject, self.contents, self.answer, self.is_public, self.user
+        )
 
     def __str__(self):
         return self.__repr__()
@@ -657,6 +666,7 @@ class Clarification(Base):
 
 class UserRole(Base):
     """Stores system user roles"""
+
     __tablename__ = "user_role"
 
     id = Column(Integer, primary_key=True)

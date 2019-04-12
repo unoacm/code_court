@@ -5,10 +5,12 @@
     <thead>
         <tr>
             <th>id</th>
+	    <th>problem</th>
             <th>subject</th>
             <th>contents</th>
             <th>initiating_user</th>
             <th>is_public</th>
+	    <th>answered</th>
             <th></th>
             <th></th>
         </tr>
@@ -17,10 +19,19 @@
         {% for clarification in clarifications %}
         <tr>
             <td class="clar_id">{{ clarification.id }}</td>
+	    <td class="clar_problem">{{ clarification.problem }}</td>
             <td class="clar_subject">{{ clarification.subject }}</td>
             <td class="clar_contents">{{ clarification.contents }}</td>
-            <td class="clar_initiating_user">{{ clarification.initiating_user }}</td>
+	    <td class="clar_initiating_user"><a href="{{ url_for('users.users_profile', username=clarification.initiating_user.username) }}">{{ clarification.initiating_user.name }}</a></td>
             <td class="clar_is_public">{{ clarification.is_public }}</td>
+	    <td class="clar_answered"><a href="{{ url_for('clarifications.clarifications_answer', clar_id=clarification.id) }}", method="GET">
+		    {% if clarification.answer and clarification.answer != 'None' %}
+		        <span class="green" data-test-green-check="green">&#10003;</span>
+		    {% else %}
+		        <span class="red">&#215;</span>
+		    {% endif %}
+		    </a>
+	    </td>
             <td></td>
             <td>
                 <form action="{{ url_for('clarifications.clarifications_del', clar_id=clarification.id) }}" method="GET">
@@ -31,5 +42,5 @@
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('clarifications.clarifications_add') }}" class="btn btn-primary">add</a>
+<a href="{{ url_for('clarifications.clarifications_add') }}" class="btn btn-primary">Add</a>
 {% endblock %}

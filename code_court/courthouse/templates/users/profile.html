@@ -2,7 +2,11 @@
 {% block view %}
 
 <h1>{{ user.name }}</h1>
-<h3>{{ user.contests[0].name }}</h3>
+{% if user.contests %}
+    <h3>{{ user.contests[0].name }}</h3>
+{% else %}
+   <h3>No contest</h3>
+{% endif %}
 
 <table class="table">
     <thead>

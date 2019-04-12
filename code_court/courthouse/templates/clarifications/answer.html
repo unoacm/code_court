@@ -1,0 +1,33 @@
+{% extends "navbase.html" %}
+{% block content %}
+
+{% if action_label == "Answer" %}
+<h1>{{ action_label }}</h1>
+{% endif %}
+
+<form action="{{ url_for('clarifications.clarifications_answer', clar_id=clarification.id) }}" method="POST" class="form">
+
+	<div class="form-group">
+		<label for="problem">Problem</label>
+		<input type="text" class="form-control" id="problem" name="problem" value="{{ clarification.problem.name }}" readonly/>
+	</div>
+	<div class="form-group">
+		<label for="subject">Subject</label>
+		<input type="text" class="form-control" id="subject" name="subject" value="{{ clarification.subject }}" readonly/>
+	</div>
+	<div class="form-group">
+		<label for="contents">Contents</label>
+		<input type="text" class="form-control" id="contents" name="contents" value="{{ clarification.contents }}" readonly/>
+	</div>
+	<div class="form-group">
+		<label for="answer">Answer</label>
+		<input type="text" class="form-control" id="answer" name="answer" value="{{ clarification.answer }}" required/>
+	</div>
+	<div class="checkbox">
+		<input type="checkbox" name="is_public" {%if clarification.is_public == True%}checked="checked"{% endif %}/> is public?
+	</div>
+	<button type="submit" class+"btn btn-default">Submit</button>
+
+</form>
+
+{% endblock %}
