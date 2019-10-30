@@ -10,11 +10,8 @@
         <tr>
             <th>id</th>
             <th>name</th>
-            <th>activate_time</th>
             <th>start_time</th>
-            <th>freeze_time</th>
             <th>end_time</th>
-            <th>deactivate_time</th>
             <th>is_public</th>
             <th></th>
             <th></th>
@@ -25,11 +22,8 @@
         <tr>
             <td class="contest_id">{{ contest.id }}</td>
             <td class="contest_name">{{ contest.name }}</td>
-            <td class="contest_activate_time">{{ contest.activate_time|dt_to_str }}</td>
             <td class="contest_start_time">{{ contest.start_time|dt_to_str }}</td>
-            <td class="contest_freeze_time">{{ contest.freeze_time|dt_to_str }}</td>
             <td class="contest_end_time">{{ contest.end_time|dt_to_str }}</td>
-            <td class="contest_deactivate_time">{{ contest.deactivate_time|dt_to_str }}</td>
             <td class="contest_is_public">{{ contest.is_public }}</td>
             <td>
                 <a href="{{ url_for('contests.contests_add', contest_id=contest.id) }}" class="btn btn-info btn-xs">edit</a>

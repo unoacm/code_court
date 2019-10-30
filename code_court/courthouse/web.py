@@ -41,6 +41,7 @@ from views.admin.runs import runs
 from views.admin.contests import contests
 from views.defendant import defendant
 from views.auth import auth
+from views.admin.utils import utils
 
 # turn down log level for werkzeug
 logging.getLogger("werkzeug").setLevel(logging.INFO)
@@ -126,6 +127,7 @@ def create_app():
     app.register_blueprint(contests, url_prefix="/admin/contests")
     app.register_blueprint(defendant, url_prefix="/defendant")
     app.register_blueprint(auth, url_prefix="/admin")
+    app.register_blueprint(utils, url_prefix="/admin/utils")
 
     @app.context_processor
     def inject_user():
@@ -489,9 +491,6 @@ def populate_db():
         start_time=datetime.datetime.utcnow(),
         end_time=datetime.datetime.utcnow() + datetime.timedelta(hours=1),
         is_public=True,
-        activate_time=datetime.datetime.utcnow(),
-        freeze_time=None,
-        deactivate_time=None,
     )
 
     db_session.add(version_contest)
@@ -553,9 +552,6 @@ def dev_populate_db():
         start_time=now,
         end_time=now + datetime.timedelta(hours=2),
         is_public=True,
-        activate_time=now,
-        freeze_time=None,
-        deactivate_time=None,
     )
     test_contest.users += contestants
     db_session.add(test_contest)
