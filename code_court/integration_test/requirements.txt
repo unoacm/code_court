@@ -100,7 +100,7 @@ uwsgitop==0.10
 virtualenv==15.1.0
 virtualenv-clone==0.2.6
 wcwidth==0.1.7
-Werkzeug==0.12.2.dev0
+Werkzeug==0.15.3
 widgetsnbextension==2.0.0
 xdot==0.7
 xkcdpass==1.12.0
