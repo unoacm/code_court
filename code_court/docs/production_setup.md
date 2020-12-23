@@ -1,7 +1,7 @@
 # Production setup
 NOTE: Currently untested for WSL. Docker only runs on Windows 10 Professional or Enterprise or there is this method that has variable mileage: https://blogs.msdn.microsoft.com/commandline/2017/12/08/cross-post-wsl-interoperability-with-docker/
 ## Courthouse
-1. Install dependencies (ubuntu example): `sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip -y`
+1. Install dependencies (ubuntu example): `sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev libpq-dev gcc build-essential htop virtualenv docker.io npm python-pip -y`
 1. Setup docker: `sudo systemctl start docker; sudo systemctl enable docker; sudo gpasswd -a $USER docker` (re-login to activate group)
 1. Clone the code\_court repository: `git clone http://github.com/unoacm/code_court`
 1. Start postgres (optional) (these instructions run it with docker)
@@ -17,7 +17,7 @@ NOTE: Currently untested for WSL. Docker only runs on Windows 10 Professional or
    1. Start the courthouse: `cd /home/ben/code_court/code_court/courthouse && ./start_with_postgres.sh`
 
 ## Executor
-1. Install dependencies (ubuntu example): `sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
+1. Install dependencies (ubuntu example): `sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev libpq-dev gcc build-essential htop virtualenv docker.io npm python-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
 1. Clone the code\_court repository: `git clone http://github.com/unoacm/code_court`
 1. Setup docker: `sudo systemctl start docker; sudo systemctl enable docker; sudo gpasswd -a $USER docker` (re-login to activate group)
 1. Build the executor docker image: `cd ~/code_court/code_court/executor/executor/executor_container && ./build.sh`
