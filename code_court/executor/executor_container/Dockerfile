@@ -3,7 +3,7 @@ FROM alpine
 ARG UNAME=user
 ARG UID=1000
 
-RUN apk add --no-cache python python3 lua gcc g++ openjdk8 gfortran ruby perl nodejs guile bash rust
+RUN apk add --no-cache python2 python3 lua gcc g++ openjdk8 gfortran ruby perl nodejs guile bash rust
 
 RUN adduser -D $UNAME -u $UID -g $UID
 

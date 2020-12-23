@@ -1,17 +1,17 @@
 ## Intro
 Currently code\_court only runs on unix systems (linux, macos, etc). If you only have access to windows machines you have a few options (in order of preferability):
 
-1. [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (Should work for development, however with the current Windows Build(1709), docker is difficult to work with)
-2. Run a linux [virtual machine](https://www.virtualbox.org/)
-3. Run a linux container with [docker](https://www.docker.com/docker-windows)
-4. Use a linux server (I like [Linode](https://www.linode.com/), [AWS](https://aws.amazon.com/) would be a good choice too)
+1. Run a linux [virtual machine](https://www.virtualbox.org/)
+2. Run a linux container with [docker](https://www.docker.com/docker-windows)
+3. Use a linux server (I like [Linode](https://www.linode.com/), [AWS](https://aws.amazon.com/) would be a good choice too)
+4. Use Windows Subsystem for Linux (needs testing)
 
 I've also been playing around with running code\_court on loki, and have had mild success. You can see my notes on that in `loki_setup_example.md`.
 
 ## General setup
 
 Here's a rough list of what you'll need to install. This command works for the latest ubuntu; you may need to adjust it for other distros.
-`sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev gcc build-essential htop virtualenv docker.io npm python-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
+`sudo apt install python3-dev nodejs bash libffi-dev libxml2-dev libxslt-dev libpq-dev gcc build-essential htop virtualenv docker.io npm python3-pip default-jdk lua5.1 guile-2.0 ruby rustc -y`
 
 Next you'll need to clone the repository
 `git clone https://github.com/unoacm/code_court.git`
@@ -26,9 +26,9 @@ using its api (in `courthouse/views/api.py`)
 ```bash
 # Create a virtualenv for the courthouse
 # We want to use the latest python3, so
-# specify that path (python3.6 would be ideal, a lower version of 3 is fine, though)
+# specify that path
 cd code_court/code_court/courthouse
-virtualenv env -p /usr/bin/python3.6
+virtualenv env -p /usr/bin/python3.x
 
 # Source the virtualenv. Note that you will need to do this anytime
 # you want to start the server (run `deactivate` to turn it off)
@@ -56,7 +56,7 @@ to run the executor using docker
 ```bash
 # Create and source executor virtualenv
 cd code_court/code_court/executor
-virtualenv env -p /usr/local/bin/python3.4
+virtualenv env -p /usr/bin/python3.x
 source env/bin/activate
 
 # Install executor python dependencies
