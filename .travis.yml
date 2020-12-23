@@ -1,15 +1,14 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  - "3.8"
 install:
   - pip install six
   - pip install -r code_court/courthouse/requirements.txt
   - pip install -r code_court/executor/requirements.txt
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then pip install black; fi
+  - pip install black
 script:
   - cd code_court/courthouse/
   - nosetests
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then black --check; fi
+  - black --check
   - cd ../executor
   - nosetests
