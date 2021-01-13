@@ -19,15 +19,15 @@
     <div class="form-group">
         <label>Start Date and Time</label>
         <div class="form-inline">
-            <input type="date" class="form-control" id="start_date" name="start_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.start_time and contest.start_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
-            <input type="time" step="2" class="form-control" id="start_time" name="start_time" placeholder="HH:MM:SS" title="A valid time format is of the form HH:MM:SS" value="{{ contest.start_time and contest.start_time|dt_to_time_str }}" pattern="d{2}:d{2}:d{2}" required>
+            <input type="date" class="form-control" id="start_date" name="start_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form MM-DD-YYYY" value="{{ contest.start_time and contest.start_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
+            <input type="time" step="2" class="form-control" id="start_time" name="start_time" placeholder="HH:MM:SS" title="A valid time format is of the form HH:MM:SS AM or PM" value="{{ contest.start_time and contest.start_time|dt_to_time_str }}" pattern="d{2}:d{2}:d{2}" required>
         </div>
     </div>
     <div class="form-group">
         <label>End Date and Time</label>
         <div class="form-inline">
-            <input type="date" class="form-control" id="end_date" name="end_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form YYYY-MM-DD" value="{{ contest.end_time and contest.end_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
-            <input type="time" step="2" class="form-control" id="end_time" name="end_time" placeholder="HH:MM:SS" title="A valid time format is of the form HH:MM:SS" value="{{ contest.end_time and contest.end_time|dt_to_time_str }}" pattern="d{2}:d{2}:d{2}" required>
+            <input type="date" class="form-control" id="end_date" name="end_date" placeholder="YYYY-MM-DD" title="A valid time format is of the form MM-DD-YYYY" value="{{ contest.end_time and contest.end_time|dt_to_date_str }}" pattern="\d{4}-\d{2}-\d{2}" required>
+            <input type="time" step="2" class="form-control" id="end_time" name="end_time" placeholder="HH:MM:SS" title="A valid time format is of the form HH:MM:SS AM or PM" value="{{ contest.end_time and contest.end_time|dt_to_time_str }}" pattern="d{2}:d{2}:d{2}" required>
         </div>
     </div>
     <div class="checkbox">
