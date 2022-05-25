@@ -81,7 +81,7 @@ py-postgresql==1.2.2
 pycparser==2.20
 pycrypto==2.6.1
 Pygments==2.7.3
-PyJWT==1.7.1
+PyJWT==2.4.0
 pyOpenSSL==20.0.1
 pyparsing==2.4.6
 pyrsistent==0.17.3
