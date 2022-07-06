@@ -24,7 +24,7 @@
     "less": "^3.0.2",
     "less-loader": "^2.2.3",
     "marked": "^0.3.9",
-    "moment": "^2.21.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.11",
     "style-loader": "^0.13.2",
     "vue": "^2.2.1",
